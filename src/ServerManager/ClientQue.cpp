@@ -29,7 +29,22 @@ void	ClientsQue::removeClient(listOfClients::iterator &position)
 	Clients.erase(position);
 }
 
-#define TIMEOUT 10
+void	ClientsQue::readClients()
+{
+	listOfClients::iterator	it = Clients.begin();
+
+	while (it != Clients.end())
+	{
+		if (checkFd(it->first)) {
+			it->second.receivePacket();
+			it->second.updateTime();
+			std::cout << it->second.getMessage() << std::endl;
+		}
+		it++;
+	}
+}
+
+#define TIMEOUT 3
 
 void	ClientsQue::closeTimeOut()
 {

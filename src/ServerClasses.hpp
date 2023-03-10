@@ -121,14 +121,30 @@ class Response {
 		
 };
 
-class Client {
+class	TcpMessage
+{
+	private:
+		int			fd;
+		std::string	message;
+
+	public:
+		TcpMessage() {};
+		TcpMessage(const int &fd): fd(fd) {};
+
+	public:
+		void		receivePacket();
+		std::string	getMessage() const {
+			return (message);
+		};
+};
+
+class	Client: public TcpMessage {
 	public:
 		Response		response;
 	private:
 		HttpRequest		request;
 		VirtualServer	*virtualServer;
 		sockaddr_in 	socketAddress;
-		int				clientFd;
 		struct timeval	lst_msg_time;
 	public:
 		Client() {};
@@ -138,7 +154,7 @@ class Client {
 		const int					&getSocket() const;
 		const struct socketaddr_in	&getAddress() const;
 		time_t						getElapsedTime() const;
-		const HttpRequest			&getRequest() const; // debug purposes
+		// const HttpRequest			&getRequest() const; // debug purposes
 
 		void						setSocket(int const &socketFd);
 		void						setAddress(sockaddr_in const &socketAddress);
@@ -186,6 +202,7 @@ class	ClientsQue: virtual public Observer
 
 		void	setClients(std::list<int> const &Clients);
 		void	removeClient(listOfClients::iterator &position);
+		void	readClients();
 		void	closeTimeOut();
 
 };

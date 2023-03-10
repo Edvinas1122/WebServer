@@ -15,7 +15,7 @@ void	ServerManager::Start()
 {
 	Poll(true);
 	setClients(getLoudSockets());
-	// setClients(getSockets());
+	readClients();
 	closeTimeOut();
 }
 

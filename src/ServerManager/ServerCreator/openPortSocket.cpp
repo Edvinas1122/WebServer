@@ -6,7 +6,7 @@
 	2. bind to socket https://man7.org/linux/man-pages/man2/bind.2.html
 */
 
-static void set_socket_as_non_blocking(const int socket_fd)
+static void set_fd_as_non_blocking(const int socket_fd)
 {
 	int flags;
 	
@@ -46,7 +46,7 @@ static int	init_socket_from_address_list(struct addrinfo *socket_addr_list) EXCE
 		if (socket_fd != FAILED_SOCKET) {
 			setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 			if (bind(socket_fd, socket_addr_list_node->ai_addr, socket_addr_list_node->ai_addrlen) == SUCESS) {
-				set_socket_as_non_blocking(socket_fd);
+				set_fd_as_non_blocking(socket_fd);
 				limit_socket_buffer_intake(socket_fd);
 				break;
 			}

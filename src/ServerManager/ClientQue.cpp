@@ -39,12 +39,28 @@ void	ClientsQue::readClients()
 			it->second.receivePacket();
 			it->second.updateTime();
 			std::cout << it->second.getMessage() << std::endl;
+			it->second << "Message received";
 		}
 		it++;
 	}
 }
 
-#define TIMEOUT 3
+void	ClientsQue::respondClients()
+{
+	listOfClients::iterator	it = Clients.begin();
+
+	while (it != Clients.end())
+	{
+		if (it->second.ready() && checkFd(it->first, POLLOUT))
+		{
+			it->second.sendPacket();
+			it->second.updateTime();
+		}
+		it++;
+	}
+}
+
+#define TIMEOUT 10
 
 void	ClientsQue::closeTimeOut()
 {

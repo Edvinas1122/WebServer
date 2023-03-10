@@ -121,24 +121,27 @@ class Response {
 		
 };
 
-class	TcpMessage
+class	Tcp
 {
 	private:
 		int			fd;
-		std::string	message;
-
+		std::string	incoming;
+		std::string	outgoing;
 	public:
-		TcpMessage() {};
-		TcpMessage(const int &fd): fd(fd) {};
+		Tcp() {};
+		Tcp(const int &fd): fd(fd) {};
 
 	public:
 		void		receivePacket();
 		std::string	getMessage() const {
-			return (message);
+			return (incoming);
 		};
+		void		sendPacket();
+		bool		ready() const;
+		Tcp	&operator<<(const std::string& str);
 };
 
-class	Client: public TcpMessage {
+class	Client: public Tcp {
 	public:
 		Response		response;
 	private:
@@ -203,6 +206,7 @@ class	ClientsQue: virtual public Observer
 		void	setClients(std::list<int> const &Clients);
 		void	removeClient(listOfClients::iterator &position);
 		void	readClients();
+		void	respondClients();
 		void	closeTimeOut();
 
 };

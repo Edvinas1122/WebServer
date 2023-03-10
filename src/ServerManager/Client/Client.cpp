@@ -1,6 +1,6 @@
 #include <ServerClasses.hpp>
 
-Client::Client(const int clientFd, const struct sockaddr_in &socketAddress): TcpMessage(clientFd)
+Client::Client(const int clientFd, const struct sockaddr_in &socketAddress): Tcp(clientFd)
 {
 	this->socketAddress = socketAddress;
 	updateTime();

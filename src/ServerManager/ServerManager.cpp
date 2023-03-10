@@ -17,7 +17,6 @@ void	ServerManager::Start()
 	setClients(getLoudSockets());
 	// setClients(getSockets());
 	closeTimeOut();
-
 }
 
 

@@ -223,19 +223,13 @@ class	VirtualServers {
 
 };
 
-class	ServerManager: public ClientsQue, public PortSockets, public VirtualServers {
-
+class	ServerManager: public ClientsQue, public PortSockets, public VirtualServers
+{
 	public:
-		/*
-			Creates virtual servers sets them up
-			initiator - creates at start
-		*/
 		void	serverCreator(const char *config_file);
 		void	Start();
 
 	private:
-
-		/* pushes a client into the Client list */
 		// void	receiveRequest();
 		// void	respondToClient();
 };

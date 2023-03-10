@@ -6,31 +6,12 @@
 	2. bind to socket https://man7.org/linux/man-pages/man2/bind.2.html
 */
 
-static void set_fd_as_non_blocking(const int socket_fd)
-{
-	int flags;
-	
-	flags = fcntl(socket_fd, F_GETFL, 0);
-	if (flags == -1) {
-		// handle error getting socket flags
-		std::cerr << "can not set socket as non-blocking" << std::endl;
-		exit (0);
-	}
+// static void	limit_socket_buffer_intake(const int sock)
+// {
+// 	const int bufsize = 1000000;
 
-	flags |= O_NONBLOCK;
-	if (fcntl(socket_fd, F_SETFL, flags) == -1) {
-		// handle error setting socket flags
-		std::cerr << "can not set socket as non-blocking" << std::endl;
-		exit (0);
-	}
-}
-
-static void	limit_socket_buffer_intake(const int sock)
-{
-	const int bufsize = 1000000;
-
-	setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof bufsize);
-}
+// 	setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &bufsize, sizeof bufsize);
+// }
 
 static int	init_socket_from_address_list(struct addrinfo *socket_addr_list) EXCEPTION
 {
@@ -46,8 +27,7 @@ static int	init_socket_from_address_list(struct addrinfo *socket_addr_list) EXCE
 		if (socket_fd != FAILED_SOCKET) {
 			setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 			if (bind(socket_fd, socket_addr_list_node->ai_addr, socket_addr_list_node->ai_addrlen) == SUCESS) {
-				set_fd_as_non_blocking(socket_fd);
-				limit_socket_buffer_intake(socket_fd);
+				// limit_socket_buffer_intake(socket_fd);
 				break;
 			}
 			close(socket_fd);

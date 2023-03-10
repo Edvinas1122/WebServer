@@ -18,7 +18,7 @@
 # include <sstream>
 # include <list>
 # include <vector>
-# include <sys/epoll.h>
+# include <poll.h>
 # include <fcntl.h>
 # include <cerrno>
 # include <sys/types.h>

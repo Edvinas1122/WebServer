@@ -2,7 +2,7 @@
 
 bool VirtualServer::pathcheck(std::string const &path)
 {
-	return (access(path.c_str(), R_OK | W_OK));
+	return (access(path.c_str(), R_OK));
 }
 
 bool VirtualServer::isPositiveNumber(std::string const &str)

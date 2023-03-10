@@ -128,13 +128,16 @@ class Client {
 		HttpRequest		request;
 		VirtualServer	*virtualServer;
 		sockaddr_in 	socketAddress;
-		// int				socketFd;
-		time_t			lst_msg_time;
+		int				clientFd;
+		struct timeval	lst_msg_time;
 	public:
+		Client() {};
+		~Client();
+		Client(const int clientFd, const struct sockaddr_in &socketAddress);
 		/**/
 		const int					&getSocket() const;
 		const struct socketaddr_in	&getAddress() const;
-		const time_t				&getLastTime() const;
+		time_t						getElapsedTime() const;
 		const HttpRequest			&getRequest() const; // debug purposes
 
 		void						setSocket(int const &socketFd);
@@ -147,15 +150,80 @@ class Client {
 		void						buildResponse();
 };
 
-class	ServerManager {
+class	Observer
+{
+	private:
+        std::vector<struct pollfd>   vector;
+		static const int MAX_CONNECTIONS = 10;
+		static const int TIMEOUT = 5000;
+	public:
+		Observer();
+		~Observer() {};
 
-	typedef	std::map<std::string, VirtualServer>	virtualServerMap;
-	typedef	std::map<int,Client>					listOfClients;
+		int	Poll(const bool timeOutOn = false);
+
+	protected:
+
+		void	insertFileDescriptor(const int fd, const int events = POLLIN | POLLOUT);
+		void	removeFileDescriptor(const int fd);
+		bool	checkFd(const int fd, const int events = POLLIN);
 
 	private:
-		virtualServerMap			VirtualServers;
-		listOfClients				Clients;
-		std::map<std::string, int>	portSockets;	
+		void	setAsNonBlocking(const int socket_fd) const;
+
+	public:
+		class	InvalidFd: public std::exception {};
+};
+
+class	ClientsQue: virtual public Observer
+{
+	public:
+		typedef	std::map<int, Client>	listOfClients;
+	private:
+		listOfClients	Clients;
+	
+	protected:
+
+		void	setClients(std::list<int> const &Clients);
+		void	removeClient(listOfClients::iterator &position);
+		void	closeTimeOut();
+
+};
+
+class	PortSockets: virtual public Observer
+{
+	private:
+		std::map<std::string, int>	portSockets;
+	
+	public:
+		PortSockets() {};
+		~PortSockets() {};
+
+	protected:
+		void startPorts(DescendParser &parser, bool asynch = true);
+		std::list<int>	getLoudSockets(const int events = POLLIN);
+		std::list<int>	getSockets();
+	
+};
+
+class	VirtualServers {
+	public:
+		typedef	std::map<std::string, VirtualServer>	virtualServerMap;
+	protected:
+		virtualServerMap	virtualServers;
+	
+	public:
+		VirtualServers() {};
+		~VirtualServers() {};
+
+		void	Info() const;
+
+	protected:
+		void parseServers(DescendParser &parser);
+
+};
+
+class	ServerManager: public ClientsQue, public PortSockets, public VirtualServers {
 
 	public:
 		/*
@@ -163,15 +231,13 @@ class	ServerManager {
 			initiator - creates at start
 		*/
 		void	serverCreator(const char *config_file);
-		void	PrintServers();
-
-		void	checkPortSockets();
+		void	Start();
 
 	private:
 
 		/* pushes a client into the Client list */
-		void	receiveRequest();
-		void	respondToClient();
+		// void	receiveRequest();
+		// void	respondToClient();
 };
 
 #endif

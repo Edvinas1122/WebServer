@@ -5,9 +5,9 @@ int	main(void)
 	ServerManager	engine;
 
 	engine.serverCreator("/home/WebServer/server.conf");
-	engine.PrintServers();
+	engine.Info();
 	while (42)
 	{
-		engine.checkPortSockets();
+		engine.Start();
 	}
 }

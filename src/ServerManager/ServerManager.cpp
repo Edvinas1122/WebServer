@@ -1,11 +1,14 @@
 #include <ServerClasses.hpp>
+#include <configurationFileFormat.hpp>
 
 void	ServerManager::serverCreator(const char *path)
 {
-	ConfigurationFile	configurationFile(path);
+	// ConfigurationFile	configurationFile(path);
 	DescendParser		parser;
+	FileProcessor		configurationFile;
 
-	parser.setFile(configurationFile);
+	configurationFile.Open(path);
+	parser.setContent(configurationFile.Get(removeComents));
 	parseServers(parser);
 	startPorts(parser);
 }
@@ -13,7 +16,7 @@ void	ServerManager::serverCreator(const char *path)
 
 void	ServerManager::Start()
 {
-	Poll(true);
+	Poll();
 	setClients(getLoudSockets());
 	readClients();
 	respondClients();

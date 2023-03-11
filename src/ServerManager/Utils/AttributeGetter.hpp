@@ -1,8 +1,8 @@
+
 #ifndef ATTRIBUTE_GETTER_HPP
 # define ATTRIBUTE_GETTER_HPP
 
 # include <includes.hpp>
-# include <ConfigurationFile.hpp>
 # include <DefinitionExtractor.hpp>
 
 #define SUCESS 0

@@ -3,6 +3,8 @@
 
 # include <includes.hpp>
 # include <DescendParser.hpp>
+# include <Terminal.hpp>
+
 
 enum HttpMethodes
 {
@@ -105,6 +107,7 @@ class HttpRequest {
 
 /*
 	A complete message to a client
+	https://www.tutorialspoint.com/http/http_requests.html
 */
 class Response {
 	private:
@@ -133,11 +136,13 @@ class	Tcp
 
 	public:
 		void		receivePacket();
+		bool		ready() const;
+		void		sendPacket();
+
 		std::string	getMessage() const {
 			return (incoming);
 		};
-		void		sendPacket();
-		bool		ready() const;
+
 		Tcp	&operator<<(const std::string& str);
 };
 
@@ -172,7 +177,7 @@ class	Client: public Tcp {
 class	Observer
 {
 	private:
-        std::vector<struct pollfd>   vector;
+        std::vector<struct pollfd>	vector;
 		static const int MAX_CONNECTIONS = 10;
 		static const int TIMEOUT = 5000;
 	public:
@@ -194,7 +199,7 @@ class	Observer
 		class	InvalidFd: public std::exception {};
 };
 
-class	ClientsQue: virtual public Observer
+class	ClientsQue: virtual public Observer, public Terminal
 {
 	public:
 		typedef	std::map<int, Client>	listOfClients;
@@ -207,6 +212,7 @@ class	ClientsQue: virtual public Observer
 		void	removeClient(listOfClients::iterator &position);
 		void	readClients();
 		void	respondClients();
+		// void	respondClients(std::string message);
 		void	closeTimeOut();
 
 };

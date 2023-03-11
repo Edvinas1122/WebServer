@@ -45,12 +45,30 @@ void	ClientsQue::readClients()
 	}
 }
 
+// void	ClientsQue::respondClients()
+// {
+// 	listOfClients::iterator	it = Clients.begin();
+
+// 	while (it != Clients.end())
+// 	{
+// 		if (it->second.ready() && checkFd(it->first, POLLOUT))
+// 		{
+// 			it->second.sendPacket();
+// 			it->second.updateTime();
+// 		}
+// 		it++;
+// 	}
+// }
+
 void	ClientsQue::respondClients()
 {
 	listOfClients::iterator	it = Clients.begin();
+	terminal_interface();
 
 	while (it != Clients.end())
 	{
+		if (notEmpty())
+			it->second << extractMessage();
 		if (it->second.ready() && checkFd(it->first, POLLOUT))
 		{
 			it->second.sendPacket();
@@ -58,9 +76,10 @@ void	ClientsQue::respondClients()
 		}
 		it++;
 	}
+	clearMessage();
 }
 
-#define TIMEOUT 10
+#define TIMEOUT 30
 
 void	ClientsQue::closeTimeOut()
 {

@@ -4,6 +4,7 @@
 # include <includes.hpp>
 # include <AttributeGetter.hpp>
 # include <DefinitionExtractor.hpp>
+# include <File.hpp>
 
 
 class DescendParser: public AttributeGetter, public DefinitionExtractor
@@ -11,13 +12,9 @@ class DescendParser: public AttributeGetter, public DefinitionExtractor
 	public:
 		DescendParser() {};
 
-		void	setFile(std::string const &content) {
+		void	setContent(std::string const &content) {
 			DefinitionExtractor::setDefinitionContent(content);
 			AttributeGetter::setObject(content);
-		};
-		void	setFile(ConfigurationFile &file) {
-			DefinitionExtractor::setDefinitionContent(file.getContent());
-			AttributeGetter::setObject(file.getContent());
 		};
 
 		template <typename TYPE>

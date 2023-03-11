@@ -6,6 +6,7 @@
 # include <Terminal.hpp>
 # include <VirtualServer.hpp>
 # include <Parser.hpp>
+# include <Error.hpp>
 
 enum HttpMethodes
 {
@@ -19,7 +20,7 @@ enum HttpMethodes
 
 class HttpRequest {
 	private:
-		size_t		method;
+		HttpMethodes method;
 		size_t		protocol_version;
 		bool		keep_alive;
 		std::string	host;
@@ -30,6 +31,8 @@ class HttpRequest {
 		std::string	location;
 		std::string	file_name;
 		std::string	query;
+		std::string body;
+		int			error;
 
 	public:
 		HttpRequest() {};
@@ -37,25 +40,47 @@ class HttpRequest {
 
 			std::cout << parser.getValue("Dog") << std::endl;
 		};
+		int getError(){return(error);}
+		size_t getBodylength(){return(body.length());}
+		std::string getBody(){return(body);}
+		HttpMethodes getMethod(){return(method);}
 };
+
 
 /*
 	A complete message to a client
 	https://www.tutorialspoint.com/http/http_requests.html
 */
-class Response {
-	private:
-		HttpRequest	request;
-		
-	public:
-		bool		text;
-		std::string	getRes();
-		// std::string getResHeader();
-		// int			getBodyFd();
-		void		setRequest(HttpRequest &);
-		void		build();
-		// /*some data type*/	get();
-		
+class Response
+{
+private:
+	std::string version;
+	std::multimap<std::string, std::string> 	_head;
+	std::string _body;
+	std::string _location;
+	std::string _response;
+	int _status;
+	size_t _content_length;
+	HttpRequest _request;
+
+	size_t		_cgi_response_lenght;
+
+	void build_error(int code);
+	bool buildBody();
+	void getLocationMatch();
+	bool handleTarget();
+	bool reqError();
+	void setStatusLine();
+	void setHeaders();
+public:
+	Response();
+	//Response(const HttpRequest &);
+	//Response &operator=(const HttpRequest &);
+	//Response(HttpRequest &);
+	//Response &operator=(HttpRequest &);
+	//~Response();
+	void		Build();
+	std::string	get(){return (_response);}
 };
 
 class	Tcp
@@ -220,5 +245,4 @@ class	ServerManager: public ClientsQue, public PortSockets, public VirtualServer
 		// void	receiveRequest();
 		// void	respondToClient();
 };
-
 #endif

@@ -8,18 +8,18 @@ void	ServerManager::serverCreator(const char *path)
 
 	configurationFile.Open(path);
 	parser.setContent(configurationFile.GetContents(removeComents));
-	parseServers(parser);
-	startPorts(parser);
+	VirtualServers::parseServers(parser);
+	PortSockets::startPorts(parser);
 }
 
 
 void	ServerManager::Start()
 {
-	Poll();
-	setClients(getLoudSockets());
-	readClients();
-	respondClients();
-	closeTimeOut();
+	Observer::Poll();
+	ClientsQue::setClients(getLoudSockets());
+	ClientsQue::readClients();  // process inbound
+	ClientsQue::respondClients(); // process outgoing
+	ClientsQue::closeTimeOut();
 }
 
 

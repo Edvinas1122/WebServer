@@ -38,24 +38,26 @@ void	ClientsQue::readClients()
 		if (checkFd(it->first)) {
 			it->second.receivePacket();
 			it->second.updateTime();
-			std::cout << it->second.getMessage() << std::endl;
-			it->second << "Message received";
+			// Process incoming if not downloading
+			if (it->second.processState())
+			{
+				it->second << it->second.ProcessMessage();
+
+			}
+			// it->second << "Message received\n";
 		}
 		it++;
 	}
 }
 
-// void	ClientsQue::respondClients()
+// void	ClientsQue::processRequests()
 // {
 // 	listOfClients::iterator	it = Clients.begin();
 
 // 	while (it != Clients.end())
 // 	{
-// 		if (it->second.ready() && checkFd(it->first, POLLOUT))
-// 		{
-// 			it->second.sendPacket();
-// 			it->second.updateTime();
-// 		}
+// 		if (it->second.processState())
+// 			it->second.validateFormat();
 // 		it++;
 // 	}
 // }
@@ -63,12 +65,13 @@ void	ClientsQue::readClients()
 void	ClientsQue::respondClients()
 {
 	listOfClients::iterator	it = Clients.begin();
-	terminal_interface();
 
+	Terminal::terminal_interface();
 	while (it != Clients.end())
 	{
-		if (notEmpty())
-			it->second << extractMessage();
+		// Push message
+		if (Terminal::notEmpty())
+			it->second << Terminal::extractMessage() << "\n";
 		if (it->second.ready() && checkFd(it->first, POLLOUT))
 		{
 			it->second.sendPacket();
@@ -76,7 +79,7 @@ void	ClientsQue::respondClients()
 		}
 		it++;
 	}
-	clearMessage();
+	Terminal::clearMessage();
 }
 
 #define TIMEOUT 30

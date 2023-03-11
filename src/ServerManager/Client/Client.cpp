@@ -20,3 +20,8 @@ time_t	Client::getElapsedTime() const
 	gettimeofday(&currentTime, NULL);
 	return (currentTime.tv_sec - lst_msg_time.tv_sec);
 }
+
+std::string	Client::ProcessMessage()
+{
+	return (MessageProcessor::validateFormat(Tcp::getMessage()));
+}

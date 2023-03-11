@@ -27,6 +27,10 @@ time_t	Client::getElapsedTime() const
 */
 void	Client::ProcessMessage()
 {
-	MessageProcessor::getParsed<HttpRequest>(Tcp::getMessage());
-	*this << "DOG BARKS!";
+	try {
+		MessageProcessor::getParsed<HttpRequest>(Tcp::getMessage());
+		*this << "DOG BARKS!\n";
+	} catch (AttributeGetter::ValidationFailure &e) {
+		*this << "Error\n";
+	}
 }

@@ -110,7 +110,6 @@ class	Client: public Tcp, public MessageProcessor<Parser> {
 		Response		response;
 	private:
 		HttpRequest		request;
-		VirtualServer	*virtualServer;
 		sockaddr_in 	socketAddress;
 		struct timeval	lst_msg_time;
 	public:
@@ -132,7 +131,7 @@ class	Client: public Tcp, public MessageProcessor<Parser> {
 		/*
 			build response from a request
 		*/
-		// void						BuildResponse();
+		void						BuildResponse(VirtualServer	*virtualServer);
 		void						ProcessMessage();
 };
 

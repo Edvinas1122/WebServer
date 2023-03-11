@@ -21,7 +21,10 @@ class	File: std::fstream
 class	FileProcessor: public File 
 {
 	public:
-		std::string Get(std::string (*processor)(std::string));
+		std::string GetContents(std::string (*processor)(std::string const&) = default_processor);
+	
+	private:
+		static std::string	default_processor(std::string const &content);
 };
 
 #endif

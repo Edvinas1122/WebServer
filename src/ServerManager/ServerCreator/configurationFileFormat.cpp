@@ -1,6 +1,6 @@
 #include <configurationFileFormat.hpp>
 
-std::string	removeComents(std::string content)
+std::string	removeComents(std::string const &content)
 {
 	std::stringstream	stream(content);
 	std::string			line;

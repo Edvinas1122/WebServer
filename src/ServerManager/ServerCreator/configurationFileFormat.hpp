@@ -7,7 +7,7 @@
 	Server Configuration File specific syntax validation
 	and other related validation
 */
-	std::string	removeComents(std::string content);
+	std::string	removeComents(std::string const &content);
 
 	class	ConfFileAccessFailure: public std::exception {};
 

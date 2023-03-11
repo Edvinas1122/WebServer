@@ -49,7 +49,12 @@ std::string File::GetContentsBuffer()
 	return (buffer);
 }
 
-std::string FileProcessor::Get(std::string (*processor)(std::string))
+std::string FileProcessor::GetContents(std::string (*processor)(std::string const&))
 {
 	return (processor(File::GetContents()));
+}
+
+std::string	FileProcessor::default_processor(std::string const &content)
+{
+	return (content);
 }

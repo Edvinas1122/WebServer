@@ -3,12 +3,11 @@
 
 void	ServerManager::serverCreator(const char *path)
 {
-	// ConfigurationFile	configurationFile(path);
 	DescendParser		parser;
 	FileProcessor		configurationFile;
 
 	configurationFile.Open(path);
-	parser.setContent(configurationFile.Get(removeComents));
+	parser.setContent(configurationFile.GetContents(removeComents));
 	parseServers(parser);
 	startPorts(parser);
 }

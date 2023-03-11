@@ -54,3 +54,4 @@ bool AttributeGetter::defaultValidator(std::string const &str)
 	(void) str;
 	return (false);
 }
+

@@ -1,4 +1,4 @@
-UTILS = $(addprefix src/ServerManager/Utils/, File.cpp AttributeGetter.cpp wordFind.cpp)
+UTILS = $(addprefix src/ServerManager/Utils/, File.cpp AttributeGetter.cpp Parser.cpp wordFind.cpp)
 PARSER = $(addprefix src/ServerManager/ServerCreator/,DescendParser.cpp DefinitionExtractor.cpp configurationFileFormat.cpp openPortSocket.cpp)
 VIRTUAL_SERVER = $(addprefix src/ServerManager/VirtualServer/,VirtualServer.cpp Route.cpp VirtualServerValidators.cpp)
 SERVERMANAGER = $(addprefix src/ServerManager/,ServerManager.cpp PortSockets.cpp VirtualServers.cpp ClientQue.cpp Observer.cpp)

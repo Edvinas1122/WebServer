@@ -1,4 +1,5 @@
 #include <ServerClasses.hpp>
+#include <AttributeGetter.hpp>
 
 Client::Client(const int clientFd, const struct sockaddr_in &socketAddress): Tcp(clientFd)
 {
@@ -21,7 +22,11 @@ time_t	Client::getElapsedTime() const
 	return (currentTime.tv_sec - lst_msg_time.tv_sec);
 }
 
-std::string	Client::ProcessMessage()
+/*
+	Void
+*/
+void	Client::ProcessMessage()
 {
-	return (MessageProcessor::validateFormat(Tcp::getMessage()));
+	MessageProcessor::getParsed<HttpRequest>(Tcp::getMessage());
+	*this << "DOG BARKS!";
 }

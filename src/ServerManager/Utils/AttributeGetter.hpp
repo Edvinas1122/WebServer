@@ -15,9 +15,9 @@
 	An interface that provides tools for classes to parse
 	attributes from text file
 */
-class AttributeGetter
+class	AttributeGetter
 {
-	private:
+	protected:
 		std::string	object_definition;
 	protected:
 		AttributeGetter() {};

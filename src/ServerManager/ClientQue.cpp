@@ -41,26 +41,14 @@ void	ClientsQue::readClients()
 			// Process incoming if not downloading
 			if (it->second.processState())
 			{
-				it->second << it->second.ProcessMessage();
+				// a method to push a message in but it is better to internally do it because 
+				it->second.ProcessMessage();
 
 			}
-			// it->second << "Message received\n";
 		}
 		it++;
 	}
 }
-
-// void	ClientsQue::processRequests()
-// {
-// 	listOfClients::iterator	it = Clients.begin();
-
-// 	while (it != Clients.end())
-// 	{
-// 		if (it->second.processState())
-// 			it->second.validateFormat();
-// 		it++;
-// 	}
-// }
 
 void	ClientsQue::respondClients()
 {
@@ -69,7 +57,7 @@ void	ClientsQue::respondClients()
 	Terminal::terminal_interface();
 	while (it != Clients.end())
 	{
-		// Push message
+		// Push message into terminal
 		if (Terminal::notEmpty())
 			it->second << Terminal::extractMessage() << "\n";
 		if (it->second.ready() && checkFd(it->first, POLLOUT))

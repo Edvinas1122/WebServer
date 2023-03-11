@@ -1,5 +1,4 @@
 #include <HttpFormat.hpp>
-#include <wordFind.hpp>
 
 bool	validHttpMessage(std::string const &message)
 {
@@ -7,3 +6,4 @@ bool	validHttpMessage(std::string const &message)
 		return (true);
 	return (false);
 }
+

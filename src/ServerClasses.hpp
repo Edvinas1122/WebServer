@@ -5,7 +5,7 @@
 # include <DescendParser.hpp>
 # include <Terminal.hpp>
 # include <VirtualServer.hpp>
-
+# include <Parser.hpp>
 
 enum HttpMethodes
 {
@@ -33,6 +33,10 @@ class HttpRequest {
 
 	public:
 		HttpRequest() {};
+		HttpRequest(Parser parser) {
+
+			std::cout << parser.getValue("Dog") << std::endl;
+		};
 };
 
 /*
@@ -76,7 +80,8 @@ class	Tcp
 		Tcp	&operator<<(const std::string& str);
 };
 
-class	MessageProcessor: protected AttributeGetter
+template<typename PARSER>
+class	MessageProcessor
 {
 	private:
 		bool	state;
@@ -84,14 +89,23 @@ class	MessageProcessor: protected AttributeGetter
 		MessageProcessor(): state(false) {};
 
 		std::string	validateFormat(std::string const &message);
-		bool		processState();
+
+		template<typename TYPE>
+		TYPE		getParsed(std::string const &message) {
+			return (TYPE(PARSER(message)));
+		};
+
+		bool		processState()
+		{
+			return (!state);
+		};
 
 	private:
 		
 };
 
 
-class	Client: public Tcp, public MessageProcessor {
+class	Client: public Tcp, public MessageProcessor<Parser> {
 	public:
 		Response		response;
 	private:
@@ -119,7 +133,7 @@ class	Client: public Tcp, public MessageProcessor {
 			build response from a request
 		*/
 		// void						BuildResponse();
-		std::string					ProcessMessage();
+		void						ProcessMessage();
 };
 
 class	Observer
@@ -160,8 +174,6 @@ class	ClientsQue: virtual public Observer, public Terminal
 		void	removeClient(listOfClients::iterator &position);
 		void	readClients();
 		void	respondClients();
-		// void	processRequests();
-		// void	respondClients(std::string message);
 		void	closeTimeOut();
 
 };

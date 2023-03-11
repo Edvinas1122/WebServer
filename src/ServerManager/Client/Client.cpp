@@ -34,3 +34,9 @@ void	Client::ProcessMessage()
 		*this << "Error\n";
 	}
 }
+
+void	Client::BuildResponse()
+{
+	response.Build();
+	*this << response.get();
+}

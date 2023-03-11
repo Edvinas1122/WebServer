@@ -156,7 +156,9 @@ class	Client: public Tcp, public MessageProcessor<Parser> {
 		/*
 			build response from a request
 		*/
-		void						BuildResponse(VirtualServer	*virtualServer);
+		// void						BuildResponse(VirtualServer	*virtualServer);
+		void						BuildResponse();
+		
 		void						ProcessMessage();
 };
 

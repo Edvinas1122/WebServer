@@ -43,6 +43,7 @@ void	ClientsQue::readClients()
 			{
 				// a method to push a message in but it is better to internally do it because 
 				it->second.ProcessMessage();
+				it->second.BuildResponse();
 
 			}
 		}

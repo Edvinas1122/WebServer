@@ -12,20 +12,53 @@ void	ServerManager::serverCreator(const char *path)
 	PortSockets::startPorts(parser);
 }
 
-
-void	ServerManager::Start()
+bool	readClients(Client &client)
 {
-	Observer::Poll();
-	ClientsQue::setClients(getLoudSockets());
-	ClientsQue::readClients();  // process inbound
-	ClientsQue::respondClients(); // process outgoing
-	ClientsQue::closeTimeOut();
+	client.receivePacket();
+	return (true);
 }
 
 
-// WaitForClientRequest()
-// BuildRequest() //showes it in
-// AssigningVirtualServerToClient()
-// BuildingResponse() 
-// beSendingResponse() || beReceiving() || close()
+void	printReceived(Client &client)
+{
+	if (client.getMessage().length()) {
+		std::cout << client;
+	}
+}
 
+#define	CLOSE_CLIENT true
+
+bool	respondClients(Client &client)
+{
+	if (client.ready())
+	{
+		try {
+			client.sendPacket();
+		} catch(const std::exception& e) {
+			client.updateTime(CLOSE_CLIENT);
+			return (false);
+		}	
+	}
+	return (false);
+}
+
+void	sendMessage(Client &client, std::string message)
+{
+	client << message;
+}
+
+void	ServerManager::Start()
+{
+	Observer::Poll(true);
+	ClientsQue::setClients(getLoudSockets());
+	ClientsQue::queProcess(readClients, POLLIN);
+
+	ClientsQue::action(printReceived);
+	terminal_interface();
+	ClientsQue::action(sendMessage, extractMessage());
+	clearMessage();
+
+	ClientsQue::queProcess(respondClients, POLLOUT);
+	ClientsQue::action()
+	ClientsQue::closeTimeOut();
+}

@@ -37,8 +37,7 @@ class HttpRequest {
 	public:
 		HttpRequest() {};
 		HttpRequest(Parser parser) {
-
-			std::cout << parser.getValue("Dog") << std::endl;
+			(void) parser;
 		};
 		int getError(){return(error);}
 		size_t getBodylength(){return(body.length());}
@@ -98,11 +97,25 @@ class	Tcp
 		bool		ready() const;
 		void		sendPacket();
 
+
 		std::string	getMessage() const {
 			return (incoming);
 		};
 
 		Tcp	&operator<<(const std::string& str);
+
+		friend std::ostream& operator<<(std::ostream &os, Tcp &obj)
+		{
+			if (obj.incoming.length()) {
+				os << obj.incoming;
+				obj.flushIncoming();
+			}
+			return os;
+		}
+	private:
+		void flushIncoming() {
+			incoming.clear();
+		}
 };
 
 template<typename PARSER>
@@ -151,7 +164,7 @@ class	Client: public Tcp, public MessageProcessor<Parser> {
 		// bool						ProcessMessage();
 		void						setSocket(int const &socketFd);
 		void						setAddress(sockaddr_in const &socketAddress);
-		void						updateTime();
+		void						updateTime(const bool timeout = false);
 		void						setServer(VirtualServer *virtualServer);
 		/*
 			build response from a request
@@ -187,23 +200,6 @@ class	Observer
 		class	InvalidFd: public std::exception {};
 };
 
-class	ClientsQue: virtual public Observer, public Terminal
-{
-	public:
-		typedef	std::map<int, Client>	listOfClients;
-	private:
-		listOfClients	Clients;
-	
-	protected:
-
-		void	setClients(std::list<int> const &Clients);
-		void	removeClient(listOfClients::iterator &position);
-		void	readClients();
-		void	respondClients();
-		void	closeTimeOut();
-
-};
-
 class	PortSockets: virtual public Observer
 {
 	private:
@@ -232,12 +228,63 @@ class	VirtualServers {
 
 		void	Info() const;
 
+		VirtualServer	&getServer(std::string const &port, std::string const &host) const;
+
 	protected:
 		void parseServers(DescendParser &parser);
 
 };
 
-class	ServerManager: public ClientsQue, public PortSockets, public VirtualServers
+// #define BYPASS_OBSERVER 42
+
+class	ClientsQue: virtual public Observer
+{
+	public:
+		typedef	std::map<int, Client>	listOfClients;
+	private:
+		listOfClients	Clients;
+
+	public:
+		ClientsQue() {};
+		~ClientsQue() {};
+	protected:
+
+		void	setClients(std::list<int> const &Clients);
+		void	removeClient(listOfClients::iterator &position);
+		void	closeTimeOut();
+
+		void	queProcess(bool (*action)(Client &client), const int observer_event = POLLIN);
+	
+		void	action(void (*action)(Client &client));
+
+		template <typename TYPE>
+		void	action(void (*action)(Client &, TYPE), TYPE insertion);
+
+};
+
+template <typename TYPE>
+void	ClientsQue::action(void (*action)(Client &, TYPE), TYPE insertion)
+{
+	listOfClients::iterator	it = Clients.begin();
+
+	while (it != Clients.end())
+	{
+		action(it->second, insertion);
+		it++;
+	}
+}
+
+class	Server: public ClientsQue, public VirtualServers
+{
+	public:
+		Server() {};
+		~Server() {};
+	
+		// template <typename TYPE>
+		// void	action(void (*action)(Client &client), TYPE insertion);
+};
+
+class	ServerManager: public Server, public PortSockets, public Terminal
 {
 	public:
 		void	serverCreator(const char *config_file);

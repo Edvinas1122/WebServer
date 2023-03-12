@@ -20,6 +20,8 @@ void	Tcp::sendPacket()
 	int	bytes_sent;
 
 	bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
+	if (bytes_sent == -1)
+		throw std::exception();
 	if (bytes_sent > 0)
 		outgoing = outgoing.substr(bytes_sent, outgoing.length());
 }

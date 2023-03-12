@@ -29,49 +29,32 @@ void	ClientsQue::removeClient(listOfClients::iterator &position)
 	Clients.erase(position);
 }
 
-void	ClientsQue::readClients()
+void	ClientsQue::queProcess(bool	(*action)(Client &client), const int observer_event)
 {
 	listOfClients::iterator	it = Clients.begin();
 
 	while (it != Clients.end())
 	{
-		if (checkFd(it->first)) {
-			it->second.receivePacket();
+		if (checkFd(it->first, observer_event) && action(it->second))
 			it->second.updateTime();
-			// Process incoming if not downloading
-			if (it->second.processState())
-			{
-				// a method to push a message in but it is better to internally do it because 
-				it->second.ProcessMessage();
-				it->second.BuildResponse();
-
-			}
-		}
+		// else if (observer_event == BYPASS_OBSERVER)
+		// 	action(it->second);
 		it++;
 	}
 }
 
-void	ClientsQue::respondClients()
+void	ClientsQue::queProcess(void	(*action)(Client &client))
 {
 	listOfClients::iterator	it = Clients.begin();
 
-	Terminal::terminal_interface();
 	while (it != Clients.end())
 	{
-		// Push message into terminal
-		if (Terminal::notEmpty())
-			it->second << Terminal::extractMessage() << "\n";
-		if (it->second.ready() && checkFd(it->first, POLLOUT))
-		{
-			it->second.sendPacket();
-			it->second.updateTime();
-		}
+		action(it->second);
 		it++;
 	}
-	Terminal::clearMessage();
 }
 
-#define TIMEOUT 30
+#define TIMEOUT 10
 
 void	ClientsQue::closeTimeOut()
 {
@@ -81,7 +64,7 @@ void	ClientsQue::closeTimeOut()
 	{
 		if ((*it).second.getElapsedTime() > TIMEOUT)
 		{
-			std::cout << "elapsed: " << (*it).second.getElapsedTime() << std::endl;
+			std::cout << "Timeout: ";
 			removeClient(it);
 			it = Clients.begin();
 			if (it == Clients.end())

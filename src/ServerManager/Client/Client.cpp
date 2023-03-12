@@ -9,9 +9,12 @@ Client::Client(const int clientFd, const struct sockaddr_in &socketAddress): Tcp
 
 Client::~Client() {}
 
-void	Client::updateTime()
+void	Client::updateTime(const bool timeout)
 {
-	gettimeofday(&lst_msg_time, NULL);
+	if (!timeout)
+		gettimeofday(&lst_msg_time, NULL);
+	else
+		memset(&lst_msg_time, 0, sizeof(lst_msg_time));
 }
 
 time_t	Client::getElapsedTime() const
@@ -30,8 +33,8 @@ void	Client::ProcessMessage()
 	try {
 		MessageProcessor::getParsed<HttpRequest>(Tcp::getMessage());
 		*this << "DOG BARKS!\n";
-	} catch (AttributeGetter::ValidationFailure &e) {
-		*this << "Error\n";
+	} catch (std::exception &e) {
+		// *this << "Error\n";
 	}
 }
 

@@ -17,14 +17,12 @@ void	ClientsQue::setClients(std::list<int> const &loudPortList)
 			Clients.insert(std::make_pair(clientFd, Client(clientFd, socketAddress)));
 			insertFileDescriptor(clientFd);
 			it++;
-			std::cout << "received client" << std::endl;
 		}
 	}
 }
 
 void	ClientsQue::removeClient(listOfClients::iterator &position)
 {
-	std::cout << "closeFd: " << position->first << std::endl;
 	removeFileDescriptor(position->first);
 	Clients.erase(position);
 }
@@ -43,7 +41,7 @@ void	ClientsQue::queProcess(bool	(*action)(Client &client), const int observer_e
 	}
 }
 
-void	ClientsQue::queProcess(void	(*action)(Client &client))
+void	ClientsQue::action(void	(*action)(Client &client))
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -64,7 +62,6 @@ void	ClientsQue::closeTimeOut()
 	{
 		if ((*it).second.getElapsedTime() > TIMEOUT)
 		{
-			std::cout << "Timeout: ";
 			removeClient(it);
 			it = Clients.begin();
 			if (it == Clients.end())

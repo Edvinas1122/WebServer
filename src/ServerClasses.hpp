@@ -36,9 +36,7 @@ class HttpRequest {
 
 	public:
 		HttpRequest() {};
-		HttpRequest(Parser parser) {
-			(void) parser;
-		};
+		HttpRequest(Parser parser);
 		int getError(){return(error);}
 		size_t getBodylength(){return(body.length());}
 		std::string getBody(){return(body);}
@@ -94,9 +92,9 @@ class	Tcp
 
 	public:
 		void		receivePacket();
-		bool		ready() const;
 		void		sendPacket();
 
+		bool		ready() const; // outgoing empty
 
 		std::string	getMessage() const {
 			return (incoming);
@@ -118,42 +116,25 @@ class	Tcp
 		}
 };
 
-template<typename PARSER>
-class	MessageProcessor
-{
+class	Client: public Tcp {
+	// public:
+		// Response		response;
 	private:
-		bool	state;
-	public:
-		MessageProcessor(): state(false) {};
-
-		std::string	validateFormat(std::string const &message);
-
-		template<typename TYPE>
-		TYPE		getParsed(std::string const &message) {
-			return (TYPE(PARSER(message)));
-		};
-
-		bool		processState()
-		{
-			return (!state);
-		};
-
-	private:
-		
-};
-
-
-class	Client: public Tcp, public MessageProcessor<Parser> {
-	public:
-		Response		response;
-	private:
-		HttpRequest		request;
+		// HttpRequest		request;
 		sockaddr_in 	socketAddress;
 		struct timeval	lst_msg_time;
+
 	public:
-		Client() {};
+		bool			serviceStatus;
+	public:
+		Client() {serviceStatus = true;};
 		~Client();
 		Client(const int clientFd, const struct sockaddr_in &socketAddress);
+
+		bool	responseBuilt()
+		{
+			return (serviceStatus);
+		};
 
 		/**/
 		const int					&getSocket() const;
@@ -169,10 +150,6 @@ class	Client: public Tcp, public MessageProcessor<Parser> {
 		/*
 			build response from a request
 		*/
-		// void						BuildResponse(VirtualServer	*virtualServer);
-		void						BuildResponse();
-		
-		void						ProcessMessage();
 };
 
 class	Observer
@@ -277,11 +254,9 @@ void	ClientsQue::action(void (*action)(Client &, TYPE), TYPE insertion)
 class	Server: public ClientsQue, public VirtualServers
 {
 	public:
+
 		Server() {};
 		~Server() {};
-	
-		// template <typename TYPE>
-		// void	action(void (*action)(Client &client), TYPE insertion);
 };
 
 class	ServerManager: public Server, public PortSockets, public Terminal
@@ -291,7 +266,11 @@ class	ServerManager: public Server, public PortSockets, public Terminal
 		void	Start();
 
 	private:
-		// void	receiveRequest();
-		// void	respondToClient();
+		static bool	respondClients(Client &client);
+		static bool	readClients(Client &client);
+		static void	printReceived(Client &client);
+		static void	sendMessage(Client &client, std::string message);
+		static void	buildResponse(Client &client);
+
 };
 #endif

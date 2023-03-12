@@ -1,14 +1,14 @@
 #include <ServerClasses.hpp>
 #include <HttpFormat.hpp>
 
-template<typename PARSER>
-std::string	MessageProcessor<PARSER>::validateFormat(std::string const &message)
-{
-	std::cout << message << std::endl;
-	if (validHttpMessage(message))
-		return ("you hot \n");
-	return ("you cold \n");
-}
+// template<typename PARSER>
+// std::string	MessageProcessor<PARSER>::validateFormat(std::string const &message)
+// {
+// 	std::cout << message << std::endl;
+// 	if (validHttpMessage(message))
+// 		return ("you hot \n");
+// 	return ("you cold \n");
+// }
 /*
 	Tells if a message been processed
 */

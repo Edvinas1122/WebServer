@@ -1,5 +1,6 @@
-#include <ServerClasses.hpp>
-#include <configurationFileFormat.hpp>
+# include <ServerClasses.hpp>
+# include <MessageProcessor.hpp>
+# include <configurationFileFormat.hpp>
 
 void	ServerManager::serverCreator(const char *path)
 {
@@ -12,23 +13,27 @@ void	ServerManager::serverCreator(const char *path)
 	PortSockets::startPorts(parser);
 }
 
-bool	readClients(Client &client)
+void	ServerManager::Start()
 {
-	client.receivePacket();
-	return (true);
+	Observer::Poll(true);
+
+	ClientsQue::setClients(getLoudSockets());
+
+	ClientsQue::queProcess(readClients, POLLIN);
+	ClientsQue::action(printReceived);
+	ClientsQue::action(buildResponse);
+	terminal_interface();
+	ClientsQue::action(sendMessage, extractMessage());
+	clearMessage();
+
+	ClientsQue::queProcess(respondClients, POLLOUT);
+	ClientsQue::closeTimeOut();
 }
 
-
-void	printReceived(Client &client)
-{
-	if (client.getMessage().length()) {
-		std::cout << client;
-	}
-}
 
 #define	CLOSE_CLIENT true
 
-bool	respondClients(Client &client)
+bool	ServerManager::respondClients(Client &client)
 {
 	if (client.ready())
 	{
@@ -42,23 +47,37 @@ bool	respondClients(Client &client)
 	return (false);
 }
 
-void	sendMessage(Client &client, std::string message)
+bool	ServerManager::readClients(Client &client)
+{
+	client.receivePacket();
+	client.serviceStatus = false;
+	// processor.setObject(client.getMessage());
+	// std::cout << processor.getWord(1, 1) << std::endl;
+	return (true);
+}
+
+
+void	ServerManager::sendMessage(Client &client, std::string message)
 {
 	client << message;
 }
 
-void	ServerManager::Start()
+
+void	ServerManager::printReceived(Client &client)
 {
-	Observer::Poll(true);
-	ClientsQue::setClients(getLoudSockets());
-	ClientsQue::queProcess(readClients, POLLIN);
+	if (client.getMessage().length()) {
+		std::cout << client;
+	}
+}
 
-	ClientsQue::action(printReceived);
-	terminal_interface();
-	ClientsQue::action(sendMessage, extractMessage());
-	clearMessage();
+void	ServerManager::buildResponse(Client &client)
+{
+	if (!client.ready() && !client.responseBuilt())
+	{
+		Response	response;
 
-	ClientsQue::queProcess(respondClients, POLLOUT);
-	ClientsQue::action()
-	ClientsQue::closeTimeOut();
+		response.Build();
+		client << response.get();
+		client.serviceStatus = true;
+	}
 }

@@ -3,6 +3,9 @@
 Observer::Observer()
 {
 	vector.reserve(MAX_CONNECTIONS);
+#ifdef TERMINAL
+	insertFileDescriptor(STDIN_FILENO);
+#endif
 }
 
 int	Observer::Poll(const bool timeOutOn)

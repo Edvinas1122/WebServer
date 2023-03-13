@@ -38,7 +38,7 @@ bool	Terminal::parce_input(std::string const &user_input)
 bool Terminal::terminal_interface()
 {
 	char c;
-	ssize_t bytes_read;
+	ssize_t bytes_read = 0;
 	std::string	user_input;
 
 	bytes_read = read(STDIN_FILENO, &c, 1);

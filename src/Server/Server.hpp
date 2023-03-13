@@ -4,11 +4,10 @@
 # include <includes.hpp>
 # include <Client.hpp>
 
-
 class	Observer
 {
 	private:
-        std::vector<struct pollfd>	vector;
+		std::vector<struct pollfd>	vector;
 		static const int MAX_CONNECTIONS = 10;
 		static const int TIMEOUT = 5000;
 	public:
@@ -95,7 +94,6 @@ class	ConnectionQue: virtual public Observer
 	protected:
 
 		void	setClients(std::list<int> const &Clients);
-		void	closeConnection(listOfClients::iterator &position);
 		void	closeTimeOut();
 
 		void	queProcess(bool (*action)(Client &client), const int observer_event = POLLIN);
@@ -105,6 +103,8 @@ class	ConnectionQue: virtual public Observer
 		template <typename TYPE>
 		void	action(void (*action)(Client &, TYPE), TYPE insertion);
 
+	private:
+		void	closeConnection(listOfClients::iterator &position);
 };
 
 template <typename TYPE>

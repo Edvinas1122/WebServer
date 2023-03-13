@@ -1,4 +1,5 @@
 #include <Response.hpp>
+#include "mod/headers.hpp"
 
 Response::Response()
 {
@@ -15,14 +16,14 @@ void Response::build_error(int code)
 }
 void Response::Build()
 {
+	setStatusLine();
+	_response.append(setHeaders());
 	/*if(reqError || buildBody())
 		build_error(_status);*/
-	_status = 404;
-	build_error(_status);
-	setStatusLine();
-	setHeaders();
-    if (_request.getMethod() != HEAD && (_request.getMethod() == GET || _status != 200))
-        _response.append(_body);
+	// _status = 404;
+	// build_error(_status);
+    // if (_request.getMethod() != HEAD && (_request.getMethod() == GET || _status != 200))
+    //     _response.append(_body);
 }
 
 
@@ -62,25 +63,5 @@ void        Response::setStatusLine()
 {
     _response.append("HTTP/1.1 " + toString(_status) + " ");
     _response.append(error::getHttpErrorExplanation(_status));
-    _response.append("\r\n");
-}
-
-void    Response::setHeaders()
-{
-	_response.append("Content-Type: text/html\r\n");
-    _response.append("Content-Length: ");
-    _response.append(toString(_body.length()));
-    _response.append("\r\n");
-    //connection();
-    //server();
-    //location();
-    char date[1000];
-    time_t now = time(0);
-    struct tm tm = *gmtime(&now);
-    strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S %Z", &tm);
-    _response.append("Date: ");
-    _response.append(date);
-    _response.append("\r\n");
-
     _response.append("\r\n");
 }

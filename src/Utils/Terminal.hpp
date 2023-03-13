@@ -2,6 +2,7 @@
 # define TERMINAL_HPP
 
 #include <includes.hpp>
+#include <Server.hpp>
 
 class	Terminal
 {
@@ -10,8 +11,8 @@ class	Terminal
 	public:
 		Terminal()
 		{
-			int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-			fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+			// int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+			// fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
 		};
 		bool	terminal_interface();
 		bool	notEmpty();

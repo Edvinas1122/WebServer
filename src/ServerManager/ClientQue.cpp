@@ -1,6 +1,6 @@
 #include <ServerClasses.hpp>
 
-void	ClientsQue::setClients(std::list<int> const &loudPortList)
+void	ConnectionQue::setClients(std::list<int> const &loudPortList)
 {
 	struct sockaddr_in				socketAddress;
 	socklen_t						addrlen = sizeof(struct sockaddr_in);
@@ -21,13 +21,13 @@ void	ClientsQue::setClients(std::list<int> const &loudPortList)
 	}
 }
 
-void	ClientsQue::removeClient(listOfClients::iterator &position)
+void	ConnectionQue::closeConnection(listOfClients::iterator &position)
 {
 	removeFileDescriptor(position->first);
 	Clients.erase(position);
 }
 
-void	ClientsQue::queProcess(bool	(*action)(Client &client), const int observer_event)
+void	ConnectionQue::queProcess(bool	(*action)(Client &client), const int observer_event)
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -41,7 +41,7 @@ void	ClientsQue::queProcess(bool	(*action)(Client &client), const int observer_e
 	}
 }
 
-void	ClientsQue::action(void	(*action)(Client &client))
+void	ConnectionQue::action(void	(*action)(Client &client))
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -54,7 +54,7 @@ void	ClientsQue::action(void	(*action)(Client &client))
 
 #define TIMEOUT 10
 
-void	ClientsQue::closeTimeOut()
+void	ConnectionQue::closeTimeOut()
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -62,7 +62,7 @@ void	ClientsQue::closeTimeOut()
 	{
 		if ((*it).second.getElapsedTime() > TIMEOUT)
 		{
-			removeClient(it);
+			closeConnection(it);
 			it = Clients.begin();
 			if (it == Clients.end())
 				break;

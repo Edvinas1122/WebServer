@@ -1,23 +1,4 @@
 #include <ServerClasses.hpp>
-#include <openPortSocket.hpp>
-
-void	PortSockets::startPorts(DescendParser &parser, bool asynch)
-{
-	int	fd;
-	int	iterator = 1;
-
-	while (parser.count("listen") >= iterator)
-	{
-		if (portSockets.find(parser.getValue("listen", iterator)) == portSockets.end())
-		{
-			fd = openPortSocket(parser.getValue("listen", iterator).c_str());
-			portSockets[parser.getValue("listen", iterator)] = fd;
-			if (asynch)
-				insertFileDescriptor(fd);
-		}
-		iterator++;
-	}
-}
 
 std::list<int>	PortSockets::getLoudSockets(const int events)
 {

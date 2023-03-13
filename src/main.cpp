@@ -1,13 +1,41 @@
 #include <ServerClasses.hpp>
 
+void	printReceived(Client &client)
+{
+	if (client.getMessage().length()) {
+		std::cout << client;
+	}
+}
+
+void	queMessage(Client &client)
+{
+	client << "message received\n";
+}
+
+#include <DescendParser.hpp>
+#include <configurationFileFormat.hpp>
+#include <openPortSocket.hpp>
+
+void	startHttpServer(Server<std::string> &server, const char *configPath)
+{
+	DescendParser		parser;
+	FileProcessor		configurationFile;
+
+	configurationFile.Open(configPath);
+	parser.setContent(configurationFile.GetContents(removeComents));
+	server.setStartSocketMethod(openPortSocket);
+	server.startPorts<DescendParser>(wordMatchMethod, parser);
+}
+
 int	main(void)
 {
-	ServerManager	engine;
+	Server<std::string>	httpServer;
 
-	engine.serverCreator("/home/WebServer/server.conf");
-	engine.Info();
+	startHttpServer(httpServer, "/home/WebServer/server.conf");
+	httpServer.setReceivingAction(printReceived);
+	httpServer.setRespondingAction(queMessage);
 	while (42)
 	{
-		engine.Start();
+		httpServer.Run();
 	}
 }

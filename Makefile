@@ -1,7 +1,7 @@
 UTILS = $(addprefix src/ServerManager/Utils/, File.cpp AttributeGetter.cpp Parser.cpp wordFind.cpp)
 PARSER = $(addprefix src/ServerManager/ServerCreator/,DescendParser.cpp DefinitionExtractor.cpp configurationFileFormat.cpp openPortSocket.cpp)
 VIRTUAL_SERVER = $(addprefix src/ServerManager/VirtualServer/,VirtualServer.cpp Route.cpp VirtualServerValidators.cpp)
-SERVERMANAGER = $(addprefix src/ServerManager/,ServerManager.cpp PortSockets.cpp VirtualServers.cpp ClientQue.cpp Observer.cpp)
+SERVERMANAGER = $(addprefix src/ServerManager/,ServerManager.cpp Server.cpp PortSockets.cpp VirtualServers.cpp ClientQue.cpp Observer.cpp)
 HTTP_PROTOCOL = $(addprefix src/ServerManager/HTTP_Protocol/,HttpRequest.cpp HttpFormat.cpp MessageProcessor.cpp)
 CLIENT = $(addprefix src/ServerManager/Client/,Client.cpp Tcp.cpp)
 TERMINAL = $(addprefix src/ServerManager/,terminal.cpp)

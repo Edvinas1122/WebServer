@@ -13,11 +13,12 @@ int	Observer::Poll(const bool timeOutOn)
 	return (info);
 }
 
-void	Observer::insertFileDescriptor(const int fd, const int events)
+void	Observer::insertFileDescriptor(const int fd, const int events, const bool asynch)
 {
 	struct pollfd	info;
 
-	setAsNonBlocking(fd);
+	if (asynch)
+		setAsNonBlocking(fd);
 	info.fd = fd;
 	info.events = events;
 	info.revents = 0;

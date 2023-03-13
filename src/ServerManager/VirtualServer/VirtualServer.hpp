@@ -21,7 +21,7 @@ class Route
 		short		forbit_methods[8];
 	public:
 		Route() {};
-		Route(DescendParser parser);
+		// Route(DescendParser parser);
 
 		void	displayInfo(const char *append) const;
 };
@@ -59,7 +59,7 @@ class VirtualServer {
 		// std::map<std::string, CGI>			cgi_map;
 	public:
 		VirtualServer() {};
-		VirtualServer(DescendParser parser);
+		// VirtualServer(DescendParser parser);
 		// VirtualServer(const VirtualServer &src);
 		// VirtualServer& operator=(const VirtualServer& other);
 		const char	*getRoot() const;

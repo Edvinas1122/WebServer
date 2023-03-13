@@ -6,33 +6,33 @@ static void	copy_list_values(container &destination, container const &source)
 	std::copy(source.begin(), source.end(), std::back_inserter(destination));
 }
 
-VirtualServer::VirtualServer(DescendParser parser)
-{
-	int	iterator = 1;
+// VirtualServer::VirtualServer(DescendParser parser)
+// {
+// 	int	iterator = 1;
 
-	port_number = parser.getValuesList("listen", this->isPositiveNumber);
-	root_dir = parser.getValue("root", 1, this->pathcheck);
-	index = parser.getValue("index");
-	server_name = parser.getValue("server_name");
-	host = parser.getValue("host");
-	while (parser.count("location") >= iterator)
-	{
-		locations.insert(parser.getMaped<Route>("location", iterator));
-		iterator++;
-	}
-	iterator = 1;
-	while (parser.count("status") >= iterator)
-	{
-		error_pages.insert(parser.getPair("status", iterator));
-		iterator++;
-	}
-	iterator = 1;
-	while (parser.count("use_cgi") >= iterator)
-	{
-		cgi_response.insert(parser.getPair("use_cgi", iterator));
-		iterator++;
-	}
-}
+// 	port_number = parser.getValuesList("listen", this->isPositiveNumber);
+// 	root_dir = parser.getValue("root", 1, this->pathcheck);
+// 	index = parser.getValue("index");
+// 	server_name = parser.getValue("server_name");
+// 	host = parser.getValue("host");
+// 	while (parser.count("location") >= iterator)
+// 	{
+// 		locations.insert(parser.getMaped<Route>("location", iterator));
+// 		iterator++;
+// 	}
+// 	iterator = 1;
+// 	while (parser.count("status") >= iterator)
+// 	{
+// 		error_pages.insert(parser.getPair("status", iterator));
+// 		iterator++;
+// 	}
+// 	iterator = 1;
+// 	while (parser.count("use_cgi") >= iterator)
+// 	{
+// 		cgi_response.insert(parser.getPair("use_cgi", iterator));
+// 		iterator++;
+// 	}
+// }
 
 const char	*VirtualServer::getHost() const
 {

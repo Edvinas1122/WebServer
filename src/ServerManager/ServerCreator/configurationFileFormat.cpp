@@ -1,3 +1,4 @@
+#include <DescendParser.hpp>
 #include <configurationFileFormat.hpp>
 
 std::string	removeComents(std::string const &content)
@@ -15,4 +16,21 @@ std::string	removeComents(std::string const &content)
 		result += line + '\n';
 	}
 	return (result);
+}
+
+std::list<std::string>	wordMatchMethod(DescendParser &parser)
+{
+	std::list<std::string>	portSockets;
+	int	iterator = 1;
+
+	while (parser.count("listen") >= iterator)
+	{
+		if (std::find(portSockets.begin(), portSockets.end(), parser.getValue("listen", iterator).c_str()) == portSockets.end())
+		{
+			std::cout << parser.getValue("listen", iterator).c_str() << std::endl;
+			portSockets.push_back(parser.getValue("listen", iterator));
+		}
+		iterator++;
+	}
+	return (portSockets);
 }

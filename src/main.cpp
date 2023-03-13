@@ -1,39 +1,54 @@
-#include <ServerClasses.hpp>
+#include <Server.hpp>
+#include <Terminal.hpp>
 
 void	printReceived(Client &client)
 {
 	if (client.getMessage().length()) {
 		std::cout << client;
+		client << "message received\n";
 	}
 }
 
-void	queMessage(Client &client)
+void	handleTerminal(Client &client, Terminal terminal)
 {
-	client << "message received\n";
+	terminal.terminal_interface();
+	terminal.extractMessage();
+	if (terminal.notEmpty())
+	{
+		client << terminal.extractMessage();
+		terminal.clearMessage();
+	}
 }
+
+// void	queMessage(Client &client)
+// {
+// 	client << "message received\n";
+// }
 
 #include <DescendParser.hpp>
 #include <configurationFileFormat.hpp>
-#include <openPortSocket.hpp>
 
-void	startHttpServer(Server<std::string> &server, const char *configPath)
+void	startHttpServer(Server<Terminal> &server, const char *configPath)
 {
 	DescendParser		parser;
 	FileProcessor		configurationFile;
 
 	configurationFile.Open(configPath);
 	parser.setContent(configurationFile.GetContents(removeComents));
-	server.setStartSocketMethod(openPortSocket);
+	// server.setStartSocketMethod(openPortSocket);
 	server.startPorts<DescendParser>(wordMatchMethod, parser);
 }
 
+
+
 int	main(void)
 {
-	Server<std::string>	httpServer;
+	Server<Terminal>	httpServer;
+	Terminal			terminal;
 
 	startHttpServer(httpServer, "/home/WebServer/server.conf");
-	httpServer.setReceivingAction(printReceived);
-	httpServer.setRespondingAction(queMessage);
+	httpServer.setAction(printReceived);
+	httpServer.setAction(handleTerminal, terminal);
 	while (42)
 	{
 		httpServer.Run();

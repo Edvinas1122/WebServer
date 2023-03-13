@@ -2,7 +2,8 @@
 # define SERVER_HPP
 
 # include <includes.hpp>
-# include <ServerClasses.hpp>
+# include <Client.hpp>
+
 
 class	Observer
 {

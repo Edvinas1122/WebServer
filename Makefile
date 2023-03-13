@@ -1,18 +1,18 @@
-FORMATS = $(addprefix Formats/,configurationFileFormat.cpp)
+FORMATS = $(addprefix Formats/,configurationFileFormat.cpp httpFormat.cpp)
 PARSER = $(addprefix Parsers/,AttributeGetter.cpp Parser.cpp DescendParser.cpp DefinitionExtractor.cpp mod/wordFind.cpp $(FORMATS))
-UTILS = $(addprefix src/Utils/,File.cpp $(PARSER))
-VIRTUAL_SERVER = $(addprefix src/ServerManager/VirtualServer/,VirtualServer.cpp Route.cpp VirtualServerValidators.cpp)
+UTILS = $(addprefix src/Utils/,File.cpp $(PARSER) Terminal.cpp)
 CLIENT = $(addprefix Client/,Client.cpp Tcp.cpp)
 SERVER = $(addprefix src/Server/,Server.cpp PortSockets.cpp ConnectionQue.cpp Observer.cpp mod/openPortSocket.cpp $(CLIENT))
-# HTTP_PROTOCOL = $(addprefix src/ServerManager/HTTP_Protocol/,HttpRequest.cpp HttpFormat.cpp MessageProcessor.cpp)
-TERMINAL = $(addprefix src/ServerManager/,terminal.cpp)
-RESPONSE = $(addprefix src/Response/,Error.cpp Response.cpp)
-SRC = src/main.cpp $(SERVER) $(VIRTUAL_SERVER) $(TERMINAL) $(UTILS) $(RESPONSE)
-TEST = src/test.cpp $(UTILS) $(HTTP_PROTOCOL)
+VIRTUAL_SERVER = $(addprefix VirtualServer/,VirtualServer.cpp Route.cpp VirtualServerValidators.cpp)
+REQUEST = $(addprefix Request/,HttpRequest.cpp)
+RESPONSE = $(addprefix src/Response/,Error.cpp Response.cpp $(VIRTUAL_SERVER) $(REQUEST))
+
+SRC = src/main.cpp $(SERVER) $(RESPONSE) $(UTILS) $(TERMINAL)
+TEST = src/test.cpp $(UTILS) $(RESPONSE)
 
 HEADER_FILES = -Isrc/Utils/Parsers/ -Isrc/Utils/Parsers/Formats/ \
-				-Isrc/Utils -Isrc/ServerManager/VirtualServer/ -Isrc/ \
-				-Isrc/Response/ -Isrc/Server/
+				-Isrc/Utils -Isrc/Response/VirtualServer/ -Isrc/ \
+				-Isrc/Response/ -Isrc/Server/ -Isrc/Server/Client/
 FLAGS = -Wall -Wextra -Werror -std=c++98 $(HEADER_FILES) -DC98 -g
 NAME = server
 CC = c++

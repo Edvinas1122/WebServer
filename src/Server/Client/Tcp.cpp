@@ -1,4 +1,4 @@
-#include <ServerClasses.hpp>
+#include <Client.hpp>
 
 #define RECEIVE_BUFFER_SIZE 1024
 

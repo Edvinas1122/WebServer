@@ -1,4 +1,4 @@
-#include <ServerClasses.hpp>
+#include <VirtualServer.hpp>
 
 bool VirtualServer::pathcheck(std::string const &path)
 {

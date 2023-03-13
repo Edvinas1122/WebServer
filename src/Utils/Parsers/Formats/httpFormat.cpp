@@ -1,4 +1,4 @@
-#include <HttpFormat.hpp>
+#include <httpFormat.hpp>
 
 std::map<std::string, int>	getMethodMap()
 {

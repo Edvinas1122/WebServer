@@ -1,4 +1,4 @@
-#include <ServerClasses.hpp>
+#include <VirtualServer.hpp>
 
 template <typename container>
 static void	copy_list_values(container &destination, container const &source)

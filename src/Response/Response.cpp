@@ -1,4 +1,4 @@
-#include <ServerClasses.hpp>
+#include <Response.hpp>
 
 Response::Response()
 {

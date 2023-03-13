@@ -1,5 +1,5 @@
-#include <ServerClasses.hpp>
-#include <HttpFormat.hpp>
+#include <Response.hpp>
+#include <httpFormat.hpp>
 
 HttpRequest::HttpRequest(Parser parser)
 {

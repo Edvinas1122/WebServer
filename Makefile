@@ -29,7 +29,7 @@ $(NAME): $(SRC)
 	$(CC) $(FLAGS) $(SRC) -o $(NAME)
 
 test: $(TEST)
-	$(CC) $(FLAGS) $(TEST) -o parser
+	$(CC) $(FLAGS) $(TEST) -o service
 
 
 clean:

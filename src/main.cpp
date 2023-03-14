@@ -1,13 +1,32 @@
 #include <Server.hpp>
 #include <Terminal.hpp>
 #include <Response.hpp>
+#include <Parser.hpp>
+
+void	parseRequest(Client &client, std::string request)
+{
+	Parser	parser;
+	File	file;
+
+	parser.setObject(request);
+	if (parser.getWord(0, 0) == "GET")
+	{
+		if (parser.getWord(1, 0) == "/")
+			file.Open("/home/WebServer/files/example.html");
+		else
+			file.Open("/home/WebServer/files/test.txt");
+
+		client << file;
+		// client << "test";
+	}
+}
 
 void	printReceived(Client &client)
 {
 	if (client.getMessage().length()) {
 		client.info();
+		parseRequest(client, client.getMessage());
 		std::cout << client;
-		client.updateTime(true);
 		// client << "message received\n";
 	}
 }
@@ -52,13 +71,20 @@ void	startHttpServer(Server<Terminal*> &server, const char *configPath)
 int	main(void)
 {
 	Server<Terminal*>	httpServer;
+#ifdef TERMINAL
 	Terminal			terminal;
+#endif
 
 	startHttpServer(httpServer, "/home/WebServer/server.conf");
+
 	httpServer.setAction(printReceived);
+#ifdef TERMINAL
 	httpServer.setAction(handleTerminal, &terminal);
 	httpServer.setAction(clearTerminalMessages, &terminal);
 	while (terminal.terminal_interface())
+#else
+	while (42)
+#endif
 	{
 		httpServer.Run();
 	}

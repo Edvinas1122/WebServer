@@ -38,3 +38,4 @@ Tcp	&Tcp::operator<<(const std::string& str)
 	outgoing.append(str);
 	return (*this);
 }
+

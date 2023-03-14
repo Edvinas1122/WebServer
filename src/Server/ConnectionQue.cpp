@@ -14,6 +14,7 @@ void	ConnectionQue::setClients(std::list<int> const &loudPortList)
 			clientFd = accept(*(loudPortList.begin()), (struct sockaddr *) &socketAddress, &addrlen);
 			if (clientFd == -1)
 				break;
+			
 			Clients.insert(std::make_pair(clientFd, Client(clientFd, socketAddress)));
 			insertFileDescriptor(clientFd);
 			it++;
@@ -27,7 +28,7 @@ void	ConnectionQue::closeConnection(listOfClients::iterator &position)
 	Clients.erase(position);
 }
 
-void	ConnectionQue::queProcess(bool	(*action)(Client &client), const int observer_event)
+void	ConnectionQue::queProcess(bool (*action)(Client &client), const int observer_event)
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -35,13 +36,11 @@ void	ConnectionQue::queProcess(bool	(*action)(Client &client), const int observe
 	{
 		if (checkFd(it->first, observer_event) && action(it->second))
 			it->second.updateTime();
-		// else if (observer_event == BYPASS_OBSERVER)
-		// 	action(it->second);
 		it++;
 	}
 }
 
-void	ConnectionQue::action(void	(*action)(Client &client))
+void	ConnectionQue::action(void (*action)(Client &client))
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -52,7 +51,7 @@ void	ConnectionQue::action(void	(*action)(Client &client))
 	}
 }
 
-#define TIMEOUT 10
+#define TIMEOUT 2
 
 void	ConnectionQue::closeTimeOut()
 {

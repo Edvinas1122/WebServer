@@ -2,9 +2,11 @@
 # define CLIENT_HPP
 
 # include <includes.hpp>
+# include <File.hpp>
+
 class	Tcp
 {
-	private:
+	protected:
 		int			fd;
 		std::string	incoming;
 		std::string	outgoing;
@@ -23,6 +25,7 @@ class	Tcp
 		};
 
 		Tcp	&operator<<(const std::string& str);
+		Tcp	&operator<<(File& file);
 
 		friend std::ostream& operator<<(std::ostream &os, Tcp &obj)
 		{
@@ -65,11 +68,7 @@ class	Client: public Tcp, public ProcessTrack {
 		struct timeval	lst_msg_time;
 
 	public:
-		bool			serviceStatus;
-	public:
-		Client() {
-			serviceStatus = true;
-		};
+		Client() {};
 		~Client();
 		Client(const int clientFd, const struct sockaddr_in &socketAddress);
 
@@ -92,6 +91,12 @@ class	Client: public Tcp, public ProcessTrack {
 		/*
 			build response from a request
 		*/
+
+		// Client	&operator<<(const std::string& str) {
+		// 		outgoing.append(str);
+		// 		return (*this);
+		// };
+
 };
 
 #endif

@@ -17,7 +17,7 @@ void	Client::updateTime(const bool timeout)
 	if (!timeout)
 		gettimeofday(&lst_msg_time, NULL);
 	else
-		memset(&lst_msg_time, 1, sizeof(lst_msg_time));
+		memset(&lst_msg_time, 0, sizeof(lst_msg_time));
 }
 
 time_t	Client::getElapsedTime() const
@@ -26,4 +26,10 @@ time_t	Client::getElapsedTime() const
 
 	gettimeofday(&currentTime, NULL);
 	return (currentTime.tv_sec - lst_msg_time.tv_sec);
+}
+
+Tcp	&Tcp::operator<<(File& file)
+{
+	outgoing.append(file.GetContents());
+	return (*this);
 }

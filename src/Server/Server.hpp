@@ -30,7 +30,7 @@ class	Observer
 };
 
 
-#include <openPortSocket.hpp>
+#include "mod/openPortSocket.hpp"
 
 class	PortSockets: virtual public Observer
 {
@@ -98,10 +98,9 @@ class	ConnectionQue: virtual public Observer
 
 		void	queProcess(bool (*action)(Client &client), const int observer_event = POLLIN);
 	
-		void	action(void (*action)(Client &client));
-
 		template <typename TYPE>
 		void	action(void (*action)(Client &, TYPE), TYPE insertion);
+		void	action(void (*action)(Client &client));
 
 	private:
 		void	closeConnection(listOfClients::iterator &position);
@@ -180,7 +179,6 @@ template<typename PROTOCOL>
 bool	Server<PROTOCOL>::pullIncoming(Client &client)
 {
 	client.receivePacket();
-	client.serviceStatus = false;
 	return (true);
 }
 
@@ -191,6 +189,7 @@ bool	Server<PROTOCOL>::pushOutgoing(Client &client)
 {
 	if (client.ready())
 	{
+		client.UpdateHeaderInfo();
 		try {
 			client.sendPacket();
 			return (true);
@@ -198,6 +197,11 @@ bool	Server<PROTOCOL>::pushOutgoing(Client &client)
 			client.updateTime(CLOSE_CLIENT);
 			return (false);
 		}	
+	}
+	if (!client.ready() && client.HeaderSent())
+	{
+		std::cout << "Task completed" << std::endl;
+		client.updateTime(CLOSE_CLIENT);
 	}
 	return (false);
 }

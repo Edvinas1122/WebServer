@@ -65,6 +65,7 @@ class Response
 		bool handleTarget();
 		bool reqError();
 		void setStatusLine();
+
 	public:
 		Response();
 		//Response(const HttpRequest &);

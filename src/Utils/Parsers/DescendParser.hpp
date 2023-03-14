@@ -4,8 +4,12 @@
 # include <includes.hpp>
 # include <AttributeGetter.hpp>
 # include <DefinitionExtractor.hpp>
-# include <File.hpp>
 
+/*
+	Parser for list structure definitions
+	Can be enstructed to scope into object definitions f.e. into curly brackets
+	Can also extract mapped definitions - aka pairs
+*/
 
 class DescendParser: public AttributeGetter, public DefinitionExtractor
 {

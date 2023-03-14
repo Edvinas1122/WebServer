@@ -3,7 +3,7 @@
 #ifndef FILE_HPP
 # define FILE_HPP
 
-class	File: std::fstream
+class	File: public std::fstream
 {
 	public:
 		File(const char *path): std::fstream(path, std::ios::in) {};

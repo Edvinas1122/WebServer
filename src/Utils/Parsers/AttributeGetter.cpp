@@ -1,7 +1,7 @@
 #include <AttributeGetter.hpp>
-#include <wordFind.hpp>
+# include "mod/wordFind.hpp"
 
-std::list<std::string>	AttributeGetter::getValuesList(const char *key_word, bool (*ValueTest)(std::string const&)) EXCEPTION
+std::list<std::string>	AttributeGetter::getValuesList(const char *key_word, bool (*ValueTest)(std::string const&)) const EXCEPTION
 {
 	std::list<std::string>	list_of_ports;
 	int						occurance_iterator = 1;
@@ -16,7 +16,7 @@ std::list<std::string>	AttributeGetter::getValuesList(const char *key_word, bool
 	return (list_of_ports);
 }
 
-std::string	AttributeGetter::getValue(const char *key_word, const int occurance, bool (*ValueTest)(std::string const&)) EXCEPTION
+std::string	AttributeGetter::getValue(const char *key_word, const int occurance, bool (*ValueTest)(std::string const&)) const EXCEPTION
 {
 	std::size_t	value_position;
 
@@ -30,7 +30,7 @@ std::string	AttributeGetter::getValue(const char *key_word, const int occurance,
 
 std::pair<std::string, std::string>	AttributeGetter::getPair(const char *key_word, const int occurance,
 																bool (*ValueTest)(std::string const&),
-																bool (*KeyTest)(std::string const&)) EXCEPTION
+																bool (*KeyTest)(std::string const&)) const EXCEPTION
 {
 	std::pair<std::string, std::string>	pair;
 	std::size_t	key_position;
@@ -49,9 +49,26 @@ std::pair<std::string, std::string>	AttributeGetter::getPair(const char *key_wor
 	return (pair);
 }
 
-bool AttributeGetter::defaultValidator(std::string const &str)
+bool	AttributeGetter::defaultValidator(std::string const &str)
 {
 	(void) str;
 	return (false);
 }
 
+std::string	AttributeGetter::getWord(const int n_th, const int row, bool (*ValueTest)(std::string const&)) const EXCEPTION
+{
+	if ((*ValueTest)(get_nth_word_by_row(object_definition, n_th, row)))
+		throw ValueExcept();
+	return (get_nth_word_by_row(object_definition, n_th, row));
+}
+
+
+std::string	AttributeGetter::findSubstring(const char* startChars, const char* endChars) const
+{
+	size_t	begin = object_definition.find_last_of(startChars) + 1;
+	size_t	end =  object_definition.find_first_of(endChars);
+
+	if (begin >= end)
+		return ("");
+	return (object_definition.substr(begin, end - begin));
+}

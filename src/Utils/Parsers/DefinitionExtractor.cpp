@@ -1,5 +1,6 @@
 #include <DefinitionExtractor.hpp>
-#include <wordFind.hpp>
+#include "mod/wordFind.hpp"
+
 
 std::pair<std::string, std::string> DefinitionExtractor::getMapedDefinition(const char *key, const int occurance) EXCEPTION
 {

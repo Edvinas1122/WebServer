@@ -2,44 +2,6 @@
 # define RESPONSE_HPP
 
 # include <includes.hpp>
-# include <Error.hpp>
-# include <Parser.hpp>
-
-enum HttpMethodes
-{
-	GET,
-	POST,
-	PUT,
-	HEAD,
-	DELETE,
-	NONE
-};
-
-class HttpRequest {
-	private:
-		HttpMethodes method;
-		size_t		protocol_version;
-		bool		keep_alive;
-		std::string	host;
-		std::string	path; // full query
-		/*
-			query parsed into:
-		*/
-		std::string	location;
-		std::string	file_name;
-		std::string	query;
-		std::string body;
-		int			error;
-
-	public:
-		HttpRequest() {};
-		HttpRequest(Parser parser);
-		int getError(){return(error);}
-		size_t getBodylength(){return(body.length());}
-		std::string getBody(){return(body);}
-		HttpMethodes getMethod(){return(method);}
-};
-
 
 /*
 	A complete message to a client
@@ -55,7 +17,7 @@ class Response
 		std::string _response;
 		int _status;
 		size_t _content_length;
-		HttpRequest _request;
+		// HttpRequest _request;
 
 		size_t		_cgi_response_lenght;
 

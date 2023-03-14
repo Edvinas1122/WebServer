@@ -1,4 +1,4 @@
-#include <wordFind.hpp>
+#include "wordFind.hpp"
 
 static int	is_value_symbol(const char c)
 {
@@ -93,4 +93,22 @@ std::string	matchKey(std::string const &content, const int key_len, const int in
 	if (!end && content[iterator] == terminator)
 		end = iterator;
 	return (content.substr(begin, end - begin));
+}
+
+std::string	get_nth_word_by_row(std::string const &content, const int n_th, const int row)
+{
+	std::stringstream	line;
+	std::string			token;
+	int					iterator;
+
+	token = content;
+	iterator = 0;
+	while (row > iterator++)
+		token = token.substr(token.find('\n', 0), token.length());
+	token = token.substr(0, token.find('\n', 0));
+	line << token;
+	iterator = 0;
+	while (n_th + 1 > iterator++)
+		line >> token;
+	return (token);
 }

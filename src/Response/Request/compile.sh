@@ -1,0 +1,1 @@
+c++ -Wall -Wextra -Werror -I. test.cpp UrlQuery.cpp

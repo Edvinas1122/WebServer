@@ -4,6 +4,15 @@
 #include <includes.hpp>
 #include <AttributeGetter.hpp>
 
+/*
+	Used to get types that supports this parser
+	a.d. for objects that can use this interface to aquire own variables
+
+	example:
+		template <typename PARSER>
+		HttpRequest(PARSER parser);
+*/
+
 class	Parser: public AttributeGetter
 {
 	public:
@@ -13,49 +22,13 @@ class	Parser: public AttributeGetter
 	public:
 
 		void	setObject(std::string const &definition) {
-			object_definition = definition;
+			AttributeGetter::setObject(definition);
 		};
 
-		template<typename TYPE>
-		TYPE	matchMapped(std::map<std::string, TYPE> map, int n_th, int row = 0) {
-			return (map[getWord(n_th, row)]);
+		template <typename TYPE>
+		TYPE	get() {
+			return (TYPE(*this));
 		};
-	
-		std::string	getWord(const int n_th, const int row);
-	private:
-
 };
-
-// class	defaultProtocol
-// {
-	
-// };
-
-// template <typename TYPE, typename PARSER>
-// class	MessageProcessor
-// {
-// 	private:
-// 		bool	state;
-// 	public:
-// 		MessageProcessor(): state(false) {};
-
-// 		std::string	validateFormat(std::string const &message);
-
-// 		// template<typename TYPE>
-// 		TYPE	getParsed()
-// 		{
-// 			TYPE	protocol(PARSER());
-
-// 			return ();
-// 		};
-
-// 		bool		processState()
-// 		{
-// 			return (!state);
-// 		};
-
-// 	private:
-		
-// };
 
 #endif

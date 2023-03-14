@@ -3,7 +3,6 @@
 
 # include <includes.hpp>
 
-
 /*
 	definition extract scope brackets fix
 */

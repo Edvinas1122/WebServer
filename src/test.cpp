@@ -1,6 +1,9 @@
 #include <File.hpp>
 #include <AttributeGetter.hpp>
 #include "/home/WebServer/src/Service/Request/HTTP.hpp"
+#include <DescendParser.hpp>
+#include <Response.hpp>
+#include <Service.hpp>
 
 // void	test_request(HttpRequest &request)
 // {
@@ -14,12 +17,14 @@
 
 int	main(void)
 {
-	File		requestSample("/home/WebServer/samples/http_request.txt");
-	HttpRequest	request;
+	Service			messageProcessor;
+	HttpRequest		request;
+	File			requestSample("/home/WebServer/samples/http_request.txt");
 
+
+	messageProcessor.parseConfigurationFile("/home/WebServer/server.conf");
+	messageProcessor.Info();
 	request.append(requestSample.GetContents());
-	
-
 	return (0);
 
 }

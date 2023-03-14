@@ -6,8 +6,8 @@
 class	File: public std::fstream
 {
 	public:
-		File(const char *path): std::fstream(path, std::ios::in) {};
 		File() {};
+		File(const char *path): std::fstream(path, std::ios::in) {};
 		virtual ~File() {};
 
 		void	Create(const char *path);
@@ -21,6 +21,9 @@ class	File: public std::fstream
 class	FileProcessor: public File 
 {
 	public:
+		FileProcessor() {};
+		FileProcessor(const char *path): File(path) {};
+
 		std::string GetContents(std::string (*processor)(std::string const&) = default_processor);
 	
 	private:

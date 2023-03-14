@@ -39,38 +39,4 @@ class Response
 		std::string	get(){return (_response);}
 };
 
-# include <VirtualServer.hpp>
-
-class	VirtualServers {
-	public:
-		typedef	std::map<std::string, VirtualServer>	virtualServerMap;
-	protected:
-		virtualServerMap	virtualServers;
-	
-	public:
-		VirtualServers() {};
-		~VirtualServers() {};
-
-		void	Info() const;
-
-		VirtualServer	&getServer(std::string const &port, std::string const &host) const;
-
-	// protected:
-		// void parseServers(DescendParser &parser);
-
-};
-
-template<typename REQUEST, typename RESPONSE>
-class	Service: public VirtualServers
-{
-	public:
-		Service() {};
-		~Service() {};
-
-		RESPONSE compose(const REQUEST& request, const std::string &port) {
-			// getServer(port, request).root
-			return (response(request, getServer(port, request)));
-		}
-};
-
 #endif

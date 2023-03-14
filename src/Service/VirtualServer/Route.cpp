@@ -13,11 +13,11 @@
 	
 */
 
-// Route::Route(DescendParser parser) 
-// {
-// 	response_dir = parser.getValue("dir_route");
+Route::Route(DescendParser parser) 
+{
+	response_dir = parser.getValue("dir_route");
 
-// }
+}
 
 
 void	Route::displayInfo(const char *append) const

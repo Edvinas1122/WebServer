@@ -1,6 +1,6 @@
 #include <Server.hpp>
 
-void	ConnectionQue::setClients(std::list<int> const &loudPortList)
+void	ConnectionQueController::setClients(std::list<int> const &loudPortList)
 {
 	struct sockaddr_in				socketAddress;
 	socklen_t						addrlen = sizeof(struct sockaddr_in);
@@ -22,13 +22,13 @@ void	ConnectionQue::setClients(std::list<int> const &loudPortList)
 	}
 }
 
-void	ConnectionQue::closeConnection(listOfClients::iterator &position)
+void	ConnectionQueController::closeConnection(listOfClients::iterator &position)
 {
 	removeFileDescriptor(position->first);
 	Clients.erase(position);
 }
 
-void	ConnectionQue::queProcess(bool (*action)(Client &client), const int observer_event)
+void	ConnectionQueController::queProcess(bool (*action)(Client &client), const int observer_event)
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -40,7 +40,7 @@ void	ConnectionQue::queProcess(bool (*action)(Client &client), const int observe
 	}
 }
 
-void	ConnectionQue::action(void (*action)(Client &client))
+void	ConnectionQueController::action(void (*action)(Client &client))
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -53,7 +53,7 @@ void	ConnectionQue::action(void (*action)(Client &client))
 
 #define TIMEOUT 2
 
-void	ConnectionQue::closeTimeOut()
+void	ConnectionQueController::closeTimeOut()
 {
 	listOfClients::iterator	it = Clients.begin();
 

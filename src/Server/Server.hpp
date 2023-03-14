@@ -81,7 +81,7 @@ void	PortSockets::startPorts(std::list<std::string> (*parsingMethod)(PARSER &), 
 };
 
 
-class	ConnectionQue: virtual public Observer
+class	ConnectionQueController: virtual public Observer
 {
 	public:
 		typedef	std::map<int, Client>	listOfClients;
@@ -89,8 +89,8 @@ class	ConnectionQue: virtual public Observer
 		listOfClients	Clients;
 
 	public:
-		ConnectionQue() {};
-		~ConnectionQue() {};
+		ConnectionQueController() {};
+		~ConnectionQueController() {};
 	protected:
 
 		void	setClients(std::list<int> const &Clients);
@@ -107,7 +107,7 @@ class	ConnectionQue: virtual public Observer
 };
 
 template <typename TYPE>
-void	ConnectionQue::action(void (*action)(Client &, TYPE), TYPE insertion)
+void	ConnectionQueController::action(void (*action)(Client &, TYPE), TYPE insertion)
 {
 	listOfClients::iterator	it = Clients.begin();
 
@@ -118,11 +118,11 @@ void	ConnectionQue::action(void (*action)(Client &, TYPE), TYPE insertion)
 	}
 }
 
-template<typename PROTOCOL = std::string>
-class Server : public ConnectionQue, public PortSockets
+template<typename SERVICE = std::string>
+class Server : public ConnectionQueController, public PortSockets
 {
 	public:
-		typedef std::list<std::pair<void (*)(Client &, PROTOCOL), PROTOCOL> > ObjectActionList;
+		typedef std::list<std::pair<void (*)(Client &, SERVICE), SERVICE> > ObjectActionList;
 		typedef std::list<void (*)(Client &)>	ActionList;
 
 	private:
@@ -137,8 +137,8 @@ class Server : public ConnectionQue, public PortSockets
 			actions.push_back(Action);
 		}
 
-		void setAction(void (*Action)(Client &, PROTOCOL), PROTOCOL object) {
-			object_actions.push_back(std::make_pair<void (*)(Client &, PROTOCOL), PROTOCOL>(Action, object));
+		void setAction(void (*Action)(Client &, SERVICE), SERVICE object) {
+			object_actions.push_back(std::make_pair<void (*)(Client &, SERVICE), SERVICE>(Action, object));
 		}
 
 		void Run() {
@@ -163,7 +163,7 @@ class Server : public ConnectionQue, public PortSockets
 			typename ObjectActionList::const_iterator it2 = object_actions.begin();
 
 			while (it2 != object_actions.end()) {
-				action<PROTOCOL>(it2->first, it2->second);
+				action<SERVICE>(it2->first, it2->second);
 				it2++;
 			}
 		}
@@ -175,8 +175,8 @@ class Server : public ConnectionQue, public PortSockets
 		}
 };
 
-template<typename PROTOCOL>
-bool	Server<PROTOCOL>::pullIncoming(Client &client)
+template<typename SERVICE>
+bool	Server<SERVICE>::pullIncoming(Client &client)
 {
 	client.receivePacket();
 	return (true);
@@ -184,8 +184,8 @@ bool	Server<PROTOCOL>::pullIncoming(Client &client)
 
 #define	CLOSE_CLIENT true
 
-template<typename PROTOCOL>
-bool	Server<PROTOCOL>::pushOutgoing(Client &client)
+template<typename SERVICE>
+bool	Server<SERVICE>::pushOutgoing(Client &client)
 {
 	if (client.ready())
 	{

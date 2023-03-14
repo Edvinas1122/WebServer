@@ -10,15 +10,15 @@ REQUEST_INCLUDE = -Isrc/Response/Request/
 RESPONSE = $(addprefix src/Response/,Error.cpp Response.cpp $(VIRTUAL_SERVER) $(REQUEST) mod/*.cpp)
 TERMINAL = $(addprefix src/Utils/,Terminal.cpp)
 
-SRC = src/main.cpp $(SERVER) $(RESPONSE) $(UTILS) $(TERMINAL)
+SRC = src/main.cpp $(SERVER) $(UTILS) $(TERMINAL)
 TEST = src/test.cpp $(REQUEST) $(UTILS)
 
 HEADER_FILES := -Isrc/
 HEADER_FILES += $(if $(filter $(UTILS),$(SRC)), $(UTILS_INCLUDE))
-HEADER_FILES += $(if $(filter $(REQUEST),$(SRC)), $(REQUEST_INCLUDE))
-# HEADER_FILES = -Isrc/Utils/Parsers/ -Isrc/Utils/Parsers/Formats/ \
-# 				-Isrc/Response/VirtualServer/ -Isrc/ \
-# 				-Isrc/Response/ -Isrc/Server/ -Isrc/Server/Client/
+# HEADER_FILES += $(if $(filter $(REQUEST),$(SRC)), $(REQUEST_INCLUDE))
+HEADER_FILES += -Isrc/Utils/Parsers/ -Isrc/Utils/Parsers/Formats/ \
+				-Isrc/Response/VirtualServer/ -Isrc/ \
+				-Isrc/Response/ -Isrc/Server/ -Isrc/Server/Client/
 FLAGS = -Wall -Wextra -Werror -std=c++98 $(HEADER_FILES) -DC98 -DTERMINAL=1 -g
 NAME = server
 CC = c++

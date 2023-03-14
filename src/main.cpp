@@ -2,6 +2,7 @@
 #include <Terminal.hpp>
 #include <Response.hpp>
 #include <Parser.hpp>
+#include <File.hpp>
 
 void	parseRequest(Client &client, std::string request)
 {
@@ -15,9 +16,7 @@ void	parseRequest(Client &client, std::string request)
 			file.Open("/home/WebServer/files/example.html");
 		else
 			file.Open("/home/WebServer/files/test.txt");
-
 		client << file;
-		// client << "test";
 	}
 }
 
@@ -33,14 +32,14 @@ void	printReceived(Client &client)
 
 void	handleTerminal(Client &client, Terminal *terminal)
 {
-	Response	response;
+	// Response	response;
 
 	if (terminal->notEmpty())
 	{
 		if (!client.HeaderSent()) {
 			client.UpdateHeaderInfo();
-			response.Build();
-			client << response.get();
+			// response.Build();
+			// client << response.get();
 		}
 		client << terminal->extractMessage();
 	}

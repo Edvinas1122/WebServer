@@ -15,8 +15,8 @@ class	Tcp
 		Tcp(const int &fd): fd(fd) {};
 
 	public:
-		void		receivePacket();
-		void		sendPacket();
+		bool		receivePacket();
+		bool		sendPacket();
 
 		bool		ready() const; // outgoing empty
 
@@ -45,17 +45,26 @@ class	ProcessTrack
 {
 	private:
 		bool	headerSent;
+		bool	keepAlive;
 	public:
-		ProcessTrack() { headerSent = false;};
+		ProcessTrack() {
+			headerSent = false;
+			keepAlive = false;
+		};
 
 		bool	HeaderSent() const 
 		{
 			return (headerSent);
 		};
-		
-		void	UpdateHeaderInfo() {
-			headerSent = true;
+
+		bool	keepAliveInfo() {
+			return (keepAlive);
 		};
+		
+		void	UpdateHeaderInfo(const bool info = true) {
+			headerSent = info;
+		};
+
 };
 
 

@@ -2,7 +2,7 @@
 
 #define RECEIVE_BUFFER_SIZE 1024
 
-void	Tcp::receivePacket()
+bool	Tcp::receivePacket()
 {
 	char	mesg[RECEIVE_BUFFER_SIZE + 1];
 	int		bytes_read = 0;
@@ -11,10 +11,12 @@ void	Tcp::receivePacket()
 	bytes_read = recv(fd, mesg, RECEIVE_BUFFER_SIZE, 0);
 	if (bytes_read > 0) {
 		incoming.append(mesg);
+		return (true);
 	}
+	return (false);
 }
 
-void	Tcp::sendPacket()
+bool	Tcp::sendPacket()
 {
 	std::string	buffer = outgoing.substr(0, 1024);
 	int	bytes_sent;
@@ -22,8 +24,11 @@ void	Tcp::sendPacket()
 	bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
 	if (bytes_sent == -1)
 		throw std::exception();
-	if (bytes_sent > 0)
+	if (bytes_sent > 0) {
 		outgoing = outgoing.substr(bytes_sent, outgoing.length());
+		return (true);
+	}
+	return (false);
 }
 
 bool	Tcp::ready() const

@@ -51,8 +51,6 @@ void	ConnectionQueController::action(void (*action)(Client &client))
 	}
 }
 
-#define TIMEOUT 5
-
 void	ConnectionQueController::closeTimeOut()
 {
 	listOfClients::iterator	it = Clients.begin();

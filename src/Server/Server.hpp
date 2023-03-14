@@ -80,6 +80,7 @@ void	PortSockets::startPorts(std::list<std::string> (*parsingMethod)(PARSER &), 
 	}
 };
 
+#define TIMEOUT 10
 
 class	ConnectionQueController: virtual public Observer
 {
@@ -148,6 +149,7 @@ class Server : public ConnectionQueController, public PortSockets
 			queProcess(pullIncoming, POLLIN);
 			DoActions();
 			queProcess(pushOutgoing, POLLOUT);
+			queProcess(validateConnections, POLLOUT);
 			closeTimeOut();
 		}
 
@@ -170,6 +172,7 @@ class Server : public ConnectionQueController, public PortSockets
 
 		static bool pullIncoming(Client &client);
 		static bool pushOutgoing(Client &client);
+		static bool validateConnections(Client &client);
 		static void default_action(Client &client) {
 			(void)client;
 		}
@@ -178,8 +181,8 @@ class Server : public ConnectionQueController, public PortSockets
 template<typename SERVICE>
 bool	Server<SERVICE>::pullIncoming(Client &client)
 {
-	client.receivePacket();
-	return (true);
+	// client.receivePacket();
+	return (client.receivePacket());
 }
 
 #define	CLOSE_CLIENT true
@@ -191,19 +194,29 @@ bool	Server<SERVICE>::pushOutgoing(Client &client)
 	{
 		client.UpdateHeaderInfo();
 		try {
-			client.sendPacket();
-			return (true);
+			// client.sendPacket();
+			return (client.sendPacket());
 		} catch(const std::exception& e) {
 			client.updateTime(CLOSE_CLIENT);
 			return (false);
 		}	
 	}
-	if (!client.ready() && client.HeaderSent())
-	{
-		std::cout << "Task completed" << std::endl;
-		client.updateTime(CLOSE_CLIENT);
-	}
 	return (false);
 }
+
+template<typename SERVICE>
+bool	Server<SERVICE>::validateConnections(Client &client)
+{
+	if (!client.ready() && client.HeaderSent()) // close after completion
+	{
+		if (!client.keepAliveInfo())
+			client.updateTime(CLOSE_CLIENT);
+		else
+			client.UpdateHeaderInfo(false);
+		std::cout << "Task completed" << std::endl;
+	}
+	return (false); // dont affet timestamps
+}
+
 
 #endif

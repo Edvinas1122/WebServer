@@ -18,7 +18,7 @@ int	main(void)
 	HttpRequest	request;
 
 	request.append(requestSample.GetContents());
-
+	
 
 	return (0);
 

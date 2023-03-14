@@ -1,21 +1,21 @@
 #include <Server.hpp>
 
-void	ConnectionQueController::setClients(std::list<int> const &loudPortList)
+void	ConnectionQueController::setClients(std::list<std::pair<std::string, int> > const &loudPortList)
 {
 	struct sockaddr_in				socketAddress;
 	socklen_t						addrlen = sizeof(struct sockaddr_in);
 	int								clientFd;
-	std::list<int>::const_iterator	it = loudPortList.begin();
+	std::list<std::pair<std::string, int> >::const_iterator	it = loudPortList.begin();
 
 	if (loudPortList.size())
 	{
 		while (it != loudPortList.end())
 		{
-			clientFd = accept(*(loudPortList.begin()), (struct sockaddr *) &socketAddress, &addrlen);
+			clientFd = accept((*it).second, (struct sockaddr *) &socketAddress, &addrlen);
 			if (clientFd == -1)
 				break;
 			
-			Clients.insert(std::make_pair(clientFd, Client(clientFd, socketAddress)));
+			Clients.insert(std::make_pair(clientFd, Client(clientFd, socketAddress, it->first)));
 			insertFileDescriptor(clientFd);
 			it++;
 		}
@@ -51,7 +51,7 @@ void	ConnectionQueController::action(void (*action)(Client &client))
 	}
 }
 
-#define TIMEOUT 2
+#define TIMEOUT 5
 
 void	ConnectionQueController::closeTimeOut()
 {

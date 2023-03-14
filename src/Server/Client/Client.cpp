@@ -1,8 +1,13 @@
 #include <Client.hpp>
 
-Client::Client(const int clientFd, const struct sockaddr_in &socketAddress): Tcp(clientFd)
+Client::Client(const int clientFd, const struct sockaddr_in &socketAddress): Tcp(clientFd), socketAddress(socketAddress)
 {
-	this->socketAddress = socketAddress;
+	updateTime();
+	std::cout << "Client created " << clientFd << std::endl;
+}
+
+Client::Client(const int clientFd, const struct sockaddr_in &socketAddress, const std::string &port): Tcp(clientFd), socketAddress(socketAddress), port(port)
+{
 	updateTime();
 	std::cout << "Client created " << clientFd << std::endl;
 }

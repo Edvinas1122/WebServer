@@ -64,13 +64,15 @@ class	Client: public Tcp, public ProcessTrack {
 		// Response		response;
 	private:
 		// HttpRequest		request;
-		sockaddr_in 	socketAddress;
-		struct timeval	lst_msg_time;
+		sockaddr_in 		socketAddress;
+		struct timeval		lst_msg_time;
+		const std::string	port;
 
 	public:
 		Client() {};
 		~Client();
 		Client(const int clientFd, const struct sockaddr_in &socketAddress);
+		Client(const int clientFd, const struct sockaddr_in &socketAddress, const std::string &port);
 
 		void	info() const
 		{

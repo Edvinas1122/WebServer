@@ -1,16 +1,16 @@
 #include <Server.hpp>
 
-std::list<int>	PortSockets::getLoudSockets(const int events)
+std::list<std::pair<std::string, int> >	PortSockets::getLoudSockets(const int events)
 {
 	std::map<std::string, int>::iterator	it = portSockets.begin();
-	std::list<int>							loudSocketList;
+	std::list<std::pair<std::string, int> >	loudSocketList;
 
 	while (it != portSockets.end())
 	{
 		if (checkFd(it->second, events))
 		{
 			std::cout << "loud socket: " << it->second << std::endl;
-			loudSocketList.push_back(it->second);
+			loudSocketList.push_back(std::make_pair<std::string, int>(it->first, it->second));
 		}
 		it++;
 	}

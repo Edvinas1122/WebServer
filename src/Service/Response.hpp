@@ -60,4 +60,17 @@ class	VirtualServers {
 
 };
 
+template<typename REQUEST, typename RESPONSE>
+class	Service: public VirtualServers
+{
+	public:
+		Service() {};
+		~Service() {};
+
+		RESPONSE compose(const REQUEST& request, const std::string &port) {
+			// getServer(port, request).root
+			return (response(request, getServer(port, request)));
+		}
+};
+
 #endif

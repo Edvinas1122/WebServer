@@ -54,9 +54,9 @@ class	PortSockets: virtual public Observer
 		};
 	
 	protected:
-		std::list<int>	getSockets();
-		std::list<int>	getLoudSockets(const int events = POLLIN);
-
+		std::list<int>							getSockets();
+		// std::list<int>							getLoudSockets(const int events = POLLIN);
+		std::list<std::pair<std::string, int> >	getLoudSockets(const int events = POLLIN);
 };
 
 template <typename PARSER>
@@ -93,7 +93,7 @@ class	ConnectionQueController: virtual public Observer
 		~ConnectionQueController() {};
 	protected:
 
-		void	setClients(std::list<int> const &Clients);
+		void	setClients(std::list<std::pair<std::string, int> > const &loudPortList);
 		void	closeTimeOut();
 
 		void	queProcess(bool (*action)(Client &client), const int observer_event = POLLIN);

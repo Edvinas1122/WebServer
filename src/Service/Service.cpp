@@ -23,3 +23,9 @@ void	VirtualServers::Info() const
 		it++;
 	}
 }
+
+VirtualServer	&VirtualServers::getServer(std::string const &port, std::string const &host)
+{
+	(void) port;
+	return ((virtualServers[host]));
+}

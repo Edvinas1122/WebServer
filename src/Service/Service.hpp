@@ -18,7 +18,7 @@ class	VirtualServers {
 
 		void	Info() const;
 
-		VirtualServer	&getServer(std::string const &port, std::string const &host) const;
+		VirtualServer	&getServer(std::string const &port, std::string const &host);
 
 	protected:
 		void parseServers(DescendParser &parser)

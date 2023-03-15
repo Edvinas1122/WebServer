@@ -23,8 +23,10 @@ int	main(void)
 
 
 	messageProcessor.parseConfigurationFile("/home/WebServer/server.conf");
-	messageProcessor.Info();
+	// messageProcessor.Info();
 	request.append(requestSample.GetContents());
+	messageProcessor.getServer("10012", "46.101.198.64").displayInfo();
+
 	return (0);
 
 }

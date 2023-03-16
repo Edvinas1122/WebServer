@@ -11,14 +11,15 @@ class	Terminal: public Service
 	public:
 		Terminal() {};
 
-		virtual bool	Ready() {
+		virtual bool	Ready(Client &client) {
+			(void) client;
 			return (notEmpty());
 		};
 
-		virtual const std::string	Serve(std::string const &message)
+		virtual void	Serve(Client &client)
 		{
-			(void) message;
-			return (extractMessage());
+			client.setInactiveTimeOutCounter(4);
+			client << extractMessage();
 		};
 
 		virtual	void	Handle() {

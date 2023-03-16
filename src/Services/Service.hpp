@@ -2,7 +2,7 @@
 # define SERVICE_HPP
 
 # include <includes.hpp>
-
+# include <Client.hpp>
 
 /*
 	All services in the world serve requests
@@ -13,8 +13,8 @@ class	Service
 		Service() {};
 		~Service() {};
 
-	virtual	const std::string	Serve(std::string const &message) = 0;
-	virtual bool				Ready() = 0;
+	virtual bool				Ready(Client &client) = 0;
+	virtual	void				Serve(Client &client) = 0;
 	virtual	void				Handle() = 0;
 
 };
@@ -24,15 +24,15 @@ class	Service
 class	ContentBrowser: public Service
 {
 	public:
-		ContentBrowser();
-		~ContentBrowser();
+		ContentBrowser() {};
+		~ContentBrowser() {};
 	
-	virtual	const std::string	Serve(HttpRequest const &message) {
-		(void) message;
-		return ("");
-	};
-	virtual bool				Ready() = 0;
-	virtual	void				Handle() = 0;
+	virtual	void	Serve(Client &client);
+	virtual bool	Ready(Client &client) { return (client.ready());};
+	virtual	void	Handle() {};
+	
+	private:
+		void	parseRequest(HttpRequest const &message);
 };
 
 #endif

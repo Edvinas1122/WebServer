@@ -58,7 +58,7 @@ void	ConnectionQueController::closeTimeOut()
 
 	while (it != Clients.end())
 	{
-		if ((*it).second.getElapsedTime() > TIMEOUT)
+		if ((*it).second.getElapsedTime() > (*it).second.getTimeOutDurration())
 		{
 			closeConnection(it);
 			it = Clients.begin();

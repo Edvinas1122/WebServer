@@ -1,4 +1,4 @@
-#ifndef CLINET_HPP
+#ifndef CLIENT_HPP
 # define CLIENT_HPP
 
 # include <includes.hpp>
@@ -48,8 +48,9 @@ class	Tcp
 class	DataBuffer: public Tcp
 {
 	private:
-		bool	incoming_transmission;
 		File	file;
+		bool	incoming_transmission;
+
 	public:
 		DataBuffer() {};
 		DataBuffer(const int fd): Tcp(fd) {};
@@ -59,7 +60,6 @@ class	DataBuffer: public Tcp
 		bool		ready() const;
 		bool		sendPacket();
 		bool		receivePacket();
-
 
 		void	Create(const std::string &path) {
 			incoming_transmission = false;
@@ -90,44 +90,12 @@ class	DataBuffer: public Tcp
 
 };
 
-class	TransmissionTrack
-{
-	private:
-		bool	headerSent;
-		bool	keepAlive;
-	public:
-		TransmissionTrack() {
-			headerSent = false;
-			keepAlive = false;
-		};
-
-		bool	HeaderSent() const 
-		{
-			return (headerSent);
-		};
-
-
-		void	enableKeepAlive()
-		{
-			keepAlive = true;
-		};
-
-	/* Used by server */
-		void	UpdateHeaderInfo(const bool info = true) {
-			headerSent = info;
-		};
-
-		bool	keepAliveInfo() {
-			return (keepAlive);
-		};
-};
-
-
-class	Client: public DataBuffer, public TransmissionTrack
+class	Client: public DataBuffer
 {
 	private:
 		sockaddr_in 		socketAddress;
 		struct timeval		lst_msg_time;
+		int					inactiveTimeOutDurration;
 		const std::string	port;
 
 	public:
@@ -136,6 +104,7 @@ class	Client: public DataBuffer, public TransmissionTrack
 		};
 		~Client();
 		Client(const Client &src): DataBuffer(src), port(src.port) {
+			inactiveTimeOutDurration = 2;
 			socketAddress = src.socketAddress;
 			updateTime();
 		};
@@ -147,38 +116,21 @@ class	Client: public DataBuffer, public TransmissionTrack
 			std::cout << "Client info: \n" << "IP " << inet_ntoa(socketAddress.sin_addr) << std::endl;
 		};
 
-		void						updateTime(const bool timeout = false);
-		time_t						getElapsedTime() const;
+		void	setInactiveTimeOutCounter(const int counter) {
+			inactiveTimeOutDurration = counter;
+			updateTime();
+		};
 
-		/* to get rid */
-		const int					&getSocket() const;
-		const struct socketaddr_in	&getAddress() const;
+		void	updateTime(const bool timeout = false);
+		time_t	getElapsedTime() const;
+
+		/*protected*/
+		int		getTimeOutDurration() {
+			return (inactiveTimeOutDurration);
+		};
+		// const int					&getSocket() const;
+		// const struct socketaddr_in	&getAddress() const;
 
 };
-
-// class	BufferController: public Client
-// {
-// 	public:
-// 		BufferController(BufferController const &src): Client(src) {};
-
-// 		virtual void	Download(std::string const &path = "", std::string const &boundry = "------WebKitFormBoundary") {
-// 			if (path.length()) {
-// 				Create(path, boundry);
-// 				setInfoDownloadUp();
-// 			}
-// 			else if (DownloadInfo())
-// 				insertBuffer(incoming.c_str(), incoming.length());
-// 					// updateTime(CLOSE_CLIENT);
-// 		};
-	
-
-
-// 		static const char	*trimClosingBoundry(std::string string, std::string const &boundry)
-// 		{
-// 			if (string.find(boundry) != std::string::npos)
-// 				string = string.substr(0, string.find_last_of(boundry));
-// 			return (string.c_str());
-// 		};
-// };
 
 #endif

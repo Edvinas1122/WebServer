@@ -2,8 +2,7 @@
 # define VIRTUALSERVE_HPP
 
 #include <includes.hpp>
-#include <DescendParser.hpp>
-
+# include <DescendParser.hpp>
 /*
 	Set a default file to answer if the request is a directory
 	Make it work with POST and GET methods
@@ -74,6 +73,36 @@ class VirtualServer {
 		static bool	validIndexFile(std::string const &str);
 		static bool	pathcheck(std::string const &str);
 		static bool	isPositiveNumber(std::string const &str);
+};
+
+
+class	VirtualServers {
+	public:
+		typedef	std::map<std::string, VirtualServer>	virtualServerMap;
+	protected:
+		virtualServerMap	virtualServers;
+	
+	public:
+		VirtualServers() {};
+		~VirtualServers() {};
+
+		void	Info() const;
+
+		void	parseConfigurationFile(const char *path);
+		VirtualServer	&getServer(std::string const &port, std::string const &host);
+
+	public:
+		void parseServers(DescendParser &parser)
+		{
+			int	iterator = 1;
+
+			while (parser.count("server") >= iterator)
+			{
+				virtualServers[parser.get<VirtualServer>("server", iterator).getHost()] = parser.get<VirtualServer>("server", iterator);
+				iterator++;
+			};
+		};
+
 };
 
 #endif

@@ -36,3 +36,25 @@ const std::string	HttpRequest::getKeepAlive() const
 
 	return (substr(begin, len));
 }
+
+const HttpHeaders	HttpRequest::getHeaders() const
+{
+	return (substr(find_first_of('\n')));
+}
+
+const std::string	HttpRequest::getBoundry() const
+{
+	return (getHeaders().at("Content-Type").substr(getHeaders().at("Content-Type").find("boundary=") + 9));
+}
+
+const std::string	HttpRequest::getFilename() const
+{
+	return (substr(find("filename=") + 10, substr(find("filename=") + 11).find('"')));
+}
+
+const std::string	HttpRequest::getBody() const
+{
+	std::string	string;
+
+	return (string);
+}

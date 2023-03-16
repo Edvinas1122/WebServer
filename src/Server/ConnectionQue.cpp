@@ -1,4 +1,5 @@
 #include <Server.hpp>
+# include <File.hpp>
 
 void	ConnectionQueController::setClients(std::list<std::pair<std::string, int> > const &loudPortList)
 {
@@ -15,7 +16,7 @@ void	ConnectionQueController::setClients(std::list<std::pair<std::string, int> >
 			if (clientFd == -1)
 				break;
 			
-			Clients.insert(std::make_pair(clientFd, Client(clientFd, socketAddress, it->first)));
+			Clients.insert(std::pair<int, Client>(clientFd, Client(clientFd, socketAddress, it->first)));
 			insertFileDescriptor(clientFd);
 			it++;
 		}

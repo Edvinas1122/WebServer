@@ -1,7 +1,20 @@
-GET /docker/cat/index.php?jumpers=funny HTTP/1.1
-User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
-Host: www.tutorialspoint.com
-Accept-Language: en-us
+POST /upload HTTP/1.1
+Host: 46.101.198.64:10012
+Connection: keep-alive
+Content-Length: 319
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Origin: http://46.101.198.64:10012
+Content-Type: multipart/form-data; boundary=---WebKitFormBoundaryyhpWEKBoDcUWqo5A
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://46.101.198.64:10012/
 Accept-Encoding: gzip, deflate
-Connection: Keep-Alive
+Accept-Language: en-US,en;q=0.9
 
+------WebKitFormBoundaryyhpWEKBoDcUWqo5A
+Content-Disposition: form-data; name="file"; filename="link_to_ticket.txt"
+Content-Type: text/plain
+
+https://mobile.lufthansa.com/mbp/2a1udt4k33upmkrdc78tfmcd5?fbclid=IwAR1IpGvirxPAOQ24Akx-lQDkZ0UsLYlooKLtKxgPRHO-ZGZds7IYl0hNBuw
+------WebKitFormBoundaryyhpWEKBoDcUWqo5A--

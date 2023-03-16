@@ -2,6 +2,7 @@
 # define SERVER_HPP
 
 # include <includes.hpp>
+# include <Service.hpp>
 # include <Client.hpp>
 
 class	Observer
@@ -55,7 +56,6 @@ class	PortSockets: virtual public Observer
 	
 	protected:
 		std::list<int>							getSockets();
-		// std::list<int>							getLoudSockets(const int events = POLLIN);
 		std::list<std::pair<std::string, int> >	getLoudSockets(const int events = POLLIN);
 };
 
@@ -119,7 +119,7 @@ void	ConnectionQueController::action(void (*action)(Client &, TYPE), TYPE insert
 	}
 }
 
-template<typename SERVICE = std::string>
+template<typename SERVICE = Service*>
 class Server : public ConnectionQueController, public PortSockets
 {
 	public:
@@ -149,7 +149,7 @@ class Server : public ConnectionQueController, public PortSockets
 			queProcess(pullIncoming, POLLIN);
 			DoActions();
 			queProcess(pushOutgoing, POLLOUT);
-			queProcess(validateConnections, POLLOUT);
+			queProcess(validateConnections, POLLOUT | POLLIN);
 			closeTimeOut();
 		}
 
@@ -179,9 +179,7 @@ class Server : public ConnectionQueController, public PortSockets
 };
 
 template<typename SERVICE>
-bool	Server<SERVICE>::pullIncoming(Client &client)
-{
-	// client.receivePacket();
+bool	Server<SERVICE>::pullIncoming(Client &client) {
 	return (client.receivePacket());
 }
 
@@ -194,7 +192,6 @@ bool	Server<SERVICE>::pushOutgoing(Client &client)
 	{
 		client.UpdateHeaderInfo();
 		try {
-			// client.sendPacket();
 			return (client.sendPacket());
 		} catch(const std::exception& e) {
 			client.updateTime(CLOSE_CLIENT);
@@ -215,8 +212,7 @@ bool	Server<SERVICE>::validateConnections(Client &client)
 			client.UpdateHeaderInfo(false);
 		std::cout << "Task completed" << std::endl;
 	}
-	return (false); // dont affet timestamps
+	return (false);
 }
-
 
 #endif

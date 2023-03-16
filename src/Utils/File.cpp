@@ -2,11 +2,21 @@
 
 void	File::Create(const char *path)
 {
-	std::fstream::open(path, std::ios::out | std::ios::trunc);
+	if (std::fstream::is_open())
+	{
+		std::fstream::close();
+		std::fstream::clear();
+	}
+	std::fstream::open(path, std::ios::out | std::ios::binary | std::ios::trunc);
 };
 
 bool	File::Open(const char *path)
 {
+	if (std::fstream::is_open())
+	{
+		std::fstream::close();
+		std::fstream::clear();
+	}
 	std::fstream::open(path, std::ios::in);
 	return (std::fstream::is_open());
 };
@@ -15,6 +25,8 @@ std::string File::GetContents()
 {
 	std::string data;
 
+	if (!std::fstream::is_open())
+		Open();
 	if (std::fstream::is_open()) {
 		std::istreambuf_iterator<char> fileIterator(*this);
 		data = std::string(fileIterator, std::istreambuf_iterator<char>());

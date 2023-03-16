@@ -1,63 +1,77 @@
 #include <Server.hpp>
+#include <Service.hpp>
 #include <Terminal.hpp>
-#include <Response.hpp>
-#include <Parser.hpp>
 #include <File.hpp>
+#include <HTTP.hpp>
 
-void	parseRequest(Client &client, std::string request)
+// #define	FILE_BOUNDRY (request) (request.getHeaders().at("Content-Type").substr(request.getHeaders().at("Content-Type").find("boundary=") + 9))
+
+void	parseRequest(Client &client, HttpRequest request)
 {
-	Parser	parser;
-	File	file;
-
-	parser.setObject(request);
-	if (parser.getWord(0, 0) == "GET")
+	std::string get("/home/WebServer/files/http/");
+	get.append(request.getLocation());
+	std::cout << get << std::endl;
+	if (request.getMethod() == "GET")
 	{
-		if (parser.getWord(1, 0) == "/")
-			file.Open("/home/WebServer/files/example.html");
-		else
-			file.Open("/home/WebServer/files/test.txt");
-		client << file;
+		client.enableKeepAlive();
+		client << File("/home/WebServer/files/response.txt").GetContents();
+		client << "\r\nContent-Length: " << File(get.c_str()).GetSize();
+		client << "\r\n\r\n";
+		client << File(get.c_str());
+		// client << "\r\n";
+	}
+	if (request.getMethod() == "POST")
+	{
+		client.enableKeepAlive();
+		client << File("/home/WebServer/files/responseToPost.txt").GetContents();
+		if (!client.HeaderSent())
+		{
+			// client.Download("/home/WebServer/files/test.txt", request.getBoundry()); // out of map telnet exception
+		}
+		// client << "\r\nContent-Length: 0";
+		// client << "\r\n\r\n";
 	}
 }
 
 void	printReceived(Client &client)
 {
 	if (client.getMessage().length()) {
-		client.info();
-		parseRequest(client, client.getMessage());
-		std::cout << client;
-		// client << "message received\n";
-	}
-}
-
-void	handleTerminal(Client &client, Terminal *terminal)
-{
-	// Response	response;
-
-	if (terminal->notEmpty())
-	{
 		if (!client.HeaderSent()) {
-			client.UpdateHeaderInfo();
-			// response.Build();
-			// client << response.get();
+			client.info();
+			parseRequest(client, client.getMessage());
 		}
-		client << terminal->extractMessage();
+	}
+	// client.Download();
+	std::cout << client;
+}
+
+// void	fileHandle(Client &client, Service *service)
+// {
+
+// }
+
+void	handleTerminal(Client &client, Service *terminal) {
+
+	if (terminal->Ready()) {
+		if (!client.HeaderSent())
+		{
+			client.UpdateHeaderInfo();
+			client << terminal->Serve(client.getMessage());
+		}
+		client.enableKeepAlive();
 	}
 }
 
-void	clearTerminalMessages(Client &client, Terminal *terminal)
+void	clearTerminalMessages(Client &client, Service *terminal)
 {
 	(void) client;
-	if (terminal->notEmpty())
-	{
-		terminal->clearMessage();
-	}
+	terminal->Handle();
 }
 
 #include <DescendParser.hpp>
 #include <configurationFileFormat.hpp>
 
-void	startHttpServer(Server<Terminal*> &server, const char *configPath)
+void	startHttpServer(Server<Service*> &server, const char *configPath)
 {
 	DescendParser		parser;
 	FileProcessor		configurationFile;
@@ -67,16 +81,20 @@ void	startHttpServer(Server<Terminal*> &server, const char *configPath)
 	server.startPorts<DescendParser>(wordMatchMethod, parser);
 }
 
+#include <Service.hpp>
+
 int	main(void)
 {
-	Server<Terminal*>	httpServer;
 #ifdef TERMINAL
 	Terminal			terminal;
 #endif
 
+	Server<Service*>	httpServer;
+
 	startHttpServer(httpServer, "/home/WebServer/server.conf");
 
 	httpServer.setAction(printReceived);
+	// httpServer.setAction(fileHandle, &service);
 #ifdef TERMINAL
 	httpServer.setAction(handleTerminal, &terminal);
 	httpServer.setAction(clearTerminalMessages, &terminal);

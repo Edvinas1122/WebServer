@@ -2,6 +2,7 @@
 # define CONFIGURATIONFILE_HPP
 
 # include <includes.hpp>
+# include <DescendParser.hpp>
 
 /*
 	Server Configuration File specific syntax validation

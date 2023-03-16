@@ -16,10 +16,10 @@ class	Tcp
 		~Tcp() {};
 
 	public:
-		bool		receivePacket();
-		bool		sendPacket();
-
 		bool		ready() const; // outgoing empty
+		bool		sendPacket();
+		bool		receivePacket();
+
 
 		std::string	getMessage() const {
 			return (incoming);
@@ -48,21 +48,27 @@ class	Tcp
 class	DataBuffer: public Tcp
 {
 	private:
-		File			file;
+		bool	incoming_transmission;
+		File	file;
 	public:
 		DataBuffer() {};
 		DataBuffer(const int fd): Tcp(fd) {};
-		DataBuffer(const DataBuffer &src): Tcp(src.fd)
-		{ 
-			// uploadInProgress = false;
-		};
+		DataBuffer(const DataBuffer &src): Tcp(src.fd) {};
 		~DataBuffer() {};
 
 		bool		ready() const;
 		bool		sendPacket();
+		bool		receivePacket();
 
 
 		void	Create(const std::string &path) {
+			incoming_transmission = false;
+			file.Create(path.c_str());
+		};
+
+		void	Download(std::string const &path = "")
+		{
+			incoming_transmission = true;
 			file.Create(path.c_str());
 		};
 

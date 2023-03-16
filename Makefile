@@ -4,7 +4,7 @@ UTILS =  $(addprefix src/Utils/,File.cpp $(PARSER))
 UTILS_INCLUDE = -Isrc/Utils/ -Isrc/Utils/Parsers/ -Isrc/Utils/Parsers/Formats/
 
 #Server
-CLIENT = $(addprefix Client/,Client.cpp Tcp.cpp)
+CLIENT = $(addprefix Client/,Client.cpp DataBuffer.cpp Tcp.cpp)
 SERVER = $(addprefix src/Server/,Server.cpp PortSockets.cpp ConnectionQue.cpp Observer.cpp mod/*.cpp $(CLIENT))
 
 #Services

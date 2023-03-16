@@ -8,11 +8,12 @@
 
 void	parseRequest(Client &client, HttpRequest request)
 {
-	std::string get("/home/WebServer/files/http/");
-	get.append(request.getLocation());
+	std::string get("/home/WebServer/files/http/form.html");
+	// get.append(request.getLocation());
 	std::cout << get << std::endl;
 	if (request.getMethod() == "GET")
 	{
+		client.UpdateHeaderInfo();
 		client.enableKeepAlive();
 		client << File("/home/WebServer/files/response.txt").GetContents();
 		client << "\r\nContent-Length: " << File(get.c_str()).GetSize();
@@ -26,7 +27,8 @@ void	parseRequest(Client &client, HttpRequest request)
 		client << File("/home/WebServer/files/responseToPost.txt").GetContents();
 		if (!client.HeaderSent())
 		{
-			// client.Download("/home/WebServer/files/test.txt", request.getBoundry()); // out of map telnet exception
+			client.UpdateHeaderInfo();
+			client.Download("/home/WebServer/files/test.txt"); // out of map telnet exception
 		}
 		// client << "\r\nContent-Length: 0";
 		// client << "\r\n\r\n";
@@ -42,7 +44,7 @@ void	printReceived(Client &client)
 		}
 	}
 	// client.Download();
-	std::cout << client;
+	// std::cout << client;
 }
 
 // void	fileHandle(Client &client, Service *service)

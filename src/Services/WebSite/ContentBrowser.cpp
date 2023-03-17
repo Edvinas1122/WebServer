@@ -1,5 +1,10 @@
 #include <Service.hpp>
 
+bool	ContentBrowser::Ready(Client &client)
+{
+	return (client.ready());
+}
+
 void	ContentBrowser::Serve(Client &client)
 {
 	std::string get("/home/WebServer/files/http/form.html");
@@ -26,6 +31,7 @@ void	ContentBrowser::Serve(Client &client)
 	}
 };
 
-// void	ContentBrowser::parseRequest(HttpRequest const &request)
-// {
-// }
+void	ContentBrowser::Handle(Client &client)
+{
+	(void) client; 
+}

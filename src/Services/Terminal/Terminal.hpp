@@ -11,33 +11,9 @@ class	Terminal: public Service
 	public:
 		Terminal() {};
 
-		virtual bool	Ready(Client &client) {
-			(void) client;
-			return (notEmpty());
-		};
-
-		virtual void	Serve(Client &client)
-		{
-			client.setInactiveTimeOutCounter(14);
-			client << extractMessage();
-		};
-
-		virtual	void	Handle(Client &client) {
-			if (!client.getMessage().empty())
-			{
-				if (client.getMessage().find("You are gay") != std::string::npos)
-				{
-					client << "No you are";
-					client << File("/home/WebServer/files/test.txt");
-					client.setInactiveTimeOutCounter(0);
-					std::cout << client;
-					return ;
-				}
-				client.setInactiveTimeOutCounter(14);
-				std::cout << client;
-			}
-			clearMessage();
-		};
+		virtual bool	Ready(Client &client);
+		virtual void	Serve(Client &client);
+		virtual	void	Handle(Client &client);
 
 		bool	terminal_interface();
 	private:

@@ -73,3 +73,33 @@ bool	Terminal::notEmpty()
 		return (true);
 	return (false);
 }
+
+bool	Terminal::Ready(Client &client)
+{
+	(void) client;
+	return (notEmpty());
+};
+
+void	Terminal::Serve(Client &client)
+{
+	client.setInactiveTimeOutCounter(14);
+	client << extractMessage();
+};
+
+void	Terminal::Handle(Client &client)
+{
+	if (!client.getMessage().empty())
+	{
+		if (client.getMessage().find("You are gay") != std::string::npos)
+		{
+			client << "No you are";
+			client << File("/home/WebServer/files/test.txt");
+			client.setInactiveTimeOutCounter(0);
+			std::cout << client;
+			return ;
+		}
+		client.setInactiveTimeOutCounter(14);
+		std::cout << client;
+	}
+	clearMessage();
+};

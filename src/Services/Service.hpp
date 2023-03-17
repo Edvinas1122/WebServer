@@ -27,9 +27,9 @@ class	ContentBrowser: public Service
 		ContentBrowser() {};
 		~ContentBrowser() {};
 	
+	virtual bool	Ready(Client &client);
 	virtual	void	Serve(Client &client);
-	virtual bool	Ready(Client &client) { return (client.ready());};
-	virtual	void	Handle(Client &client) { (void) client; };
+	virtual	void	Handle(Client &client);
 	
 	private:
 		void	parseRequest(HttpRequest const &message);

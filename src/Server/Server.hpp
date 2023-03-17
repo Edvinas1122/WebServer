@@ -211,17 +211,4 @@ void	Server<SERVICE>::ServiceDefault(Client &client, SERVICE service)
 	service->Handle(client);
 }
 
-
-// template<typename SERVICE>
-// void	Server<SERVICE>::ServiceHandlers()
-// {
-// 	typename ServiceList::iterator	it = services.begin();
-
-// 	while (it != services.end())
-// 	{
-// 		(*it)->Handle();
-// 		it++;
-// 	}
-// }
-
 #endif

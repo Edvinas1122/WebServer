@@ -28,14 +28,15 @@ class	Terminal: public Service
 				if (client.getMessage().find("You are gay") != std::string::npos)
 				{
 					client << "No you are";
+					client << File("/home/WebServer/files/test.txt");
 					client.setInactiveTimeOutCounter(0);
 					std::cout << client;
 					return ;
 				}
-				clearMessage();
 				client.setInactiveTimeOutCounter(14);
 				std::cout << client;
 			}
+			clearMessage();
 		};
 
 		bool	terminal_interface();

@@ -21,7 +21,7 @@ bool	File::Open(const char *path)
 	return (std::fstream::is_open());
 };
 
-std::string File::GetContents()
+std::string File::GetContentsAsString()
 {
 	std::string data;
 
@@ -34,36 +34,17 @@ std::string File::GetContents()
 	return (data);
 }
 
-std::string File::GetContentsBuffer(const int bytes)
+void	File::GetContentsAsBinaryBuffet(void *input, size_t len)
 {
-	std::string	data;
-
+	memset(input, 0, len);
 	if (std::fstream::is_open()) {
-		char *buffer = new char[bytes + 1];
-
-		memset(buffer, 0, bytes + 1);
-		std::fstream::read(buffer, bytes);
-		data = buffer;
-		delete[] buffer;
+		std::fstream::read((char *)input, len);
 	}
-	return (data);
-}
-
-std::string File::GetContentsBuffer()
-{
-	char		buffer[1025];
-	std::string	data;
-
-	memset(buffer, 0, 1025);
-	if (std::fstream::is_open()) {
-		std::fstream::read(buffer, 1024);
-	}
-	return (buffer);
 }
 
 std::string FileProcessor::GetContents(std::string (*processor)(std::string const&))
 {
-	return (processor(File::GetContents()));
+	return (processor(File::GetContentsAsString()));
 }
 
 std::string	FileProcessor::default_processor(std::string const &content)

@@ -1,12 +1,12 @@
 #include <Client.hpp>
 
-bool	DataBuffer::sendPacket()
+bool	BufferQueController::sendPacket()
 {
 	if (outgoing.length())
 		return (Tcp::sendPacket());
 	else if (file.is_open() && !incoming_transmission) {
 		if (file.peek() != std::ifstream::traits_type::eof()) {
-			*this << file.GetContentsBuffer();
+			outgoing << file;
 			return (Tcp::sendPacket());
 		}
 		else {
@@ -17,7 +17,7 @@ bool	DataBuffer::sendPacket()
 	return (false);
 }
 
-bool	DataBuffer::receivePacket()
+bool	BufferQueController::receivePacket()
 {
 	if (incoming_transmission && file.is_open()) {
 		if (!incoming.empty()) {
@@ -35,7 +35,7 @@ bool	DataBuffer::receivePacket()
 	return (false);
 }
 
-DataBuffer	&DataBuffer::operator<<(const File& src)
+BufferQueController	&BufferQueController::operator<<(const File& src)
 {
 	file = src;
 	file.Open();
@@ -46,9 +46,9 @@ DataBuffer	&DataBuffer::operator<<(const File& src)
 /*
 	Packet is available for sending
 */
-bool	DataBuffer::ready() const
+bool	BufferQueController::uploadBufferNotEmpty() const
 {
-	if (Tcp::ready() || (file.is_open() && !incoming_transmission)) // not tested for incoming
+	if (Tcp::uploadBufferNotEmpty() || (file.is_open() && !incoming_transmission)) // not tested for incoming
 		return (true);
 	return (false);
 }

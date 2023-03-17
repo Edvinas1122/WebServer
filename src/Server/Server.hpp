@@ -190,7 +190,7 @@ bool	Server<SERVICE>::pullIncoming(Client &client) {
 template<typename SERVICE>
 bool	Server<SERVICE>::pushOutgoing(Client &client)
 {
-	if (client.ready())
+	if (client.uploadBufferNotEmpty())
 	{
 		try {
 			return (client.sendPacket());

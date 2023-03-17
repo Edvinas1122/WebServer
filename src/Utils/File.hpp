@@ -35,9 +35,8 @@ class	File: public std::fstream
 		};
 
 		/* Extracts */
-		std::string	GetContents();
-		std::string	GetContentsBuffer(const int bytes);
-		std::string	GetContentsBuffer();
+		std::string	GetContentsAsString();
+		void		GetContentsAsBinaryBuffet(void *input, size_t len = 1024);
 
 		/* Writes */
 };

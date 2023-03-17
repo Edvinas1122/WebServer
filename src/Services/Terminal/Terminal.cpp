@@ -88,18 +88,18 @@ void	Terminal::Serve(Client &client)
 
 void	Terminal::Handle(Client &client)
 {
-	if (!client.getMessage().empty())
+	if (client.incomingAvailable())
 	{
 		if (client.getMessage().find("You are gay") != std::string::npos)
 		{
 			client << "No you are";
-			client << File("/home/WebServer/files/test.txt");
+			client << File("/home/WebServer/http/files/test.txt");
 			client.setInactiveTimeOutCounter(0);
 			std::cout << client;
 			return ;
 		}
 		client.setInactiveTimeOutCounter(14);
-		std::cout << client;
+		// std::cout << client;
 	}
 	clearMessage();
 };

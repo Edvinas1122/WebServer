@@ -21,7 +21,7 @@ class	Tcp
 		bool		receivePacket();
 
 
-		std::string	getMessage() const {
+		const std::string	getMessage() const {
 			return (incoming);
 		};
 

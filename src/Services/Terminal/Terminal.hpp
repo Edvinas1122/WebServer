@@ -18,13 +18,23 @@ class	Terminal: public Service
 
 		virtual void	Serve(Client &client)
 		{
-			client.setInactiveTimeOutCounter(4);
+			client.setInactiveTimeOutCounter(14);
 			client << extractMessage();
 		};
 
-		virtual	void	Handle() {
-			if (notEmpty()) {
+		virtual	void	Handle(Client &client) {
+			if (!client.getMessage().empty())
+			{
+				if (client.getMessage().find("You are gay") != std::string::npos)
+				{
+					client << "No you are";
+					client.setInactiveTimeOutCounter(0);
+					std::cout << client;
+					return ;
+				}
 				clearMessage();
+				client.setInactiveTimeOutCounter(14);
+				std::cout << client;
 			}
 		};
 

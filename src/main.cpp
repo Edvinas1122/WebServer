@@ -17,20 +17,20 @@
 // 	// std::cout << client;
 // }
 
-void	handleTerminal(Client &client, Service *terminal) {
+// void	handleTerminal(Client &client, Service *terminal) {
 
-	if (terminal->Ready(client)) {
-		terminal->Serve(client);
-		client.setInactiveTimeOutCounter(10);
-	}
-	std::cout << client;
-}
+// 	if (terminal->Ready(client)) {
+// 		terminal->Serve(client);
+// 		client.setInactiveTimeOutCounter(10);
+// 	}
+// 	std::cout << client;
+// }
 
-void	clearTerminalMessages(Client &client, Service *terminal)
-{
-	(void) client;
-	terminal->Handle();
-}
+// void	clearTerminalMessages(Client &client, Service *terminal)
+// {
+// 	(void) client;
+// 	terminal->Handle();
+// }
 
 #include <DescendParser.hpp>
 #include <configurationFileFormat.hpp>
@@ -59,8 +59,8 @@ int	main(void)
 
 	// httpServer.setAction(printReceived, &webSite);
 #ifdef TERMINAL
-	httpServer.setAction(handleTerminal, &terminal);
-	httpServer.setAction(clearTerminalMessages, &terminal);
+	httpServer.setService(&terminal);
+	// httpServer.setAction(clearTerminalMessages, &terminal);
 	while (terminal.terminal_interface())
 #else
 	while (42)

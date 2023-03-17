@@ -15,7 +15,7 @@ class	Service
 
 	virtual bool				Ready(Client &client) = 0;
 	virtual	void				Serve(Client &client) = 0;
-	virtual	void				Handle() = 0;
+	virtual	void				Handle(Client &client) = 0;
 
 };
 
@@ -29,7 +29,7 @@ class	ContentBrowser: public Service
 	
 	virtual	void	Serve(Client &client);
 	virtual bool	Ready(Client &client) { return (client.ready());};
-	virtual	void	Handle() {};
+	virtual	void	Handle(Client &client) { (void) client; };
 	
 	private:
 		void	parseRequest(HttpRequest const &message);

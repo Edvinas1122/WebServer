@@ -125,12 +125,12 @@ template<typename SERVICE = Service*>
 class Server : public ConnectionQueController, public PortSockets
 {
 	public:
-		typedef std::list<std::pair<void (*)(Client &, SERVICE), SERVICE> > ObjectActionList;
+		typedef std::list<SERVICE>				ServiceList;
 		typedef std::list<void (*)(Client &)>	ActionList;
 
 	private:
-		ActionList			actions;
-		ObjectActionList	object_actions;
+		ActionList		actions;
+		ServiceList		services;
 
 	public:
 		Server() {}
@@ -138,11 +138,11 @@ class Server : public ConnectionQueController, public PortSockets
 		
 		void setAction(void (*Action)(Client &)) {
 			actions.push_back(Action);
-		}
+		};
 
-		void setAction(void (*Action)(Client &, SERVICE), SERVICE object) {
-			object_actions.push_back(std::make_pair<void (*)(Client &, SERVICE), SERVICE>(Action, object));
-		}
+		void setService(SERVICE service) {
+			services.push_back(service);
+		};
 
 		void Run() {
 			Observer::Poll(true);
@@ -151,26 +151,25 @@ class Server : public ConnectionQueController, public PortSockets
 			queProcess(pullIncoming, POLLIN);
 			DoActions();
 			queProcess(pushOutgoing, POLLOUT);
-			// queProcess(validateConnections, POLLOUT | POLLIN);
 			closeTimeOut();
-		}
+		};
 
 	private:
 		void DoActions() {
 			ActionList::const_iterator it = actions.begin();
-
 			while (it != actions.end()) {
 				action(*it);
 				it++;
 			}
 
-			typename ObjectActionList::const_iterator it2 = object_actions.begin();
-
-			while (it2 != object_actions.end()) {
-				action<SERVICE>(it2->first, it2->second);
+			typename	ServiceList::const_iterator it2 = services.begin();
+			while (it2 != services.end()) {
+				action(ServiceDefault, *it2);
 				it2++;
 			}
-		}
+		};
+
+		void	ServiceHandlers();
 
 		static bool pullIncoming(Client &client);
 		static bool pushOutgoing(Client &client);
@@ -178,6 +177,7 @@ class Server : public ConnectionQueController, public PortSockets
 		static void default_action(Client &client) {
 			(void)client;
 		}
+		static void	ServiceDefault(Client &client, SERVICE service);
 };
 
 template<typename SERVICE>
@@ -202,19 +202,26 @@ bool	Server<SERVICE>::pushOutgoing(Client &client)
 	return (false);
 }
 
+template<typename SERVICE>
+void	Server<SERVICE>::ServiceDefault(Client &client, SERVICE service)
+{
+	if (service->Ready(client)) {
+		service->Serve(client);
+	}
+	service->Handle(client);
+}
+
+
 // template<typename SERVICE>
-// bool	Server<SERVICE>::validateConnections(Client &client)
+// void	Server<SERVICE>::ServiceHandlers()
 // {
-// 	(void)client;
-// 	// if (!client.ready())
-// 	// {
-// 	// 	if (!client.keepAliveInfo())
-// 	// 		client.updateTime(CLOSE_CLIENT);
-// 	// 	else
-// 	// 		client.UpdateHeaderInfo(false);
-// 	// 	std::cout << "Task completed" << std::endl;
-// 	// }
-// 	return (false); 
+// 	typename ServiceList::iterator	it = services.begin();
+
+// 	while (it != services.end())
+// 	{
+// 		(*it)->Handle();
+// 		it++;
+// 	}
 // }
 
 #endif

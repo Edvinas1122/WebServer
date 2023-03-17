@@ -43,10 +43,12 @@ DataBuffer	&DataBuffer::operator<<(const File& src)
 }
 
 
-
+/*
+	Packet is available for sending
+*/
 bool	DataBuffer::ready() const
 {
-	if (Tcp::ready() || file.is_open()) // not tested for incoming
+	if (Tcp::ready() || (file.is_open() && !incoming_transmission)) // not tested for incoming
 		return (true);
 	return (false);
 }

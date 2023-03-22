@@ -12,7 +12,7 @@ int	Observer::Poll(const bool timeOutOn)
 {
 	int	info;
 
-	info = poll(vector.data(), vector.size(), TIMEOUT * (timeOutOn));
+	info = poll(vector.data(), vector.size(), (timeOutOn) ? TIMEOUT : -1);
 	return (info);
 }
 

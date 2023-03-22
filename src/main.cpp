@@ -1,4 +1,5 @@
 #include <Service.hpp>
+#include <ContentBrowser.hpp>
 #include <Server.hpp>
 #include <Terminal.hpp>
 #include <File.hpp>
@@ -29,8 +30,10 @@ int	main(void)
 
 #ifdef TERMINAL
 	httpServer.setService(&terminal);
+#endif
 	httpServer.setService(&webSite);
 
+#ifdef TERMINAL
 	while (terminal.terminal_interface())
 #else
 	while (42)

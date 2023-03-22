@@ -15,9 +15,10 @@ void	ConnectionQueController::setClients(std::list<std::pair<std::string, int> >
 			clientFd = accept((*it).second, (struct sockaddr *) &socketAddress, &addrlen);
 			if (clientFd == -1)
 				break;
-			
-			Clients.insert(std::pair<int, Client>(clientFd, Client(clientFd, socketAddress, it->first)));
-			insertFileDescriptor(clientFd);
+			if (Clients.find(clientFd) == Clients.end()) {
+				Clients.insert(std::pair<int, Client>(clientFd, Client(clientFd, socketAddress, it->first)));
+				insertFileDescriptor(clientFd);
+			}
 			it++;
 		}
 	}

@@ -133,8 +133,8 @@ class Server : public ConnectionQueController, public PortSockets
 		ServiceList		services;
 
 	public:
-		Server() {}
-		~Server() {}
+		Server() {};
+		~Server() {};
 		
 		void setAction(void (*Action)(Client &)) {
 			actions.push_back(Action);
@@ -144,10 +144,11 @@ class Server : public ConnectionQueController, public PortSockets
 			services.push_back(service);
 		};
 
-		void Run() {
-			Observer::Poll(true);
-
+		void Run()
+		{
+			Observer::Poll();
 			setClients(getLoudSockets());
+			usleep(100000);
 			queProcess(pullIncoming, POLLIN);
 			DoActions();
 			queProcess(pushOutgoing, POLLOUT);
@@ -156,13 +157,13 @@ class Server : public ConnectionQueController, public PortSockets
 
 	private:
 		void DoActions() {
-			ActionList::const_iterator it = actions.begin();
+			ActionList::iterator it = actions.begin();
 			while (it != actions.end()) {
 				action(*it);
 				it++;
 			}
 
-			typename	ServiceList::const_iterator it2 = services.begin();
+			typename	ServiceList::iterator it2 = services.begin();
 			while (it2 != services.end()) {
 				action(ServiceDefault, *it2);
 				it2++;

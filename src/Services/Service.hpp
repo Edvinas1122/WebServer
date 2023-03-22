@@ -13,26 +13,9 @@ class	Service
 		Service() {};
 		~Service() {};
 
-	virtual bool				Ready(Client &client) = 0;
-	virtual	void				Serve(Client &client) = 0;
-	virtual	void				Handle(Client &client) = 0;
-
-};
-
-#include <HTTP.hpp>
-
-class	ContentBrowser: public Service
-{
-	public:
-		ContentBrowser() {};
-		~ContentBrowser() {};
-	
-	virtual bool	Ready(Client &client);
-	virtual	void	Serve(Client &client);
-	virtual	void	Handle(Client &client);
-	
-	private:
-		void	parseRequest(HttpRequest const &message);
+	virtual bool	Ready(Client &client) = 0;
+	virtual	void	Serve(Client &client) = 0;
+	virtual	void	Handle(Client &client) = 0;
 };
 
 #endif

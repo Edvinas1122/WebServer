@@ -7,10 +7,17 @@ bool	BufferQueController::sendPacket()
 	else if (file.is_open() && !incoming_transmission) {
 		if (file.peek() != std::ifstream::traits_type::eof()) {
 			outgoing << file;
-			return (Tcp::sendPacket());
+			try {
+				return (Tcp::sendPacket());
+			} catch (...) {
+				file.close();
+				throw std::exception();
+				return (false);
+			}
 		}
 		else {
 			file.close();
+			setFlags(FILE_TRANSFERED);
 			return (Tcp::sendPacket());
 		}
 	}
@@ -19,26 +26,31 @@ bool	BufferQueController::sendPacket()
 
 bool	BufferQueController::receivePacket()
 {
-	if (incoming_transmission && file.is_open()) {
-		if (!incoming.empty()) {
+	bool	receive_info = true;
+
+	try {
+		if (incoming.empty())
+			receive_info = Tcp::receivePacket();
+		if (receive_info && incoming_transmission && file.is_open()) {
+			std::cout << "file incoming" << std::endl;
 			file << incoming;
-			// incoming.clear() << -- HAS TO BE VIPED
-			return (Tcp::receivePacket());
+			incoming.clear();
 		}
-		else {
+		return (receive_info);
+	} catch (...) {
+		if (incoming_transmission && file.is_open()) {
 			file.close();
-			return (Tcp::receivePacket());
+			setFlags(FILE_TRANSFERED);
 		}
+		return (false);
 	}
-	if (incoming.empty())
-		return (Tcp::receivePacket());
-	return (false);
 }
 
 BufferQueController	&BufferQueController::operator<<(const File& src)
 {
 	file = src;
 	file.Open();
+	setFlags(FILE_SENDING);
 	return (*this);
 }
 

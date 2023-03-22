@@ -98,8 +98,6 @@ void	Terminal::Handle(Client &client)
 			std::cout << client;
 			return ;
 		}
-		client.setInactiveTimeOutCounter(14);
-		// std::cout << client;
 	}
 	clearMessage();
 };

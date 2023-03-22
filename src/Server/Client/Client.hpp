@@ -2,142 +2,36 @@
 # define CLIENT_HPP
 
 # include <includes.hpp>
+# include <TCP.hpp>
 # include <File.hpp>
 
-class	Buffer
+# define FILE_TRANSFERED 0
+# define FILE_DOWNLOADING 1
+# define FILE_SENDING 2
+
+class Tracer
 {
-	public:
-		typedef std::vector<u_int8_t>	Vector;
 	private:
-		Vector	buffer;
+		int	flags;
 	public:
-		Buffer() {
-			buffer.reserve(1024);
+		Tracer(const Tracer &src) {
+			flags = src.flags;
 		};
-		Buffer(const Buffer &src): buffer(src.buffer) {};
-		Buffer(const Vector &src): buffer(src) {};
-		Buffer	&operator=(const Buffer &src) {
-			buffer.assign(src.buffer.begin(), src.buffer.end());
-			return (*this);
+		Tracer() {
+			flags = FILE_TRANSFERED;
 		};
-		~Buffer() {};
-
-		template <typename TYPE>
-		void	append(const TYPE &src, size_t lenght)
-		{
-			size_t	it = 0;
-
-			while (it < lenght)
-			{
-				buffer.push_back(src[it]);
-				it++;
-			}
-		};
-
-		Buffer	substr(size_t pos, size_t len) {
-			return (Vector(buffer.begin() + pos, buffer.begin() + len));
-		};
-
-		void	*data() {
-			return reinterpret_cast<void*>(buffer.data());
-		};
-
-		void	clear() {
-			buffer.clear();
-		};
-
-		bool	empty() const {
-			return (buffer.empty());
-		}
-
-		operator std::string() const {
-			return std::string(buffer.begin(), buffer.end());
-		};
-
-		#define FILE_BUFFERING_SIZE 1024
-
-		Buffer	&operator<<(File &file)
-		{
-			char	tmp_buffer[FILE_BUFFERING_SIZE];
-			size_t	buffer_iterator;
-			size_t	initial_buffer_size = buffer.size();
-
-			if (initial_buffer_size < FILE_BUFFERING_SIZE) {
-				memset(tmp_buffer, 0, FILE_BUFFERING_SIZE);
-				file.GetContentsAsBinaryBuffet((void *)tmp_buffer, FILE_BUFFERING_SIZE - initial_buffer_size);
-				buffer_iterator = 0;
-				while (buffer_iterator < FILE_BUFFERING_SIZE - initial_buffer_size)
-				{
-					buffer.push_back(tmp_buffer[buffer_iterator]); 
-					buffer_iterator++;
-				}
-			}
-			return (*this);
-		};
-
-		friend std::ostream& operator<<(std::ostream& os, const Buffer& buffer) {
-			const std::vector<unsigned char>	&data = buffer.buffer;
-
-			for (size_t i = 0; i < data.size(); ++i)
-			{
-				os << (char)(data[i]);
-			}
-			return os;
-		};
-
-		size_t	length() {
-			return (buffer.size());
-		};
-
-};
-
-class	Tcp
-{
 	protected:
-		int		fd;
-		Buffer	incoming;
-		Buffer	outgoing;
-	public:
-		Tcp() {};
-		Tcp(const Tcp &src): fd(src.fd), incoming(src.incoming), outgoing(src.outgoing) {};
-		Tcp(const int &fd): fd(fd) {};
-		~Tcp() {};
-
-	public:
-		bool		uploadBufferNotEmpty() const; // outgoing empty
-		bool		incomingAvailable() const 
-		{
-			return (!incoming.empty());
-		}; // outgoing empty
-		bool		sendPacket();
-		bool		receivePacket();
-
-
-		const std::string	getMessage() const {
-			return (incoming);
+		void setFlags(const int flag) {
+			flags = flag;
 		};
 
-		Tcp	&operator<<(const std::string& str);
-		Tcp	&operator<<(const char * str);
-
-		friend std::ostream& operator<<(std::ostream &os, Tcp &obj)
-		{
-			if (obj.incoming.length()) {
-				os << obj.incoming;
-				obj.flushIncoming();
-			}
-			return (os);
-		};
-
-	private:
-		void flushIncoming() {
-			incoming.clear();
+	public:
+		bool	checkFlag(const int flag) const {
+			return (flags == flag);
 		};
 };
 
-
-
-class	BufferQueController: public Tcp
+class	BufferQueController: public Tcp, public Tracer
 {
 	private:
 		File	file;
@@ -145,35 +39,32 @@ class	BufferQueController: public Tcp
 
 	public:
 		BufferQueController() {};
-		BufferQueController(const int fd): Tcp(fd) {};
-		BufferQueController(const BufferQueController &src): Tcp(src.fd) {};
+		BufferQueController(const int fd): Tcp(fd), Tracer() {};
+		BufferQueController(const BufferQueController &src): Tcp(src.fd), Tracer(src) {
+		};
 		~BufferQueController() {};
 
-		bool		uploadBufferNotEmpty() const;
-		bool		sendPacket();
-		bool		receivePacket();
-
-		void	Create(const std::string &path) {
-			incoming_transmission = false;
-			file.Create(path.c_str());
-		};
+		bool	uploadBufferNotEmpty() const;
+		bool	sendPacket();
+		bool	receivePacket();
 
 		void	Download(std::string const &path = "") {
+
 			incoming_transmission = true;
+			setFlags(FILE_DOWNLOADING);
 			file.Create(path.c_str());
 		};
 
-		friend void operator>>(const BufferQueController& client, File& file);
+		friend void	operator>>(const BufferQueController& client, File& file);
 
 	public:
 		BufferQueController	&operator<<(const File& src);
 
 		template<typename TYPE>
-		BufferQueController	&operator<<(TYPE const &src) { // non binary in receive
+		BufferQueController	&operator<<(TYPE const &src) {
 			std::stringstream buffer;
 			buffer << src;
 			outgoing.append(buffer.str(), buffer.str().length());
-			// outgoing.append(buffer.str());
 			return (*this);
 		};
 
@@ -181,7 +72,6 @@ class	BufferQueController: public Tcp
 		void	insertBuffer(std::string const &buffer, size_t len) {
 			file.insertBuffer(buffer.c_str(), len);
 		};
-
 };
 
 class	Client: public BufferQueController
@@ -212,7 +102,33 @@ class	Client: public BufferQueController
 			std::cout << "Client info: \n" << "IP " << inet_ntoa(socketAddress.sin_addr) << std::endl;
 		};
 
+		bool	sendPacket()
+		{
+			try {
+				return (BufferQueController::sendPacket());
+			} catch (...) {
+				std::cerr << "packet failed - client Close" << std::endl;
+				updateTime(true);
+				return (false);
+			}
+		};
+
+		bool	receivePacket()
+		{
+			try {
+				return (BufferQueController::receivePacket());
+			} catch (...) {
+				std::cerr << "packet recv failed - client Close" << std::endl;
+				updateTime(true);
+				return (false);
+			}
+		};
+
 		void	setInactiveTimeOutCounter(const int counter) {
+			if (counter == 0) {
+				updateTime(true);
+				return ;
+			}
 			inactiveTimeOutDurration = counter;
 			updateTime();
 		};
@@ -224,9 +140,6 @@ class	Client: public BufferQueController
 		int		getTimeOutDurration() {
 			return (inactiveTimeOutDurration);
 		};
-		// const int					&getSocket() const;
-		// const struct socketaddr_in	&getAddress() const;
-
 };
 
 #endif

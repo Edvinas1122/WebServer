@@ -50,6 +50,11 @@ class	HttpRequest: public std::string
 		const std::string	getBoundry() const;
 		const std::string	getFilename() const;
 		const std::string	getBody() const;
+
+		/*
+			Body and File related
+		*/
+		const std::string	getContentFileName() const;
 };
 
 class	HttpBody

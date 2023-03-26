@@ -1,7 +1,8 @@
 #include <Buffer.hpp>
 #include <TCP.hpp>
 #include <Client.hpp>
-
+#include <HTTP.hpp>
+#include <File.hpp>
 // const char	*trimHeaderOpeningBoundry(std::string string, std::string const &boundry)
 // {
 // 	if (string.find(boundry) != std::string::npos)
@@ -33,15 +34,9 @@
 
 int	main(void)
 {
-	Client	copy;
-	Buffer	test;
+	HttpRequest	request(File("/home/WebServer/samples/http_request.txt").GetContentsAsString());
 
-	test.append("content\n", 9);
-	copy << test;
-	// copy >> test;
-
-
-	std::cout << copy << std::endl;
+	std::cout << request.getContentFileName() << std::endl;
 	return (0);
 
 }

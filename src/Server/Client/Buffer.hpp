@@ -35,7 +35,9 @@ class	Buffer
 			}
 		};
 
-		Buffer	substr(size_t pos, size_t len) {
+		Buffer	substr(const size_t pos, const size_t len = 0) {
+			if (len == 0)
+				return (Vector(buffer.begin() + pos, buffer.end()));
 			return (Vector(buffer.begin() + pos, buffer.begin() + pos + len));
 		};
 

@@ -14,12 +14,11 @@ bool	ContentBrowser::Ready(Client &client)
 
 void	ContentBrowser::Serve(Client &client)
 {
-	// std::cout << get << std::endl;
 	HttpRequest	request(client.getMessage());
+	std::string	rootDir = "/home/WebServer/http";
 
 	if (request.getMethod() == "GET")
 	{
-		std::string	rootDir = "/home/WebServer/http";
 
 		client.setInactiveTimeOutCounter(5);
 		client << File("/home/WebServer/http/files/responseGET.txt").GetContentsAsString();
@@ -32,9 +31,9 @@ void	ContentBrowser::Serve(Client &client)
 	{
 		client.setInactiveTimeOutCounter(10000);
 		client << File("/home/WebServer/http/files/responseToPost.txt").GetContentsAsString();
-		// client.Download("/home/WebServer/http/test.txt"); // out of map telnet exception
+		std::cout << rootDir + "/upload/" + request.getContentFileName() << std::endl;
 		try {
-			addDownload(&client, "/home/WebServer/http/test.txt", request.getBoundry());
+			addDownload(&client, rootDir + "/upload/" + request.getContentFileName(), request.getBoundry());
 		} catch (...) {
 			addDownload(&client, "/home/WebServer/http/test.txt");
 		}

@@ -76,8 +76,16 @@ class	ChunkHandler
 			if (begin != std::numeric_limits<size_t>::max())
 				buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
 
+			trimUntilFileBegin();
 			*client << buffer;
 			buffer.clear();
+		};
+	
+	private:
+		void	trimUntilFileBegin()
+		{
+			buffer = buffer.substr(buffer.find("Content-Type:"));
+			buffer = buffer.substr(buffer.find("\r\n") + 4);
 		};
 	
 };

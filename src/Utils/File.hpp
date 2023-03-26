@@ -1,6 +1,7 @@
 #ifndef FILE_HPP
 # define FILE_HPP
-#include <includes.hpp>
+
+# include <includes.hpp>
 
 class	File: public std::fstream
 {
@@ -19,6 +20,7 @@ class	File: public std::fstream
 		virtual ~File() {};
 
 		void	Create(const char *path);
+		void	Create() {return (Create(this->path.c_str()));};
 		bool	Open(const char *path);
 		bool	Open() {return (Open(this->path.c_str()));};
 
@@ -39,6 +41,9 @@ class	File: public std::fstream
 		void		GetContentsAsBinaryBuffet(void *input, size_t len = 1024);
 
 		/* Writes */
+		// File	&operator<<(Buffer &buffer);
+		// File	&operator<<(Tcp &connection);
+
 };
 
 class	FileProcessor: public File 

@@ -26,6 +26,7 @@
 # include <sys/wait.h>
 # include <sys/time.h>
 # include <fstream>
+# include <limits>
 
 #ifdef C98
 # define EXCEPTION throw(std::exception)

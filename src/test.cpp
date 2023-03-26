@@ -1,4 +1,6 @@
-#include <File.hpp>
+#include <Buffer.hpp>
+#include <TCP.hpp>
+#include <Client.hpp>
 
 // const char	*trimHeaderOpeningBoundry(std::string string, std::string const &boundry)
 // {
@@ -31,24 +33,15 @@
 
 int	main(void)
 {
-	// Service			messageProcessor;
-	char			buffer[1025];
-	File			requestSample("/home/WebServer/http/files/pic.webp");
-	File			requestSample2("/home/WebServer/http/files/pic.webp");
+	Client	copy;
+	Buffer	test;
 
-	// HttpRequest		request(requestSample.GetContents());
-
-	// test_request(request);	
-
-	// std::cout << HttpBody(request).get();
-	requestSample.GetContentsAsBinaryBuffet((void *)buffer);
-	std::cout << buffer;
-	requestSample2.GetContentsAsBinaryBuffet((void *)buffer);
-	std::cout << buffer;
-
-	// messageProcessor.parseConfigurationFile("/home/WebServer/server.conf");
+	test.append("content\n", 9);
+	copy << test;
+	// copy >> test;
 
 
+	std::cout << copy << std::endl;
 	return (0);
 
 }

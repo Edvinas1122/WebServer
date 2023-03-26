@@ -4,34 +4,107 @@
 # include <includes.hpp>
 # include <Service.hpp>
 # include <Client.hpp>
-# include <HTTP.hpp>
+# include <Buffer.hpp>
+# include <File.hpp>
 
 class	ServiceProcessTrace
 {
 	private:
-		int			id;
-		std::string	request;
+		Client		*client;
+		File		file;
+		std::string	chunkDelimeter;
+
 	public:
-		bool	isClient(const Client &client);
+		ServiceProcessTrace() {};
+		ServiceProcessTrace(const ServiceProcessTrace &src) {
+			this->client = src.client;
+			this->file = src.file;
+			this->file.Create();
+		};
+		virtual	~ServiceProcessTrace() {};
+
+		ServiceProcessTrace(Client *client, std::string const &file, std::string const &chunkDelimeter = ""): client(client), file(file.c_str()), chunkDelimeter(chunkDelimeter) {};
+
+		bool	id(const Client *client) {
+			return ((this->client == client));
+		};
+
+		void	pullToFile() {
+			*client >> file;
+		};
+
+		std::string	showDelimiter() const {
+			return (chunkDelimeter);
+		};
 };
 
-class	ServiceTracer
+class	ChunkHandler
 {
-	public:
-		typedef	std::vector<ServiceProcessTrace>::iterator	st_iterator;
-
 	private:
-		std::vector<ServiceProcessTrace>	processList;
+		Buffer		buffer;
+	public:
+		ChunkHandler() {};
+		~ChunkHandler() {};
+
+		bool	chunkEnd(Client *client, std::string const &delimeter) {
+			*client >> buffer;
+			if (buffer.find(delimeter) != std::numeric_limits<size_t>::max())
+				return (true);
+			return (false);
+		};
 
 	protected:
-		void	traceClient(Client &client);
+		void	unchunkBegining(Client *client, std::string const &delimeter) {
+			size_t	begin;
 
-	private:
-		void	addToList();
-		st_iterator	findClient(const Client &client);
+			*client >> buffer;
+
+			std::cout << "Chunk delimeter: " << delimeter << std::endl;
+
+			begin = buffer.find(delimeter);
+			if (begin != std::numeric_limits<size_t>::max())
+				buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin);
+
+			std::cout << "Trimmed buffer: " << buffer << std::endl;
+
+			begin = buffer.find(delimeter);
+
+			std::cout << "Begin: " << begin << std::endl;
+			
+			if (begin != std::numeric_limits<size_t>::max())
+				buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin);
+
+			*client << buffer;
+		};
+	
 };
 
-class	ContentBrowser: public Service, public ServiceTracer
+class	UploadService: public ChunkHandler
+{
+	public:
+		typedef	std::list<ServiceProcessTrace>::iterator	st_iterator;
+
+	private:
+		std::list<ServiceProcessTrace>	processList;
+
+	public:
+		void	addDownload(Client *client, std::string const &filename, std::string const &chunkDelimeter = "POST");
+		bool	clientInServiceList(Client *client) {
+			return ((checkClientInList(client) != processList.end()));
+		};
+		void	closeDownload(Client *client);
+		void	writeBufferToFile(Client *client);
+		bool	fileEnd(Client *client) {
+			return (ChunkHandler::chunkEnd(client, checkClientInList(client)->showDelimiter()));
+		};
+
+	private:
+		st_iterator	checkClientInList(const Client *client);
+};
+
+# include <HTTP.hpp>
+
+class	ContentBrowser: public Service, public UploadService
 {
 	public:
 		ContentBrowser() {};
@@ -40,11 +113,6 @@ class	ContentBrowser: public Service, public ServiceTracer
 	virtual bool	Ready(Client &client);
 	virtual	void	Serve(Client &client);
 	virtual	void	Handle(Client &client);
-	
-	private:
-		void	gate(Client &client);
-	private:
-		void	parseRequest(HttpRequest const &message);
 };
 
 #endif

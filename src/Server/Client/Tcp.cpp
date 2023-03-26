@@ -61,3 +61,8 @@ Tcp	&Tcp::operator<<(const char *str)
 	return (*this);
 }
 
+Tcp	&Tcp::operator<<(Buffer &buffer)
+{
+	incoming = buffer;
+	return (*this);
+}

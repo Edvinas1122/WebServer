@@ -20,7 +20,7 @@ class Tracer
 		Tracer() {
 			flags = FILE_TRANSFERED;
 		};
-	protected:
+	public:
 		void setFlags(const int flag) {
 			flags = flag;
 		};
@@ -33,32 +33,36 @@ class Tracer
 
 class	BufferQueController: public Tcp, public Tracer
 {
-	private:
+	public:
 		File	file;
+	private:
 		bool	incoming_transmission;
 
 	public:
 		BufferQueController() {};
 		BufferQueController(const int fd): Tcp(fd), Tracer() {};
-		BufferQueController(const BufferQueController &src): Tcp(src.fd), Tracer(src) {
-		};
+		BufferQueController(const BufferQueController &src): Tcp(src.fd), Tracer(src) {};
 		~BufferQueController() {};
 
 		bool	uploadBufferNotEmpty() const;
 		bool	sendPacket();
 		bool	receivePacket();
 
-		void	Download(std::string const &path = "") {
-
-			incoming_transmission = true;
-			setFlags(FILE_DOWNLOADING);
-			file.Create(path.c_str());
-		};
-
-		friend void	operator>>(const BufferQueController& client, File& file);
+		// File	*Download(std::string const &path = "")
+		// {
+		// 	incoming_transmission = true;
+		// 	setFlags(FILE_DOWNLOADING);
+		// 	file.Create(path.c_str());
+		// 	return (&file);
+		// };
 
 	public:
 		BufferQueController	&operator<<(const File& src);
+
+		BufferQueController	&operator<<(Buffer& src) {
+			Tcp::operator<<(src);
+			return (*this);
+		};
 
 		template<typename TYPE>
 		BufferQueController	&operator<<(TYPE const &src) {

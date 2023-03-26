@@ -34,6 +34,7 @@ class	Tcp
 
 		Tcp	&operator<<(const std::string& str);
 		Tcp	&operator<<(const char * str);
+		Tcp	&operator<<(Buffer &buffer);
 
 		friend std::ostream& operator<<(std::ostream &os, Tcp &obj)
 		{
@@ -43,6 +44,23 @@ class	Tcp
 			}
 			return (os);
 		};
+
+		friend void	operator>>(Tcp& client, File& file)
+		{
+			client.incoming >> file;
+		};
+
+		friend void	operator>>(Tcp& client, Buffer& buffer)
+		{
+			buffer = client.incoming;
+			// client.incoming.clear();
+		};
+
+		// friend File	&operator<<(File &file, const Tcp &connection)
+		// {
+		// 	file << connection.incoming;
+		// 	return (file);
+		// };
 
 		int	getSocket() const {
 			return (fd);

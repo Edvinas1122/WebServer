@@ -85,10 +85,42 @@ class	Buffer
 			return os;
 		};
 
+		friend void	operator>>(Buffer &client, File& file)
+		{
+			file.insertBuffer((char *)client.buffer.data(), client.buffer.size());
+			client.empty();
+		}
+
 		size_t	length() {
 			return (buffer.size());
 		};
 
+		size_t	find(std::string const &match, size_t offset = 0)
+		{
+			size_t	iterator = offset;
+
+			while (iterator < buffer.size() - match.length())
+			{
+				if (testMatch(match, iterator, match.length()))
+					return (iterator);
+				iterator++;
+			}
+			return (std::numeric_limits<size_t>::max());
+		};
+
+	private:
+		bool	testMatch(std::string const &match, size_t offset, size_t len)
+		{
+			size_t	iterator = 0;
+
+			while (iterator < len)
+			{
+				if ((char)buffer[offset + iterator] != match[iterator])
+					return (false);
+				iterator++;
+			}
+			return (true);
+		};
 };
 
 #endif

@@ -70,14 +70,12 @@ void	Observer::setAsNonBlocking(const int socket_fd) const
 	flags = fcntl(socket_fd, F_GETFL, 0);
 	if (flags == -1) {
 		// handle error getting socket flags
-		std::cerr << "can not set socket as non-blocking" << std::endl;
-		exit (0);
+		throw std::exception();
 	}
 
 	flags |= O_NONBLOCK;
 	if (fcntl(socket_fd, F_SETFL, flags) == -1) {
 		// handle error setting socket flags
-		std::cerr << "can not set socket as non-blocking" << std::endl;
-		exit (0);
+		throw std::exception();
 	}
 }

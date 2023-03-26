@@ -4,7 +4,7 @@ bool	ContentBrowser::Ready(Client &client)
 {
 	if (client.incomingAvailable())
 	{
-		if (client.checkFlag(FILE_TRANSFERED))
+		if (client.checkFlag(FILE_TRANSFERED) && !clientInServiceList(&client))
 		{
 			return (true);
 		}
@@ -33,7 +33,11 @@ void	ContentBrowser::Serve(Client &client)
 		client.setInactiveTimeOutCounter(10000);
 		client << File("/home/WebServer/http/files/responseToPost.txt").GetContentsAsString();
 		// client.Download("/home/WebServer/http/test.txt"); // out of map telnet exception
-		addDownload(&client, "/home/WebServer/http/test.txt", request.getBoundry());
+		try {
+			addDownload(&client, "/home/WebServer/http/test.txt", request.getBoundry());
+		} catch (...) {
+			addDownload(&client, "/home/WebServer/http/test.txt");
+		}
 		std::cout << "Receiving file" << std::endl;
 		return ;
 	}
@@ -56,9 +60,13 @@ void	ContentBrowser::Handle(Client &client)
 	{
 		std::cout << "writing to file input" << std::endl;
 		writeBufferToFile(&client);
-		if (fileEnd(&client))
+		if (fileEnd(&client)) {
 			closeDownload(&client);
+			client.setInactiveTimeOutCounter(0);
+			std::cout << "file received" << std::endl;
+		}
 		// client << "\r\n\r\n";
 	}
-	std::cout << client;
+	if (client.incomingAvailable())
+		std::cout << client;
 };

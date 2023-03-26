@@ -17,6 +17,7 @@ class	Buffer
 		Buffer(const Buffer &src): buffer(src.buffer) {};
 		Buffer(const Vector &src): buffer(src) {};
 		Buffer	&operator=(const Buffer &src) {
+			buffer.clear();
 			buffer.assign(src.buffer.begin(), src.buffer.end());
 			return (*this);
 		};
@@ -35,7 +36,7 @@ class	Buffer
 		};
 
 		Buffer	substr(size_t pos, size_t len) {
-			return (Vector(buffer.begin() + pos, buffer.begin() + len));
+			return (Vector(buffer.begin() + pos, buffer.begin() + pos + len));
 		};
 
 		void	*data() {
@@ -99,7 +100,7 @@ class	Buffer
 		{
 			size_t	iterator = offset;
 
-			while (iterator < buffer.size() - match.length())
+			while (iterator < buffer.size() + match.length())
 			{
 				if (testMatch(match, iterator, match.length()))
 					return (iterator);

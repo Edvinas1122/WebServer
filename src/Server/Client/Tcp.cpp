@@ -31,7 +31,7 @@ bool	Tcp::sendPacket()
 	if (bytes_sent == -1)
 		throw std::exception();
 	if (bytes_sent > 0) {
-		outgoing = outgoing.substr(bytes_sent, outgoing.length());
+		outgoing = outgoing.substr(bytes_sent, outgoing.length() - bytes_sent);
 		return (true);
 	}
 	return (false);

@@ -18,6 +18,7 @@ class	ServiceProcessTrace
 		ServiceProcessTrace() {};
 		ServiceProcessTrace(const ServiceProcessTrace &src) {
 			this->client = src.client;
+			this->chunkDelimeter = src.chunkDelimeter;
 			this->file = src.file;
 			this->file.Create();
 		};
@@ -31,6 +32,7 @@ class	ServiceProcessTrace
 
 		void	pullToFile() {
 			*client >> file;
+			// file << "test";
 		};
 
 		std::string	showDelimiter() const {
@@ -63,7 +65,7 @@ class	ChunkHandler
 
 			begin = buffer.find(delimeter);
 			if (begin != std::numeric_limits<size_t>::max())
-				buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin);
+				buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
 
 			std::cout << "Trimmed buffer: " << buffer << std::endl;
 
@@ -72,9 +74,10 @@ class	ChunkHandler
 			std::cout << "Begin: " << begin << std::endl;
 			
 			if (begin != std::numeric_limits<size_t>::max())
-				buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin);
+				buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
 
 			*client << buffer;
+			buffer.clear();
 		};
 	
 };

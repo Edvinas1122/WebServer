@@ -1,8 +1,8 @@
-#include <Client.hpp>
+#include "TCP.hpp"
 
 #define RECEIVE_BUFFER_SIZE 1024
 
-bool	Tcp::receivePacket()
+bool	TCP::receivePacket()
 {
 	char	mesg[RECEIVE_BUFFER_SIZE + 1];
 	int		bytes_read = 0;
@@ -18,7 +18,7 @@ bool	Tcp::receivePacket()
 	return (false);
 }
 
-bool	Tcp::sendPacket()
+bool	TCP::sendPacket()
 {
 	int		buffer_len = outgoing.length();
 	int		bytes_sent;
@@ -35,40 +35,4 @@ bool	Tcp::sendPacket()
 		return (true);
 	}
 	return (false);
-}
-
-bool	Tcp::uploadBufferNotEmpty() const
-{
-	if (!outgoing.empty()) // not tested for incoming
-		return (true);
-	return (false);
-}
-
-
-/*
-	Stream overloads
-*/
-
-Tcp	&Tcp::operator<<(const std::string& str)
-{
-	outgoing.append(str, str.length());
-	return (*this);
-}
-
-Tcp	&Tcp::operator<<(const char *str)
-{
-	outgoing.append(str, strlen(str));
-	return (*this);
-}
-
-Tcp	&Tcp::operator<<(Buffer &buffer)
-{
-	incoming << buffer;
-	return (*this);
-}
-
-Tcp	&Tcp::operator=(Buffer &buffer)
-{
-	incoming = buffer;
-	return (*this);
 }

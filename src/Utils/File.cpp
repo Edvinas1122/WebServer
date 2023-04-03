@@ -7,6 +7,7 @@ void	File::Create(const char *path)
 		std::fstream::close();
 		std::fstream::clear();
 	}
+	this->path = path;
 	std::fstream::open(path, std::ios::out | std::ios::binary | std::ios::trunc);
 };
 
@@ -17,6 +18,7 @@ bool	File::Open(const char *path)
 		std::fstream::close();
 		std::fstream::clear();
 	}
+	this->path = path;
 	std::fstream::open(path, std::ios::in);
 	return (std::fstream::is_open());
 };

@@ -36,6 +36,12 @@ class	File: public std::fstream
 				std::fstream::write(buffer, len);
 		};
 
+		bool	ready() const
+		{
+			if (!path.empty())
+				return (true);
+			return (false);
+		};
 		/* Extracts */
 		std::string	GetContentsAsString();
 		void		GetContentsAsBinaryBuffet(void *input, size_t len = 1024);

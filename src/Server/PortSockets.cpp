@@ -29,3 +29,25 @@ std::list<int>	PortSockets::getSockets()
 	}
 	return (socketList);
 }
+
+void	PortSockets::startPorts(std::list<std::string> ports, bool asynch)
+{
+	std::list<std::string>::iterator	it = ports.begin();
+
+	while (it != ports.end())
+	{
+		startPort(*it, asynch);
+		it++;
+	}
+}
+
+void	PortSockets::startPort(std::string const &port, bool asynch)
+{
+	int	scoket_fd;
+
+	if (portSockets.find(port) != portSockets.end())
+		return ;
+	scoket_fd = this->socketInitMethod(port.c_str());
+	portSockets[port] = scoket_fd;
+	insertFileDescriptor(scoket_fd, POLLIN, asynch);
+}

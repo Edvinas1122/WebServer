@@ -1,7 +1,10 @@
 #include <Server.hpp>
 # include <File.hpp>
 
-void	ConnectionQueController::setClients(std::list<std::pair<std::string, int> > const &loudPortList)
+/*
+	TCP connections only...
+*/
+void	ConnectionQueController::setConnections(std::list<std::pair<std::string, int> > const &loudPortList)
 {
 	struct sockaddr_in				socketAddress;
 	socklen_t						addrlen = sizeof(struct sockaddr_in);
@@ -15,8 +18,8 @@ void	ConnectionQueController::setClients(std::list<std::pair<std::string, int> >
 			clientFd = accept((*it).second, (struct sockaddr *) &socketAddress, &addrlen);
 			if (clientFd == -1)
 				break;
-			if (Clients.find(clientFd) == Clients.end()) {
-				Clients.insert(std::pair<int, Client>(clientFd, Client(clientFd, socketAddress, it->first)));
+			if (Connections.find(clientFd) == Connections.end()) {
+				Connections.insert(std::pair<int, TCP>(clientFd, TCP(clientFd, socketAddress, it->first)));
 				insertFileDescriptor(clientFd);
 			}
 			it++;
@@ -24,17 +27,38 @@ void	ConnectionQueController::setClients(std::list<std::pair<std::string, int> >
 	}
 }
 
-void	ConnectionQueController::closeConnection(listOfClients::iterator &position)
+void	ConnectionQueController::closeConnection(Connection *connection)
 {
-	removeFileDescriptor(position->first);
-	Clients.erase(position);
+	listOfConnections::iterator	conn_it = Connections.begin();
+
+	while (conn_it != Connections.end())
+	{
+		if (&(conn_it->second) == connection)
+		{
+			closeConnection(conn_it);
+			break;
+		}
+		conn_it++;
+	}
 }
 
-void	ConnectionQueController::queProcess(bool (*action)(Client &client), const int observer_event)
+void	ConnectionQueController::closeConnection(listOfConnections::iterator &position)
 {
-	listOfClients::iterator	it = Clients.begin();
+	removeFileDescriptor(position->first);
+	Connections.erase(position);
+}
 
-	while (it != Clients.end())
+// void	ConnectionQueController::closeConnection(fd_t const &fd)
+// {
+// 	removeFileDescriptor(fd);
+// 	Connections.erase(Connections.at(fd));
+// }
+
+void	ConnectionQueController::ProcessQue(bool (*action)(Connection &client), const int observer_event)
+{
+	listOfConnections::iterator	it = Connections.begin();
+
+	while (it != Connections.end())
 	{
 		if (checkFd(it->first, observer_event) && action(it->second))
 			it->second.updateTime();
@@ -42,30 +66,43 @@ void	ConnectionQueController::queProcess(bool (*action)(Client &client), const i
 	}
 }
 
-void	ConnectionQueController::action(void (*action)(Client &client))
+void	ConnectionQueController::action(void (*action)(Connection &client))
 {
-	listOfClients::iterator	it = Clients.begin();
+	listOfConnections::iterator	it = Connections.begin();
 
-	while (it != Clients.end())
+	while (it != Connections.end())
 	{
 		action(it->second);
 		it++;
 	}
 }
 
-void	ConnectionQueController::closeTimeOut()
-{
-	listOfClients::iterator	it = Clients.begin();
+// bool	ConnectionQueController::checkConnection(Connection *connection)
+// {
+// 	listOfConnections::iterator	conn_it = Connections.begin();
 
-	while (it != Clients.end())
-	{
-		if ((*it).second.getElapsedTime() > (*it).second.getTimeOutDurration())
-		{
-			closeConnection(it);
-			it = Clients.begin();
-			if (it == Clients.end())
-				break;
-		}
-		it++;
-	}
-}
+// 	while (conn_it != Connections.end())
+// 	{
+// 		if (&(conn_it->second) == connection)
+// 			return (true);
+// 		conn_it++;
+// 	}
+// 	return (false);
+// }
+
+// void	ConnectionQueController::closeTimeOut()
+// {
+// 	listOfConnections::iterator	it = Connections.begin();
+
+// 	while (it != Connections.end())
+// 	{
+// 		if ((*it).second.getElapsedTime() > (*it).second.getTimeOutDurration())
+// 		{
+// 			closeConnection(it);
+// 			it = Connections.begin();
+// 			if (it == Connections.end())
+// 				break;
+// 		}
+// 		it++;
+// 	}
+// }

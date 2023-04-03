@@ -1,40 +1,44 @@
 #include <Service.hpp>
-#include <ContentBrowser.hpp>
+// #include <WebSite.hpp>
 #include <Server.hpp>
 #include <Terminal.hpp>
-#include <File.hpp>
 
-#include <DescendParser.hpp>
-#include <configurationFileFormat.hpp>
+// #include <DescendParser.hpp>
+// #include <configurationFileFormat.hpp>
 
-void	startHttpServer(Server<Service*> &server, const char *configPath)
-{
-	DescendParser		parser;
-	FileProcessor		configurationFile;
+// void	startHttpServer(Server &server, const char *configPath)
+// {
+// 	DescendParser		parser;
+// 	FileProcessor		configurationFile;
 
-	configurationFile.Open(configPath);
-	parser.setContent(configurationFile.GetContents(removeComents));
-	server.startPorts<DescendParser>(wordMatchMethod, parser);
-}
+// 	configurationFile.Open(configPath);
+// 	parser.setContent(configurationFile.GetContents(removeComents));
+// 	server.startPorts<DescendParser>(wordMatchMethod, parser);
+// }
 
+// #include <VirtualServer.hpp>
 
 int	main(void)
 {
 #ifdef TERMINAL
-	Terminal			terminal;
+	Terminal	terminal;
 #endif
-	ContentBrowser		webSite;
-	Server<Service*>	httpServer;
+	// VirtualServers	virtualServers;
+	// WebSite			webSite;
+	Server			httpServer;
 
-	startHttpServer(httpServer, "/home/WebServer/server.conf");
+	// startHttpServer(httpServer, "/home/WebServer/server.conf");
+	// virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
+	httpServer.startPort("10012");
+	// virtualServers.Info();
+	// webSite.SetVirtualServerMap(&virtualServers);
+#ifdef TERMINAL
+	httpServer.addService(&terminal);
+#endif
+	// httpServer.addService(&webSite);
 
 #ifdef TERMINAL
-	httpServer.setService(&terminal);
-#endif
-	httpServer.setService(&webSite);
-
-#ifdef TERMINAL
-	while (terminal.terminal_interface())
+	while (42)
 #else
 	while (42)
 #endif

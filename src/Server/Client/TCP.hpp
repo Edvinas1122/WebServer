@@ -7,9 +7,10 @@
 class	Tcp
 {
 	protected:
-		int		fd;
-		Buffer	incoming;
-		Buffer	outgoing;
+		int			fd;
+		sockaddr_in	socketAddress;
+		Buffer		incoming;
+		Buffer		outgoing;
 	public:
 		Tcp() {};
 		Tcp(const Tcp &src): fd(src.fd), incoming(src.incoming), outgoing(src.outgoing) {};
@@ -23,7 +24,7 @@ class	Tcp
 			return (!incoming.empty());
 		}; // outgoing empty
 	
-	protected:
+	public:
 		bool		sendPacket();
 		bool		receivePacket();
 
@@ -35,6 +36,7 @@ class	Tcp
 		Tcp	&operator<<(const std::string& str);
 		Tcp	&operator<<(const char * str);
 		Tcp	&operator<<(Buffer &buffer);
+		Tcp	&operator=(Buffer &buffer);
 
 		friend std::ostream& operator<<(std::ostream &os, Tcp &obj)
 		{
@@ -53,14 +55,7 @@ class	Tcp
 		friend void	operator>>(Tcp& client, Buffer& buffer)
 		{
 			buffer = client.incoming;
-			// client.incoming.clear();
 		};
-
-		// friend File	&operator<<(File &file, const Tcp &connection)
-		// {
-		// 	file << connection.incoming;
-		// 	return (file);
-		// };
 
 		int	getSocket() const {
 			return (fd);

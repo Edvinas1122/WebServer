@@ -27,7 +27,7 @@ class	HttpHeaders: public std::map<std::string, std::string>
 			while (headers.find('\n', begin) != std::string::npos)
 			{
 				insert(std::pair<std::string, std::string>(headers.substr(begin, headers.find(':', begin) - begin),
-					headers.substr(headers.find(':', begin) + 2, headers.find('\n', begin) - headers.find(':', begin) - 2)));
+					headers.substr(headers.find(':', begin) + 2, headers.find('\n', begin) - headers.find(':', begin) - 3)));
 				begin = headers.find('\n', begin) + 1;
 			}
 		};
@@ -51,10 +51,10 @@ class	HttpRequest: public std::string
 		const std::string	getFilename() const;
 		const std::string	getBody() const;
 
-		/*
-			Body and File related
-		*/
-		const std::string	getContentFileName() const;
+		// /*
+		// 	Body and File related
+		// */
+		// const std::string	getContentFileName() const;
 };
 
 class	HttpBody

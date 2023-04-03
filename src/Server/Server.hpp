@@ -7,12 +7,15 @@ class	Observer
 {
 	private:
 		std::vector<struct pollfd>	vector;
-		static const int MAX_CONNECTIONS = 10;
+		static const int MAX_CONNECTIONS = 10; // attribute do not limit connections
 		static const int TIMEOUT = 5000;
 	public:
 		Observer();
 		~Observer() {};
 
+		/*
+			Unix poll https://man7.org/linux/man-pages/man2/poll.2.html
+		*/
 		int	Poll(const bool timeOutOn = false);
 
 	protected:
@@ -22,6 +25,9 @@ class	Observer
 		bool	checkFd(const int fd, const int events = POLLIN);
 
 	private:
+		/*
+			Unix fcntl https://man7.org/linux/man-pages/man2/fcntl.2.html
+		*/
 		void	setAsNonBlocking(const int socket_fd) const;
 
 	public:
@@ -46,7 +52,8 @@ class	PortSockets: virtual public Observer
 
 		template <typename PARSER>
 		void	startPorts(std::list<std::string> (*parsingMethod)(PARSER &), PARSER parser, bool asynch = true);
-
+		void	startPorts(std::list<std::string> ports, bool asynch = true);
+		void	startPort(std::string const &port, bool asynch = true);
 	public:
 		void	setStartSocketMethod(int (*socketInitMethod)(char const *)) {
 			this->socketInitMethod = socketInitMethod;
@@ -60,156 +67,93 @@ class	PortSockets: virtual public Observer
 template <typename PARSER>
 void	PortSockets::startPorts(std::list<std::string> (*parsingMethod)(PARSER &), PARSER parser, bool asynch)
 {
-	std::list<std::string>::iterator	it;
-	std::list<std::string>				socketList;
-	int									fd;
-
-	socketList = parsingMethod(parser);
-	it = socketList.begin();
-	while (it != socketList.end())
-	{
-		if (portSockets.find(*it) == portSockets.end())
-		{
-			fd = this->socketInitMethod(it->c_str());
-			portSockets[*it] = fd;
-			insertFileDescriptor(fd, POLLIN, asynch);
-		}
-		it++;
-	}
+	startPorts(parsingMethod(parser), asynch);
 };
 
 
-# include <Client.hpp>
+# include <TCP.hpp>
 #define TIMEOUT 10
+
 
 class	ConnectionQueController: virtual public Observer
 {
 	public:
-		typedef	std::map<int, Client>	listOfClients;
-	private:
-		listOfClients	Clients;
+		typedef	int					fd_t;
+		typedef	std::map<fd_t, TCP>	listOfConnections;
+	protected:
+		listOfConnections	Connections;
 
 	public:
 		ConnectionQueController() {};
 		~ConnectionQueController() {};
 	protected:
 
-		void	setClients(std::list<std::pair<std::string, int> > const &loudPortList);
-		void	closeTimeOut();
+		void	setConnections(std::list<std::pair<std::string, int> > const &loudPortList);
 
-		void	queProcess(bool (*action)(Client &client), const int observer_event = POLLIN);
+		void	ProcessQue(bool (*action)(Connection &), const int observer_event = POLLIN);
 	
-		template <typename TYPE>
-		void	action(void (*action)(Client &, TYPE), TYPE insertion);
-		void	action(void (*action)(Client &client));
+		template <typename T>
+		void	action(void (*action)(Connection &, T), T);
+		template <typename T>
+		void	action(void (*action)(Connection &, T), T, fd_t);
+		void	action(void (*action)(Connection &));
 
-	private:
-		void	closeConnection(listOfClients::iterator &position);
+		void	closeConnection(Connection *);
+		void	closeConnection(listOfConnections::iterator &position);
+		// bool	checkConnection(Connection *);
+
 };
 
-template <typename TYPE>
-void	ConnectionQueController::action(void (*action)(Client &, TYPE), TYPE insertion)
+template <typename T>
+void	ConnectionQueController::action(void (*action)(Connection &, T), T object)
 {
-	listOfClients::iterator	it = Clients.begin();
+	listOfConnections::iterator	it = Connections.begin();
 
-	while (it != Clients.end())
+	while (it != Connections.end())
 	{
-		action(it->second, insertion);
+		action(it->second, object);
 		it++;
 	}
 }
 
+template <typename T>
+void	ConnectionQueController::action(void (*action)(Connection &, T), T object, fd_t conn_id)
+{
+	Connection connection = Connections.at(conn_id);
+
+	action(connection, object);
+}
+
 # include <Service.hpp>
 
-template<typename SERVICE = Service*>
 class Server : public ConnectionQueController, public PortSockets
 {
 	public:
-		typedef std::list<SERVICE>				ServiceList;
-		typedef std::list<void (*)(Client &)>	ActionList;
+		typedef std::list<Service*>			ServiceList;
+		typedef std::list<ServiceProcess*>	ProcessList;
 
 	private:
-		ActionList		actions;
 		ServiceList		services;
+		ProcessList		processes;
 
 	public:
 		Server() {};
-		~Server() {};
+		~Server();
 		
-		void setAction(void (*Action)(Client &)) {
-			actions.push_back(Action);
-		};
-
-		void setService(SERVICE service) {
-			services.push_back(service);
-		};
-
-		void Run()
-		{
-			Observer::Poll();
-			setClients(getLoudSockets());
-			usleep(100000);
-			queProcess(pullIncoming, POLLIN);
-			DoActions();
-			queProcess(pushOutgoing, POLLOUT);
-			closeTimeOut();
-		};
+	void	Run();
+	void	addService(Service *service);
 
 	private:
-		void DoActions() {
-			ActionList::iterator it = actions.begin();
-			while (it != actions.end()) {
-				action(*it);
-				it++;
-			}
 
-			typename	ServiceList::iterator it2 = services.begin();
-			while (it2 != services.end()) {
-				action(ServiceDefault, *it2);
-				it2++;
-			}
-		};
+	void					StartProcesses();
+	void					CreateProcess(Connection *connection);
+	void					KillProcess(ServiceProcess *process);
+	void					Serve();
+	ProcessList::iterator	FindProcess(Connection *connection);
 
-		void	ServiceHandlers();
-
-		static bool pullIncoming(Client &client);
-		static bool pushOutgoing(Client &client);
-		static bool validateConnections(Client &client);
-		static void default_action(Client &client) {
-			(void)client;
-		}
-		static void	ServiceDefault(Client &client, SERVICE service);
+	static bool pullIncoming(Connection &client);
+	static bool pushOutgoing(Connection &client);
+	static void wipeIncomingBuffers(Connection &client);
 };
-
-template<typename SERVICE>
-bool	Server<SERVICE>::pullIncoming(Client &client) {
-	return (client.receivePacket());
-}
-
-#define	CLOSE_CLIENT true
-
-template<typename SERVICE>
-bool	Server<SERVICE>::pushOutgoing(Client &client)
-{
-	if (client.uploadBufferNotEmpty())
-	{
-		try {
-			return (client.sendPacket());
-		} catch(const std::exception& e) {
-			client.updateTime(CLOSE_CLIENT);
-			return (false);
-		}	
-	}
-	return (false);
-}
-
-template<typename SERVICE>
-void	Server<SERVICE>::ServiceDefault(Client &client, SERVICE service)
-{
-	if (service->Ready(client)) {
-		service->Serve(client);
-	}
-	service->Handle(client);
-}
 
 #endif

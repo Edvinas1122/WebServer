@@ -8,6 +8,9 @@ Observer::Observer()
 #endif
 }
 
+/*
+	Unix poll https://man7.org/linux/man-pages/man2/poll.2.html
+*/
 int	Observer::Poll(const bool timeOutOn)
 {
 	int	info;
@@ -62,6 +65,9 @@ bool	Observer::checkFd(const int fd, const int events)
 	return (it->revents & events);
 }
 
+/*
+	Unix fcntl https://man7.org/linux/man-pages/man2/fcntl.2.html
+*/
 void	Observer::setAsNonBlocking(const int socket_fd) const
 // static void set_fd_as_non_blocking(const int socket_fd)
 {

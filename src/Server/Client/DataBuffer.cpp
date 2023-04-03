@@ -46,11 +46,17 @@ bool	BufferQueController::receivePacket()
 	}
 }
 
-BufferQueController	&BufferQueController::operator<<(const File& src)
+// BufferQueController	&BufferQueController::operator<<(const File& src)
+// {
+// 	file = src;
+// 	file.Open();
+// 	setFlags(FILE_SENDING);
+// 	return (*this);
+// }
+
+BufferQueController	&BufferQueController::operator<<(File& src)
 {
-	file = src;
-	file.Open();
-	setFlags(FILE_SENDING);
+	this->incoming << src;
 	return (*this);
 }
 

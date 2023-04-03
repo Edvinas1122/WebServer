@@ -15,7 +15,7 @@ static void end_program()
 	std::cout << "Quiting program" << std::endl;
 }
 
-bool	Terminal::parce_input(std::string const &user_input)
+bool	TerminalResponse::parce_input(std::string const &user_input)
 {
 	if (!user_input.length())
 		return (false);
@@ -35,7 +35,7 @@ bool	Terminal::parce_input(std::string const &user_input)
 	return (true);
 }
 
-bool Terminal::terminal_interface()
+bool TerminalResponse::terminal_interface()
 {
 	char c;
 	ssize_t bytes_read = 0;
@@ -57,47 +57,70 @@ bool Terminal::terminal_interface()
 	return (true);
 }
 
-void	Terminal::clearMessage()
+void	TerminalResponse::clearMessage()
 {
 	message.clear();
 }
 
-std::string	Terminal::extractMessage()
+std::string	TerminalResponse::extractMessage() const
 {
 	return (message);
 }
 
-bool	Terminal::notEmpty()
+bool	TerminalResponse::notEmpty() const
 {
 	if (message.length())
 		return (true);
 	return (false);
 }
 
-bool	Terminal::Ready(Client &client)
+bool	TerminalResponse::Handle()
 {
-	(void) client;
-	return (notEmpty());
-};
-
-void	Terminal::Serve(Client &client)
-{
-	client.setInactiveTimeOutCounter(14);
-	client << extractMessage();
-};
-
-void	Terminal::Handle(Client &client)
-{
-	if (client.incomingAvailable())
-	{
-		if (client.getMessage().find("You are gay") != std::string::npos)
-		{
-			client << "No you are";
-			client << File("/home/WebServer/http/files/test.txt");
-			client.setInactiveTimeOutCounter(0);
-			std::cout << client;
-			return ;
-		}
+	if (!terminal_interface())
+		return (false);
+	if (notEmpty()) {
+		theConnection() << extractMessage();
+		clearMessage();
+		
+		return (true);
 	}
-	clearMessage();
-};
+	return (true);
+}
+
+ServiceProcess	*Terminal::RequestParse(Connection *connection, std::string const &request)
+{
+	if (request.find("Contact") != std::string::npos)
+		return (new TerminalResponse(connection));
+	return (NULL);
+}
+
+// bool	Terminal::Ready(Client &client)
+// {
+// 	(void) client;
+// 	return (notEmpty());
+// };
+
+
+
+// void	Terminal::SetResponse(Client &client)
+// {
+// 	client.setInactiveTimeOutCounter(14);
+// 	client << extractMessage();
+// 	if (client.incomingAvailable())
+// 	{
+// 		if (client.getMessage().find("You are gay") != std::string::npos)
+// 		{
+// 			client << "No you are";
+// 			client << File("/home/WebServer/http/files/test.txt");
+// 			client.setInactiveTimeOutCounter(0);
+// 			std::cout << client;
+// 			return ;
+// 		}
+// 	}
+// };
+
+// void	Terminal::Handle(ServiceProcess *process)
+// {
+// 	(void) process;
+// 	clearMessage();
+// };

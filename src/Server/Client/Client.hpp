@@ -57,7 +57,7 @@ class	BufferQueController: public Tcp, public Tracer
 		// };
 
 	public:
-		BufferQueController	&operator<<(const File& src);
+		BufferQueController	&operator<<(File& src);
 
 		BufferQueController	&operator<<(Buffer& src) {
 			Tcp::operator<<(src);
@@ -128,6 +128,11 @@ class	Client: public BufferQueController
 			}
 		};
 
+		Client	&operator=(Buffer &buffer) {
+			Tcp::operator=(buffer);
+			return (*this);
+		};
+
 		void	setInactiveTimeOutCounter(const int counter) {
 			if (counter == 0) {
 				updateTime(true);
@@ -144,6 +149,11 @@ class	Client: public BufferQueController
 		int		getTimeOutDurration() {
 			return (inactiveTimeOutDurration);
 		};
+
+		const std::string getPort() const
+		{
+			return (port);
+		}
 };
 
 #endif

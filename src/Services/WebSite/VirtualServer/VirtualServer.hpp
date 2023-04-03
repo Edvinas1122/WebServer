@@ -86,10 +86,9 @@ class	VirtualServers {
 		VirtualServers() {};
 		~VirtualServers() {};
 
-		void	Info() const;
-
-		void	parseConfigurationFile(const char *path);
-		VirtualServer	&getServer(std::string const &port, std::string const &host);
+	void				Info() const;
+	void				parseConfigurationFile(const char *path);
+	VirtualServer	&getServer(std::string const &port, std::string const &host);
 
 	public:
 		void parseServers(DescendParser &parser)

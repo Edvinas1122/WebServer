@@ -59,11 +59,11 @@ const std::string	HttpRequest::getBody() const
 	return (string);
 }
 
-const std::string	HttpRequest::getContentFileName() const
-{
-	std::string	contentInfo = getHeaders().at("Content-Disposition");
-	size_t	begin = contentInfo.find("filename=") + strlen("filename=") + 1;
-	size_t	end = contentInfo.length() - begin - 2;
+// const std::string	HttpRequest::getContentFileName() const
+// {
+// 	std::string	contentInfo = getHeaders().at("Content-Disposition");
+// 	size_t	begin = contentInfo.find("filename=") + strlen("filename=") + 1;
+// 	size_t	end = contentInfo.length() - begin - 1;
 
-	return (contentInfo.substr(begin, end));
-}
+// 	return (contentInfo.substr(begin, end));
+// }

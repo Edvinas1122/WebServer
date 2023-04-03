@@ -95,3 +95,40 @@ void	VirtualServer::displayInfo() const
 	}
 	std::cout << "===" << std::endl;
 }
+
+#include <File.hpp>
+#include <configurationFileFormat.hpp>
+
+void	VirtualServers::parseConfigurationFile(const char *path)
+{
+	DescendParser		parser;
+	FileProcessor		configurationFile;
+
+	configurationFile.Open(path);
+	parser.setContent(configurationFile.GetContents(removeComents));
+	try {
+		parseServers(parser);
+	} catch (...)
+	{
+		std::cerr << "Configuration file failure" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
+void	VirtualServers::Info() const
+{
+	virtualServerMap::const_iterator	it = virtualServers.begin();
+
+	while (it != virtualServers.end())
+	{
+		it->second.displayInfo();
+		it++;
+	}
+}
+
+VirtualServer	&VirtualServers::getServer(std::string const &port, std::string const &host)
+{
+	(void) host;
+	(void) port;
+	return (virtualServers.at("46.101.198.64"));
+}

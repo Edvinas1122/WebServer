@@ -1,44 +1,64 @@
 #include <Service.hpp>
-#include "/home/WebServer/src/Utils/Parsers/Formats/configurationFileFormat.hpp"
-#include <File.hpp>
 
-// template<typename REQUEST, typename RESPONSE>
-// void	Service::parseConfigurationFile(const char *path)
+/*
+	Client not assigned to the service list
+*/
+// bool	Service::Ready(Client &client)
 // {
-// 	DescendParser        parser;
-// 	FileProcessor        configurationFile;
-
-// 	configurationFile.Open(path);
-// 	parser.setContent(configurationFile.GetContents(removeComents));
-// 	parseServers(parser);
+// 	if (findClient(&client) == processList.end())
+// 		return (true);
+// 	return (false);
 // }
 
-// void	VirtualServers::Info() const
+// Service::process_it	Service::findClient(Client *client)
 // {
-// 	virtualServerMap::const_iterator	it = virtualServers.begin();
+// 	process_it it = processList.begin();
 
-// 	while (it != virtualServers.end())
+// 	while (it != processList.end())
 // 	{
-// 		it->second.displayInfo();
+// 		if ((*it)->idTest(client))
+// 			return (it);
 // 		it++;
 // 	}
+// 	return (it);
 // }
 
-// VirtualServer	&VirtualServers::getServer(std::string const &port, std::string const &host)
+// void	Service::SetProcess(ServiceProcess *service)
 // {
-// 	(void) port;
-// 	return ((virtualServers[host]));
+// 	processList.push_back(service);
+// };
+
+
+// void	Service::RemoveClient(Client *client)
+// {
+// 	ServiceProcess *process = *findClient(client);
+
+// 	processList.erase(findClient(client));
+// 	delete (process);
 // }
 
-
-// void	FileUploadQue::addUpload(const int fd)
+// Service::~Service()
 // {
-// 	if (uploadQue.at(fd) != std::out_of_range)
+// 	ServiceProcess *process;
+
+// 	process_it it = processList.begin();
+
+// 	while (it != processList.end())
 // 	{
-// 		uploadQue[fd] = File("/home/WebServer/files/test.jpg");
-// 		return (true);
-// 	} else
-// 	{
-// 		return (false);
+// 		process = *it;
+// 		delete process;
+// 		it++; 
 // 	}
+// 	processList.clear();
 // }
+
+// void	Service::ServiceDefault(Client &client, Service *service)
+// {
+// 	process_it	process = FindProcess(client);
+
+// 	if (process == processList.end()) {
+// 		service->SetResponse(client);
+// 	}
+// 	if (!service->Service::Ready(client))
+// 		service->Handle(client);
+// };

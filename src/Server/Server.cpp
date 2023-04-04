@@ -96,13 +96,27 @@ void	Server::Serve()
 			KillProcess(*it);
 			it = processes.begin();
 		}
-		else if (!(*it)->Finished()) {
-			if (!(*it)->Handle())
+		else if (!(*it)->Finished())
+		{
+			try
 			{
-				CreateProcess((*it)->NextProcess());
-				EndProcess(*it);
+				if (!(*it)->Handle())
+				{
+					CreateProcess((*it)->NextProcess());
+					EndProcess(*it);
+					it = processes.begin();
+				}
+			}
+			catch(...)
+			{
+				std::cout << "Handle aborted" << std::endl;
+				KillProcess(*it);
 				it = processes.begin();
 			}
+		} else {
+			CreateProcess((*it)->NextProcess());
+			EndProcess(*it);
+			it = processes.begin();
 		}
 		it++;
 	}

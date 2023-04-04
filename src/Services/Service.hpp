@@ -22,20 +22,28 @@ class	TimeOut
 class	ServiceProcess: public TimeOut
 {
 	private:
-		Connection	*connection;
-		bool		finished;
-	
+		Connection		*connection;
+		bool			finished;
+		ServiceProcess	*followingProcess;
+
 	public:
-		ServiceProcess(Connection *connection): TimeOut(connection), connection(connection), finished(false) {};
-		virtual ~ServiceProcess() {};
+		ServiceProcess(Connection *connection): 
+						TimeOut(connection), connection(connection), finished(false), followingProcess(NULL) {};
+		ServiceProcess(Connection *connection, ServiceProcess *followingProcess): 
+						TimeOut(connection), connection(connection), finished(false), followingProcess(followingProcess) {};
+		virtual ~ServiceProcess();
 
 	bool					id(Connection *address) const;
 	bool					Finished() const;
 	virtual bool			Handle() = 0;
 	void					End();
-	virtual ServiceProcess	*NextProcess() {return (NULL);};
+	virtual ServiceProcess	*NextProcess();
 	// protected:
-	Connection		&theConnection() {return (*connection);};
+	Connection	&theConnection() {return (*connection);};
+
+	protected:
+
+	virtual void	QueFollowingProcess(ServiceProcess *);
 };
 
 class	Service
@@ -46,31 +54,5 @@ class	Service
 	
 	virtual ServiceProcess	*RequestParse(Connection *connection, std::string const &request) = 0;
 };
-
-// class	Service
-// {
-// 	public:
-// 		typedef	std::list<ServiceProcess*>::iterator	process_it;
-
-// 	private:
-// 		std::list<ServiceProcess*>	processList;
-
-// 	public:
-// 		Service() {};
-// 		~Service();
-
-// 	virtual process_it	FindProcess(Client &client);
-// 	virtual	void		SetResponse(ServiceProcess *process) = 0;
-// 	virtual	void		Handle(ServiceProcess *process) = 0;
-
-// 	protected:
-// 		void		SetProcess(ServiceProcess *service);
-// 		void		RemoveClient(Client *client);
-// 		process_it	findClient(Client *client);
-	
-// 	public:
-
-// 	static void	ServiceDefault(Client &client, Service *service);
-// };
 
 #endif

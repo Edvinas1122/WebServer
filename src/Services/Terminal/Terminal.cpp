@@ -21,11 +21,18 @@ bool	TerminalResponse::parce_input(std::string const &user_input)
 		return (false);
 	if (!user_input.compare(0, 4, "help"))
 		display_information();
+	if (!user_input.compare(0, 4, "kill"))
+		throw std::exception();
 	else if (!user_input.compare(0, 8, "continue"))
 	{
 		clearMessage();
 		continuation = true;
 		std::cout << "process set to continue" << std::endl;
+	}
+	else if (!user_input.compare(0, 4, "send"))
+	{
+		QueFollowingProcess(new FileSend(&theConnection(), new TerminalResponse(&theConnection()), "/home/WebServer/http/files/test.txt"));
+		End();
 	}
 	else if (!user_input.compare(0, 3, "end"))
 	{
@@ -95,7 +102,7 @@ bool	TerminalResponse::Handle()
 
 bool	Roast::Handle()
 {
-	theConnection() << "No you are!";
+	theConnection() << "No you are!\r\n";
 	return (false);
 }
 
@@ -104,12 +111,12 @@ ServiceProcess	*Roast::NextProcess()
 	return (new FileSend(&theConnection(), "/home/WebServer/http/files/test.txt"));
 }
 
-ServiceProcess	*TerminalResponse::NextProcess()
-{
-	if (continuation)
-		return (new TerminalResponse(&theConnection()));
-	return (NULL);
-}
+// ServiceProcess	*TerminalResponse::NextProcess()
+// {
+// 	if (continuation)
+// 		return (new TerminalResponse(&theConnection()));
+// 	return (NULL);
+// }
 
 ServiceProcess	*Terminal::RequestParse(Connection *connection, std::string const &request)
 {
@@ -117,6 +124,8 @@ ServiceProcess	*Terminal::RequestParse(Connection *connection, std::string const
 		return (new TerminalResponse(connection));
 	if (request.find("You are gay") != std::string::npos)
 		return (new Roast(connection));
+	if (request.find("Gain") != std::string::npos)
+		return (new FileSend(connection, std::string("/home/WebServer/http/files/") + request.substr(5, request.length() - 7)));
 	return (NULL);
 }
 

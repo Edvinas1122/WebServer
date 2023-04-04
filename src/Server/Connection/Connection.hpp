@@ -41,10 +41,12 @@ class	Connection: public Timer
 	Connection	&operator=(Buffer &buffer);
 	Connection	&operator<<(File &src);
 
-	// friend void	operator>>(Connection& client, File& file);
 	friend std::ostream&	operator<<(std::ostream &os, Connection &obj);
-	friend void				operator>>(Connection& client, Buffer& buffer) {
-		buffer = client.incoming;
+	friend void				operator>>(Connection& connection, Buffer& buffer) {
+		buffer = connection.incoming;
+	};
+	friend void				operator>>(Connection& connection, File& file) {
+		connection.incoming >> file;
 	};
 
 	protected:

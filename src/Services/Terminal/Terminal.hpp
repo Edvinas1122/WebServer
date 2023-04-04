@@ -15,7 +15,7 @@ class	TerminalResponse : public ServiceProcess
 		virtual ~TerminalResponse() {};
 
 	bool	Handle();
-	virtual ServiceProcess	*NextProcess();
+	// virtual ServiceProcess	*NextProcess();
 
 	private:
 

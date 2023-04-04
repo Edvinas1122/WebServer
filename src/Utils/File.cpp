@@ -42,6 +42,7 @@ void	File::GetContentsAsBinaryBuffet(void *input, size_t len)
 	if (std::fstream::is_open()) {
 		std::fstream::read((char *)input, len);
 	}
+	remaining -= gcount();
 }
 
 std::string FileProcessor::GetContents(std::string (*processor)(std::string const&))

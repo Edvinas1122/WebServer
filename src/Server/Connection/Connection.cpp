@@ -31,6 +31,12 @@ Connection	&Connection::operator<<(const char *str)
 	return (*this);
 }
 
+Connection	&Connection::operator<<(File& src)
+{
+	this->outgoing << src;
+	return (*this);
+}
+
 std::ostream&	operator<<(std::ostream& os, Connection& obj)
 {
 	if (obj.incoming.length())

@@ -21,6 +21,12 @@ bool	TerminalResponse::parce_input(std::string const &user_input)
 		return (false);
 	if (!user_input.compare(0, 4, "help"))
 		display_information();
+	else if (!user_input.compare(0, 8, "continue"))
+	{
+		clearMessage();
+		continuation = true;
+		std::cout << "process set to continue" << std::endl;
+	}
 	else if (!user_input.compare(0, 3, "end"))
 	{
 		end_program();
@@ -87,10 +93,30 @@ bool	TerminalResponse::Handle()
 	return (true);
 }
 
+bool	Roast::Handle()
+{
+	theConnection() << "No you are!";
+	return (false);
+}
+
+ServiceProcess	*Roast::NextProcess()
+{
+	return (new FileSend(&theConnection(), "/home/WebServer/http/files/test.txt"));
+}
+
+ServiceProcess	*TerminalResponse::NextProcess()
+{
+	if (continuation)
+		return (new TerminalResponse(&theConnection()));
+	return (NULL);
+}
+
 ServiceProcess	*Terminal::RequestParse(Connection *connection, std::string const &request)
 {
 	if (request.find("Contact") != std::string::npos)
 		return (new TerminalResponse(connection));
+	if (request.find("You are gay") != std::string::npos)
+		return (new Roast(connection));
 	return (NULL);
 }
 

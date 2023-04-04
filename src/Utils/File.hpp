@@ -7,9 +7,10 @@ class	File: public std::fstream
 {
 	private:
 		std::string	path;
+		std::streamsize	remaining;
 	public:
 		File(): std::fstream() {};
-		File(const char *path): std::fstream(path, std::ios::in), path(path) {};
+		File(const char *path): std::fstream(path, std::ios::in), path(path), remaining(this->rdbuf()->in_avail()) {};
 		// File(const File& other): std::fstream(other.path, std::ios::in), path(other.path) {};
 		File& operator=(const File& other)
 		{
@@ -42,6 +43,9 @@ class	File: public std::fstream
 				return (true);
 			return (false);
 		};
+
+		std::streamsize	GetRemainingLen() const {return (remaining);};
+
 		/* Extracts */
 		std::string	GetContentsAsString();
 		void		GetContentsAsBinaryBuffet(void *input, size_t len = 1024);

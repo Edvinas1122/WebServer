@@ -39,6 +39,7 @@ class	Connection: public Timer
 	Connection	&operator<<(const char * str);
 	Connection	&operator<<(Buffer &buffer);
 	Connection	&operator=(Buffer &buffer);
+	Connection	&operator<<(File &src);
 
 	// friend void	operator>>(Connection& client, File& file);
 	friend std::ostream&	operator<<(std::ostream &os, Connection &obj);

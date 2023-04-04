@@ -12,8 +12,25 @@ void	Server::Run()
 	StartProcesses();
 	ProcessQue(pushOutgoing, POLLOUT);
 	action(wipeIncomingBuffers);
-	// action(closeTimeOut());
+	TimeOutConnections(30);
 };
+
+void	Server::TimeOutConnections(const int allowedInactiveDurration)
+{
+	listOfConnections::iterator	it = Connections.begin();
+
+	while (it != Connections.end())
+	{
+		if (it->second.getElapsedTime() > allowedInactiveDurration && FindProcess(&(it->second)) == processes.end())
+		{
+			closeConnection(it);
+			it = Connections.begin();
+			if (it == Connections.end())
+				break;
+		}
+		it++;
+	}
+}
 
 void	Server::StartProcesses()
 {
@@ -50,6 +67,7 @@ void	Server::CreateProcess(Connection *connection)
 		process = (*it)->RequestParse(connection, connection->getMessage());
 		if (process != NULL)
 		{
+			process->setTimeOutDurration(12); 
 			std::cout << "porcess addedd" << std::endl;
 			processes.push_back(process);
 		}
@@ -60,6 +78,11 @@ void	Server::CreateProcess(Connection *connection)
 void	Server::KillProcess(ServiceProcess *process)
 {
 	closeConnection(&(process->theConnection()));
+	processes.remove(process);
+}
+
+void	Server::EndProcess(ServiceProcess *process)
+{
 	processes.remove(process);
 }
 
@@ -74,8 +97,10 @@ void	Server::Serve()
 			it = processes.begin();
 		}
 		else if (!(*it)->Finished()) {
-			if (!(*it)->Handle()) {
-				KillProcess(*it);
+			if (!(*it)->Handle())
+			{
+				CreateProcess((*it)->NextProcess());
+				EndProcess(*it);
 				it = processes.begin();
 			}
 		}
@@ -85,6 +110,11 @@ void	Server::Serve()
 
 void Server::addService(Service *service) {
 	services.push_back(service);
+};
+
+void Server::CreateProcess(ServiceProcess *process) {
+	if (process)
+		processes.push_back(process);
 };
 
 /*

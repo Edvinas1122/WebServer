@@ -145,9 +145,12 @@ class Server : public ConnectionQueController, public PortSockets
 
 	private:
 
+	void					TimeOutConnections(const int);
 	void					StartProcesses();
 	void					CreateProcess(Connection *connection);
+	void					CreateProcess(ServiceProcess *process);
 	void					KillProcess(ServiceProcess *process);
+	void					EndProcess(ServiceProcess *process);
 	void					Serve();
 	ProcessList::iterator	FindProcess(Connection *connection);
 

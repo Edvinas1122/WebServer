@@ -29,12 +29,13 @@ class	ServiceProcess: public TimeOut
 		ServiceProcess(Connection *connection): TimeOut(connection), connection(connection), finished(false) {};
 		virtual ~ServiceProcess() {};
 
-	bool			id(Connection *address) const;
-	bool			Finished() const;
-	virtual bool	Handle() = 0;
-	void			End();
+	bool					id(Connection *address) const;
+	bool					Finished() const;
+	virtual bool			Handle() = 0;
+	void					End();
+	virtual ServiceProcess	*NextProcess() {return (NULL);};
 	// protected:
-		Connection	&theConnection() {return (*connection);};
+	Connection		&theConnection() {return (*connection);};
 };
 
 class	Service
@@ -44,7 +45,6 @@ class	Service
 		~Service() {};
 	
 	virtual ServiceProcess	*RequestParse(Connection *connection, std::string const &request) = 0;
-
 };
 
 // class	Service

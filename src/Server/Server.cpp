@@ -8,14 +8,14 @@ void	Server::Run()
 	Observer::Poll();
 	setConnections(getLoudSockets());
 	ProcessQue(pullIncoming, POLLIN);
-	Serve();
-	StartProcesses();
+	StartProcesses(); // runs interfaces
+	Serve(); // runs processes
 	ProcessQue(pushOutgoing, POLLOUT);
 	action(wipeIncomingBuffers);
-	TimeOutConnections(30);
+	TimeOutProcessLessConnections(3);
 };
 
-void	Server::TimeOutConnections(const int allowedInactiveDurration)
+void	Server::TimeOutProcessLessConnections(const int allowedInactiveDurration)
 {
 	listOfConnections::iterator	it = Connections.begin();
 
@@ -57,6 +57,10 @@ Server::ProcessList::iterator	Server::FindProcess(Connection *connection)
 	return (it);
 }
 
+
+/**
+ *	Using interfaces assigns free connection to a process 
+ */
 void	Server::CreateProcess(Connection *connection)
 {
 	ServiceList::iterator	it = services.begin();
@@ -67,7 +71,7 @@ void	Server::CreateProcess(Connection *connection)
 		process = (*it)->RequestParse(connection, connection->getMessage());
 		if (process != NULL)
 		{
-			process->setTimeOutDurration(12); 
+			process->setTimeOutDurration(30); 
 			std::cout << "porcess addedd" << std::endl;
 			processes.push_back(process);
 		}
@@ -86,50 +90,78 @@ void	Server::EndProcess(ServiceProcess *process)
 	processes.remove(process);
 }
 
-void	Server::Serve()
+void	Server::Serve() // check for loosening connections - connections with no process
 {
 	Server::ProcessList::iterator it = processes.begin();
+	ProcessList	pullNewProcesses;
+	ProcessList	killProcesses;
 
 	while (it != processes.end())
 	{
 		if ((*it)->isTimedOut()) {
-			KillProcess(*it);
-			it = processes.begin();
+			killProcesses.push_back(*it);
 		}
 		else if (!(*it)->Finished())
 		{
-			try
-			{
+			try {
 				if (!(*it)->Handle())
-				{
-					CreateProcess((*it)->NextProcess());
-					EndProcess(*it);
-					it = processes.begin();
-				}
+					pullNewProcesses.push_back(*it);
 			}
-			catch(...)
-			{
+			catch(...) {
 				std::cout << "Handle aborted" << std::endl;
-				KillProcess(*it);
-				it = processes.begin();
+				killProcesses.push_back(*it);
 			}
-		} else {
-			CreateProcess((*it)->NextProcess());
-			EndProcess(*it);
-			it = processes.begin();
-		}
+		} else
+			pullNewProcesses.push_back(*it);
 		it++;
 	}
+	KillProcesses(killProcesses);
+	CreateProcesses(pullNewProcesses);
+	EndProcesses(pullNewProcesses);
 }
 
 void Server::addService(Service *service) {
 	services.push_back(service);
 };
 
+void	Server::CreateProcesses(ProcessList &beginers)
+{
+	ProcessList::iterator	create_it = beginers.begin();
+
+	while (create_it != beginers.end())
+	{
+		CreateProcess((*create_it)->NextProcess());
+		create_it++;
+	}
+}
+
+void	Server::EndProcesses(ProcessList &finisheds)
+{
+	ProcessList::iterator	finished_it = finisheds.begin();
+
+	while (finished_it != finisheds.end())
+	{
+		EndProcess(*finished_it);
+		finished_it++;
+	}
+}
+
 void Server::CreateProcess(ServiceProcess *process) {
 	if (process)
 		processes.push_back(process);
 };
+
+
+void	Server::KillProcesses(ProcessList &deads)
+{
+	ProcessList::iterator	kill_it = deads.begin();
+
+	while (kill_it != deads.end())
+	{
+		KillProcess(*kill_it);
+		kill_it++;
+	}
+}
 
 /*
 	Connection Handling

@@ -4,18 +4,20 @@
 # include <includes.hpp>
 # include <Service.hpp>
 # include <Connection.hpp>
+# include <Processes.hpp>
 
-class	TerminalResponse : public ServiceProcess
+
+class	TerminalChat : public ServiceProcess
 {
 	private:
-		bool		continuation;
 		std::string	message;
 	public:
-		TerminalResponse(Connection *connection): ServiceProcess(connection), continuation(false) {};
-		virtual ~TerminalResponse() {};
+		TerminalChat(Connection *connection): ServiceProcess(connection) {};
+		TerminalChat(Connection *connection, ServiceProcess *followingProcess):
+							ServiceProcess(connection, followingProcess) {};
+		virtual ~TerminalChat() {};
 
 	bool	Handle();
-	// virtual ServiceProcess	*NextProcess();
 
 	private:
 
@@ -24,6 +26,29 @@ class	TerminalResponse : public ServiceProcess
 	bool		notEmpty() const;
 	std::string	extractMessage() const;
 	void		clearMessage();
+};
+
+class	TerminalParser : public ServiceProcess
+{
+	private:
+		std::string	request;
+	public:
+		TerminalParser(Connection *connection): ServiceProcess(connection) {};
+		virtual ~TerminalParser() {};
+
+	bool	Handle();
+};
+
+class	TerminalIntroduction : public ServiceProcess
+{
+	public:
+		TerminalIntroduction(Connection *connection): ServiceProcess(connection, new TerminalParser(connection)) {};
+		virtual ~TerminalIntroduction() {};
+
+	bool	Handle() {
+		theConnection() << "Command list:\n 1. Gay\n 2. Chat\n 3. Get\n 4. Exit\n 5. Close\n 6. Post\n";
+		return (false);
+	};
 };
 
 #include <Processes.hpp>

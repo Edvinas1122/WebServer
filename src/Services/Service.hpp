@@ -9,7 +9,7 @@ class	TimeOut
 	private:
 		Timer				*timer;
 		int					timeOutDurration;
-		static const int	DefaultTODurration = 20;
+		static const int	DefaultTODurration = 90;
 
 	public:
 		TimeOut(Timer *timer): timer(timer), timeOutDurration(DefaultTODurration) {};
@@ -31,6 +31,9 @@ class	ServiceProcess: public TimeOut
 						TimeOut(connection), connection(connection), finished(false), followingProcess(NULL) {};
 		ServiceProcess(Connection *connection, ServiceProcess *followingProcess): 
 						TimeOut(connection), connection(connection), finished(false), followingProcess(followingProcess) {};
+		ServiceProcess(const ServiceProcess &src): TimeOut(src.connection), connection(src.connection), finished(false), followingProcess(NULL) {};
+		ServiceProcess(const ServiceProcess &src, ServiceProcess *followingProcess):
+						TimeOut(src.connection), connection(src.connection), finished(false), followingProcess(followingProcess) {};
 		virtual ~ServiceProcess();
 
 	bool					id(Connection *address) const;

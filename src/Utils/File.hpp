@@ -28,7 +28,7 @@ class	File: public std::fstream
 		size_t	GetSize() {
 				seekg(0, std::ios::end);
    				std::streampos fileSize = tellg();
-				seekg(0, std::ios::beg);
+				// seekg(0, std::ios::beg);
 				return (fileSize);
 		};
 		

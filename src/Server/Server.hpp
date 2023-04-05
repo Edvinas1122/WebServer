@@ -129,8 +129,8 @@ void	ConnectionQueController::action(void (*action)(Connection &, T), T object, 
 class Server : public ConnectionQueController, public PortSockets
 {
 	public:
-		typedef std::list<Service*>			ServiceList;
-		typedef std::list<ServiceProcess*>	ProcessList;
+		typedef std::list<Service*>			ServiceList; // interfaces
+		typedef std::list<ServiceProcess*>	ProcessList; // 
 
 	private:
 		ServiceList		services;
@@ -145,11 +145,14 @@ class Server : public ConnectionQueController, public PortSockets
 
 	private:
 
-	void					TimeOutConnections(const int);
+	void					TimeOutProcessLessConnections(const int);
 	void					StartProcesses();
 	void					CreateProcess(Connection *connection);
 	void					CreateProcess(ServiceProcess *process);
+	void					CreateProcesses(ProcessList &beginers);
+	void					KillProcesses(ProcessList &deads);
 	void					KillProcess(ServiceProcess *process);
+	void					EndProcesses(ProcessList &finisheds);
 	void					EndProcess(ServiceProcess *process);
 	void					Serve();
 	ProcessList::iterator	FindProcess(Connection *connection);

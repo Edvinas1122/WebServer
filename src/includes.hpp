@@ -27,6 +27,7 @@
 # include <sys/time.h>
 # include <fstream>
 # include <limits>
+# include <dirent.h>
 
 #ifdef C98
 # define EXCEPTION throw(std::exception)

@@ -25,6 +25,15 @@ Connection	&Connection::operator<<(const std::string& str)
 	return (*this);
 }
 
+Connection	&Connection::operator<<(const size_t &number)
+{
+	std::stringstream	ss;
+
+    ss << number;
+	outgoing.append(ss.str(), ss.str().length());
+	return (*this);
+}
+
 Connection	&Connection::operator<<(const char *str)
 {
 	outgoing.append(str, strlen(str));

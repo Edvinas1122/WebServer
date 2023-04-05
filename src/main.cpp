@@ -1,5 +1,5 @@
 #include <Service.hpp>
-// #include <WebSite.hpp>
+#include <WebSite.hpp>
 #include <Server.hpp>
 #include <Terminal.hpp>
 
@@ -24,7 +24,7 @@ int	main(void)
 	Terminal	terminal;
 #endif
 	// VirtualServers	virtualServers;
-	// WebSite			webSite;
+	WebSite			webSite;
 	Server			httpServer;
 
 	// startHttpServer(httpServer, "/home/WebServer/server.conf");
@@ -35,7 +35,7 @@ int	main(void)
 #ifdef TERMINAL
 	httpServer.addService(&terminal);
 #endif
-	// httpServer.addService(&webSite);
+	httpServer.addService(&webSite);
 
 #ifdef TERMINAL
 	while (42)

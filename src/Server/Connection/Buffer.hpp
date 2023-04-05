@@ -94,10 +94,20 @@ class	Buffer
 			return os;
 		};
 
+		friend void	operator>>(Buffer &buffer, std::string& str)
+		{
+			const std::vector<unsigned char>	&data = buffer.buffer;
+
+			for (size_t i = 0; i < data.size(); ++i)
+			{
+				str += (char)(data[i]);
+			}
+		}
+
 		friend void	operator>>(Buffer &client, File& file)
 		{
 			file.insertBuffer((char *)client.buffer.data(), client.buffer.size());
-			client.empty();
+			client.clear();
 		}
 
 		size_t	length() {

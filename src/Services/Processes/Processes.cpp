@@ -89,12 +89,14 @@ static std::string	typeInfo(std::string const &path)
 // 	return (info);
 // }
 
-static std::string	UploadForm(const char *path)
+static std::string	UploadForm(std::string const &path)
 {
 	std::string	form;
 
 	form.append("<div><form action=\"");
 	form.append(path);
+	if (path.at(path.length() - 1) != '/')
+		form.append("/");
 	form.append("\" method=\"post\" enctype=\"multipart/form-data\">");
 	form.append("<text>Upload</text>");
 	form.append("<input type=\"file\" name=\"fileToUpload\">");
@@ -122,7 +124,9 @@ static std::string	dirInfoHTTPFormat(const char *path, std::string const &url, b
 		info.append("<div><a href=\"");
 		info.append(url);
 		if (url.at(url.length() - 1) != '/')
+		{
 			info.append("/");
+		}
 		info.append(entry->d_name);
 		info.append("\">");
 		info.append(typeInfo(std::string(path) + std::string("/") + std::string(entry->d_name)));

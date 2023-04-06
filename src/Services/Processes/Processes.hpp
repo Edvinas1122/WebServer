@@ -50,7 +50,8 @@ class	HTTPParser : virtual public MasterProcess
 					ServiceProcess(src, followingProcess), MasterProcess(src, followingProcess), virtualServers(src.virtualServers) {};
 		virtual ~HTTPParser() {};
 
-	// bool	Handle();
+	virtual	bool	Handle();
+	bool			HeartBeatIdleConnection();
 	protected:
 
 	virtual ServiceProcess	*RequestParse(std::string const &request);

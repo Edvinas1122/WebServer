@@ -38,7 +38,7 @@ class	ServiceProcess: public TimeOut
 		virtual ~ServiceProcess();
 
 	bool					id(Connection *address) const;
-	bool					Finished() const;
+	virtual bool			Finished() const;
 	virtual bool			Handle() = 0;
 	void					End();
 	virtual ServiceProcess	*NextProcess();

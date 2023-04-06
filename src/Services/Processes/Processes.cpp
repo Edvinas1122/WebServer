@@ -79,7 +79,21 @@ static std::string	typeInfo(std::string const &path)
 // 	return (info);
 // }
 
-static std::string	dirInfoHTTPFormat(const char *path, std::string const &url)
+static std::string	UploadForm(const char *path)
+{
+	std::string	form;
+
+	form.append("<div><form action=\"");
+	form.append(path);
+	form.append("\" method=\"post\" enctype=\"multipart/form-data\">");
+	form.append("<text>Upload</text>");
+	form.append("<input type=\"file\" name=\"fileToUpload\">");
+	form.append("<input type=\"submit\" value=\"Upload\" name=\"submit\">");
+	form.append("</form></div>");
+	return (form);
+}
+
+static std::string	dirInfoHTTPFormat(const char *path, std::string const &url, bool displayUpload)
 {
 	DIR				*dir_ptr;
 	struct dirent	*entry;
@@ -105,7 +119,10 @@ static std::string	dirInfoHTTPFormat(const char *path, std::string const &url)
 		info.append(entry->d_name);
 		info.append("</a></div>");
 	}
-	info.append("</div></body>");
+	info.append("</div>");
+	if (displayUpload)
+		info.append(UploadForm(path));
+	info.append("</body>");
 	return (info);
 }
 
@@ -148,9 +165,9 @@ static std::string	HTTPHeaderDirOK(std::string const &path, const std::string &u
 	std::stringstream	header;
 
 	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
-	header << "Content-Length: " << dirInfoHTTPFormat(path.c_str(), url.c_str()).length() << "\r\n";
+	header << "Content-Length: " << dirInfoHTTPFormat(path.c_str(), url.c_str(), true).length() << "\r\n";
 	header << "\r\n";
-	header << dirInfoHTTPFormat(path.c_str(), url.c_str());
+	header << dirInfoHTTPFormat(path.c_str(), url.c_str(), true);
 	return (header.str());
 }
 
@@ -186,9 +203,30 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 	return (new HTTPParser(*this));
 };
 
+
+/*
+	test idle connections 
+	risk of wrong response in theory
+	recomended to use connection id like IP or MAC to determine
+	same connection source 
+*/
+bool	HTTPParser::Handle()
+{
+	if (!theConnection().downloadBufferReady() && theConnection().getElapsedTime() > 2)
+		HeartBeatIdleConnection();
+	return (MasterProcess::Handle());
+}
+
+bool	HTTPParser::HeartBeatIdleConnection()
+{
+	std::cout << "test connection" << std::endl;
+	theConnection() << "200 OK\r\nConnection: keep-alive\r\n\r\n";
+	return (true);
+}
+
 bool	HTTPFileSend::Handle()
 {
-	if (theConnection().getMessage().empty())
+	if (!theConnection().downloadBufferReady())
 		return (FileSend::Handle());
 	else
 	{

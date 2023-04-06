@@ -15,6 +15,11 @@ void	Server::Run()
 	TimeOutProcessLessConnections(3); // not too relevent for http only but check connectionless processes
 };
 
+/*
+	FindProcess ineficient loop
+	can be substituted with adding all connections to processes so there would not be processless connections
+
+*/
 void	Server::TimeOutProcessLessConnections(const int allowedInactiveDurration)
 {
 	listOfConnections::iterator	it = Connections.begin();
@@ -32,6 +37,11 @@ void	Server::TimeOutProcessLessConnections(const int allowedInactiveDurration)
 	}
 }
 
+
+/*
+	Should hearbeat connections that are in idle process,  comming from an origin thats already in connection que
+	inefficient FindProcess function should be substituted with adding all connections to a process
+*/
 void	Server::StartProcesses()
 {
 	listOfConnections::iterator	conn_it = Connections.begin();
@@ -89,7 +99,7 @@ void	Server::CreateProcess(Connection *connection)
 		process = (*it)->RequestParse(connection, connection->getMessage());
 		if (process != NULL)
 		{
-			process->setTimeOutDurration(90);
+			process->setTimeOutDurration(20);
 			processes.push_back(process);
 			std::cout << "porcess addedd: " << processes.size() << std::endl;
 		}
@@ -182,6 +192,15 @@ void Server::CreateProcess(ServiceProcess *process)
 	std::cout << "after create: " << processes.size() << std::endl;
 };
 
+
+/*
+	It is not possible trougth system call to determine weather client had closed
+	connection or he idles
+
+	There are Methods to determine if a client closed a connection
+	1. timeout durration strickness based on incoming rate
+	2. heart beat 200 OK message to processless idle keep-alive connections  
+*/
 void Server::closeOlderProcesses(const size_t &age, bool keepLatest)
 {
 	ProcessList::iterator	it = processes.begin();
@@ -233,6 +252,7 @@ bool	Server::pushOutgoing(Connection &connection)
 		try {
 			return (connection.sendPacket());
 		} catch(const std::exception& e) {
+			std::cout << "Connection Failed - client closed it" << std::endl;
 			connection.updateTime(CLOSE_CLIENT);
 			return (false);
 		}	
@@ -259,3 +279,11 @@ Server::~Server()
 	}
 	processes.clear();
 };
+
+
+bool	operator<(const ConnectionOrigin& left, const ConnectionOrigin& right)
+{
+	if (left.fd < right.fd)
+		return (true);
+	return (false);
+}

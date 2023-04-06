@@ -74,7 +74,6 @@ void	PortSockets::startPorts(std::list<std::string> (*parsingMethod)(PARSER &), 
 # include <TCP.hpp>
 #define TIMEOUT 10
 
-
 class	ConnectionQueController: virtual public Observer
 {
 	public:
@@ -126,11 +125,18 @@ void	ConnectionQueController::action(void (*action)(Connection &, T), T object, 
 
 # include <Service.hpp>
 
+struct ConnectionOrigin {
+    ConnectionQueController::fd_t	fd;
+	in_addr							ipAddress;
+    std::string 					port_number;
+};
+
 class Server : public ConnectionQueController, public PortSockets
 {
 	public:
 		typedef std::list<Service*>			ServiceList; // interfaces
-		typedef std::list<ServiceProcess*>	ProcessList; // 
+		typedef std::list<ServiceProcess*>	ProcessList; //
+		// typedef std::map<ConnectionOrigin, ServiceProcess*>	ProcessList; //
 
 	private:
 		ServiceList		services;

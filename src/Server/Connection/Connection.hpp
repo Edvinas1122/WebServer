@@ -53,7 +53,7 @@ class	Connection: public Timer
 		connection.incoming >> file;
 	};
 
-	protected:
+	// protected:
 		void flushIncoming() {
 			incoming.clear();
 		};

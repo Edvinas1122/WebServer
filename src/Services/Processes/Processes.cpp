@@ -58,7 +58,28 @@ static std::string	typeInfo(std::string const &path)
 		return ("File: ");
 }
 
-static std::string	dirInfo(const char *path)
+// static std::string	dirInfo(const char *path)
+// {
+// 	DIR				*dir_ptr;
+// 	struct dirent	*entry;
+// 	std::string		info;
+
+// 	dir_ptr = opendir(path);
+// 	if (dir_ptr == NULL)
+// 		throw std::exception();
+// 	while (42)
+// 	{
+// 		entry = readdir(dir_ptr);
+// 		if (entry == NULL)
+// 			break;
+// 		info.append("\n");
+// 		info.append(typeInfo(std::string(path) + std::string("/") + std::string(entry->d_name)));
+// 		info.append(entry->d_name);
+// 	}
+// 	return (info);
+// }
+
+static std::string	dirInfoHTTPFormat(const char *path, std::string const &url)
 {
 	DIR				*dir_ptr;
 	struct dirent	*entry;
@@ -67,15 +88,24 @@ static std::string	dirInfo(const char *path)
 	dir_ptr = opendir(path);
 	if (dir_ptr == NULL)
 		throw std::exception();
+	info.append("<head></head>");
+	info.append("<body><div>");
 	while (42)
 	{
 		entry = readdir(dir_ptr);
 		if (entry == NULL)
 			break;
-		info.append("\n");
+		info.append("<div><a href=\"");
+		info.append(url);
+		if (url.at(url.length() - 1) != '/')
+			info.append("/");
+		info.append(entry->d_name);
+		info.append("\">");
 		info.append(typeInfo(std::string(path) + std::string("/") + std::string(entry->d_name)));
 		info.append(entry->d_name);
+		info.append("</a></div>");
 	}
+	info.append("</div></body>");
 	return (info);
 }
 
@@ -113,14 +143,14 @@ static std::string	HTTPHeaderFileOK(std::string const &path)
 	return (header.str());
 }
 
-static std::string	HTTPHeaderDirOK(std::string const &path)
+static std::string	HTTPHeaderDirOK(std::string const &path, const std::string &url)
 {
 	std::stringstream	header;
 
 	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
-	header << "Content-Length: " << dirInfo(path.c_str()).length() << "\r\n";
+	header << "Content-Length: " << dirInfoHTTPFormat(path.c_str(), url.c_str()).length() << "\r\n";
 	header << "\r\n";
-	header << dirInfo(path.c_str());
+	header << dirInfoHTTPFormat(path.c_str(), url.c_str());
 	return (header.str());
 }
 
@@ -137,15 +167,20 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 		}
 		if (!Access(dir))
 		{
-			theConnection() << "HTTP/1.1 404 Not Found\r\n\r\n";
+			theConnection() << "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
 			return (new HTTPParser(*this));
 		}
 		if (!isFile(dir))
 		{
-			theConnection() << HTTPHeaderDirOK(dir);
+			theConnection() << HTTPHeaderDirOK(dir, std::string("http://46.101.198.64:10012") + HttpRequest(request).getLocation());
 			return (new HTTPParser(*this));
 		}
 		theConnection() << HTTPHeaderFileOK(dir);
+		if (HttpRequest(request).getKeepAlive() == "close")
+		{
+			std::cout << "requested with close" << std::endl;
+			return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), dir));
+		}
 		return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
 	}
 	return (new HTTPParser(*this));

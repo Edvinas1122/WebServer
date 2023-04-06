@@ -5,6 +5,16 @@
 # include <Service.hpp>
 # include <File.hpp>
 
+class	TerminateProcess: public ServiceProcess
+{
+	public:
+		TerminateProcess(Connection *connection): ServiceProcess(connection) {};
+		TerminateProcess(TerminateProcess const &src): ServiceProcess(src) {};
+		virtual ~TerminateProcess() {};
+
+	bool	Handle() {throw (std::exception());};
+};
+
 class	MasterProcess : virtual public ServiceProcess
 {
 	public:

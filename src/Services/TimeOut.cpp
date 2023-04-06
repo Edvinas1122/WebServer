@@ -7,7 +7,7 @@ void	TimeOut::setTimeOutDurration(const int timeOutDurration)
 		return ;
 	}
 	this->timeOutDurration = timeOutDurration;
-	timer->updateTime();
+	// timer->updateTime();
 };
 
 bool	TimeOut::isTimedOut() const

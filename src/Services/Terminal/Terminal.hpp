@@ -33,6 +33,7 @@ class	TerminalParser : public ServiceProcess
 	private:
 		std::string	request;
 	public:
+		TerminalParser(ServiceProcess const &src): ServiceProcess(src) {};
 		TerminalParser(Connection *connection): ServiceProcess(connection) {};
 		virtual ~TerminalParser() {};
 
@@ -42,7 +43,9 @@ class	TerminalParser : public ServiceProcess
 class	TerminalIntroduction : public ServiceProcess
 {
 	public:
-		TerminalIntroduction(Connection *connection): ServiceProcess(connection, new TerminalParser(connection)) {};
+		TerminalIntroduction(Connection *connection, ServiceProcess *followingProcess): ServiceProcess(connection, followingProcess) {};
+		TerminalIntroduction(TerminalIntroduction const &src): ServiceProcess(src, new TerminalParser(src)) {};
+		TerminalIntroduction(ServiceProcess const &src): ServiceProcess(src, new TerminalParser(src)) {};
 		virtual ~TerminalIntroduction() {};
 
 	bool	Handle() {

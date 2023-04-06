@@ -9,7 +9,7 @@ std::list<std::pair<std::string, int> >	PortSockets::getLoudSockets(const int ev
 	{
 		if (checkFd(it->second, events))
 		{
-			std::cout << "loud socket: " << it->second << std::endl;
+			// std::cout << "loud socket: " << it->second << std::endl;
 			loudSocketList.push_back(std::make_pair<std::string, int>(it->first, it->second));
 		}
 		it++;

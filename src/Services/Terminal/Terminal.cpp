@@ -121,13 +121,14 @@ ServiceProcess	*Roast::NextProcess()
 ServiceProcess	*Terminal::RequestParse(Connection *connection, std::string const &request)
 {
 	if (request.find("Contact") != std::string::npos)
-		return (new TerminalIntroduction(connection));
+	{
+
+		return (new TerminalIntroduction(connection, new TerminalParser(connection)));
+	}
 	if (request.find("You are gay") != std::string::npos)
 		return (new Roast(connection));
 	if (request.find("Gain") != std::string::npos)
 		return (new FileSend(connection, std::string("/home/WebServer/http/files/") + request.substr(5, request.length() - 7)));
-	if (request.find("HTTP") != std::string::npos)
-		return (new HTTPParser(connection, NULL));
 	return (NULL);
 }
 
@@ -169,7 +170,7 @@ bool	TerminalParser::Handle()
 	{
 		if (request.find("Gay") != std::string::npos)
 		{
-			QueFollowingProcess(new FileSend(&theConnection(), new TerminalIntroduction(&theConnection()), "/home/WebServer/http/files/test.txt"));
+			QueFollowingProcess(new FileSend(&theConnection(), new TerminalIntroduction(*this), "/home/WebServer/http/files/test.txt"));
 			return (false);
 		}
 		if (request.find("Chat") != std::string::npos)
@@ -185,13 +186,13 @@ bool	TerminalParser::Handle()
 				request.clear();
 				return (true);
 			}
-			QueFollowingProcess(new FileSend(&theConnection(), new TerminalIntroduction(&theConnection()), std::string("/home/WebServer/http/files/") + request.substr(4, request.length() - 6)));
+			QueFollowingProcess(new FileSend(&theConnection(), new TerminalIntroduction(*this), std::string("/home/WebServer/http/files/") + request.substr(4, request.length() - 6)));
 			return (false);
 		}
 		if (request.find("Post") != std::string::npos)
 		{
 			theConnection() << "Please write 4 characters..." << "\n";
-			QueFollowingProcess(new FileReceive(&theConnection(), new TerminalIntroduction(&theConnection()), "/home/WebServer/http/files/utest.txt", 4));
+			QueFollowingProcess(new FileReceive(&theConnection(), new TerminalIntroduction(*this), "/home/WebServer/http/files/utest.txt", 4));
 			return (false);
 		}
 		if (request.find("Close") != std::string::npos)

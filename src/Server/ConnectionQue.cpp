@@ -19,6 +19,7 @@ void	ConnectionQueController::setConnections(std::list<std::pair<std::string, in
 			if (clientFd == -1)
 				break;
 			if (Connections.find(clientFd) == Connections.end()) {
+				std::cout << "new connection" << std::endl;
 				Connections.insert(std::pair<int, TCP>(clientFd, TCP(clientFd, socketAddress, it->first)));
 				insertFileDescriptor(clientFd);
 			}

@@ -156,6 +156,8 @@ class Server : public ConnectionQueController, public PortSockets
 	void					EndProcess(ServiceProcess *process);
 	void					Serve();
 	ProcessList::iterator	FindProcess(Connection *connection);
+	ProcessList::iterator	FindProcess(ServiceProcess *service);
+	void					closeOlderProcesses(const size_t &age, bool keepLatest = true);
 
 	static bool pullIncoming(Connection &client);
 	static bool pushOutgoing(Connection &client);

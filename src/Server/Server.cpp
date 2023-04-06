@@ -12,7 +12,7 @@ void	Server::Run()
 	Serve(); // runs processes
 	ProcessQue(pushOutgoing, POLLOUT);
 	action(wipeIncomingBuffers);
-	TimeOutProcessLessConnections(3);
+	TimeOutProcessLessConnections(3); // not too relevent for http only but check connectionless processes
 };
 
 void	Server::TimeOutProcessLessConnections(const int allowedInactiveDurration)
@@ -38,8 +38,11 @@ void	Server::StartProcesses()
 
 	while (conn_it != Connections.end())
 	{
-		if (FindProcess(&(conn_it->second)) == processes.end())
+		if (conn_it->second.downloadBufferReady() && FindProcess(&(conn_it->second)) == processes.end())
+		{
+			std::cout << "Inbounded" << std::endl;
 			CreateProcess(&(conn_it->second));
+		}
 		conn_it++;
 	}
 }
@@ -51,12 +54,27 @@ Server::ProcessList::iterator	Server::FindProcess(Connection *connection)
 	while (it != processes.end())
 	{
 		if ((*it)->id(connection))
+		{
+			// std::cout << "found" << std::endl;
 			return (it);
+		}
 		it++;
 	}
 	return (it);
 }
 
+Server::ProcessList::iterator	Server::FindProcess(ServiceProcess *service)
+{
+	Server::ProcessList::iterator it = processes.begin();
+
+	while (it != processes.end())
+	{
+		if (*it == service)
+			return (it);
+		it++;
+	}
+	return (it);
+}
 
 /**
  *	Using interfaces assigns free connection to a process 
@@ -71,9 +89,9 @@ void	Server::CreateProcess(Connection *connection)
 		process = (*it)->RequestParse(connection, connection->getMessage());
 		if (process != NULL)
 		{
-			process->setTimeOutDurration(30); 
-			std::cout << "porcess addedd" << std::endl;
+			process->setTimeOutDurration(90);
 			processes.push_back(process);
+			std::cout << "porcess addedd: " << processes.size() << std::endl;
 		}
 		it++;
 	}
@@ -82,12 +100,16 @@ void	Server::CreateProcess(Connection *connection)
 void	Server::KillProcess(ServiceProcess *process)
 {
 	closeConnection(&(process->theConnection()));
+	delete (process);
 	processes.remove(process);
+	std::cout << "after kill: " << processes.size() << std::endl;
 }
 
 void	Server::EndProcess(ServiceProcess *process)
 {
+	delete (process);
 	processes.remove(process);
+	std::cout << "after rm: " << processes.size() << std::endl;
 }
 
 void	Server::Serve() // check for loosening connections - connections with no process
@@ -146,11 +168,32 @@ void	Server::EndProcesses(ProcessList &finisheds)
 	}
 }
 
-void Server::CreateProcess(ServiceProcess *process) {
+#define PROCESSES_LIMIT 60
+
+void Server::CreateProcess(ServiceProcess *process)
+{
+	// EndProcess(process);
 	if (process)
 		processes.push_back(process);
+	if (processes.size() > PROCESSES_LIMIT / 2)
+		closeOlderProcesses(3);
+	if (processes.size() > PROCESSES_LIMIT)
+		closeOlderProcesses(1, false);
+	std::cout << "after create: " << processes.size() << std::endl;
 };
 
+void Server::closeOlderProcesses(const size_t &age, bool keepLatest)
+{
+	ProcessList::iterator	it = processes.begin();
+
+	if (keepLatest)
+		it++;
+	while (it != processes.end())
+	{
+		(*it)->setTimeOutDurration(age);
+		it++;
+	}
+}
 
 void	Server::KillProcesses(ProcessList &deads)
 {
@@ -167,11 +210,21 @@ void	Server::KillProcesses(ProcessList &deads)
 	Connection Handling
 */
 
-bool	Server::pullIncoming(Connection &connection) {
-	return (connection.receivePacket());
-}
+#define	TIMEDOUT_CREDIBLE 20000 //prevent connectionless pulls before closure
+#define	CLOSE_CLIENT true //signify connaction for kill
 
-#define	CLOSE_CLIENT true
+bool	Server::pullIncoming(Connection &connection) {
+	if (connection.getElapsedTime() < TIMEDOUT_CREDIBLE)
+	{
+		try {
+			return (connection.receivePacket());
+		} catch (...) {
+			connection.updateTime(CLOSE_CLIENT);
+			return (false);
+		}
+	}
+	return (false);
+}
 
 bool	Server::pushOutgoing(Connection &connection)
 {
@@ -190,7 +243,8 @@ bool	Server::pushOutgoing(Connection &connection)
 void	Server::wipeIncomingBuffers(Connection &connection)
 {
 	if (connection.downloadBufferReady())
-		std::cout << connection;
+		connection.flushIncoming();
+		// std::cout << connection;
 }
 
 

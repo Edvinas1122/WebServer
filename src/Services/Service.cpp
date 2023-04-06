@@ -20,3 +20,10 @@ void	ServiceProcess::QueFollowingProcess(ServiceProcess *followingProcess)
 		delete (this->followingProcess);
 	this->followingProcess = followingProcess;
 }
+
+void	ServiceProcess::setTimeOutDurration(const int timeOutDurration)
+{
+	if (followingProcess)
+		followingProcess->setTimeOutDurration(timeOutDurration);
+	TimeOut::setTimeOutDurration(timeOutDurration);
+}

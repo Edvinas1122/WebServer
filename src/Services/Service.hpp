@@ -13,6 +13,7 @@ class	TimeOut
 
 	public:
 		TimeOut(Timer *timer): timer(timer), timeOutDurration(DefaultTODurration) {};
+		TimeOut(TimeOut const &src): timer(src.timer), timeOutDurration(src.timeOutDurration) {};
 		~TimeOut () {};
 
 	void	setTimeOutDurration(const int timeOutDurration);
@@ -31,9 +32,9 @@ class	ServiceProcess: public TimeOut
 						TimeOut(connection), connection(connection), finished(false), followingProcess(NULL) {};
 		ServiceProcess(Connection *connection, ServiceProcess *followingProcess): 
 						TimeOut(connection), connection(connection), finished(false), followingProcess(followingProcess) {};
-		ServiceProcess(const ServiceProcess &src): TimeOut(src.connection), connection(src.connection), finished(false), followingProcess(NULL) {};
+		ServiceProcess(const ServiceProcess &src): TimeOut(src), connection(src.connection), finished(false), followingProcess(NULL) {};
 		ServiceProcess(const ServiceProcess &src, ServiceProcess *followingProcess):
-						TimeOut(src.connection), connection(src.connection), finished(false), followingProcess(followingProcess) {};
+						TimeOut(src), connection(src.connection), finished(false), followingProcess(followingProcess) {};
 		virtual ~ServiceProcess();
 
 	bool					id(Connection *address) const;
@@ -43,7 +44,7 @@ class	ServiceProcess: public TimeOut
 	virtual ServiceProcess	*NextProcess();
 	// protected:
 	Connection	&theConnection() {return (*connection);};
-
+	void	setTimeOutDurration(const int timeOutDurration);
 	protected:
 
 	virtual void	QueFollowingProcess(ServiceProcess *);

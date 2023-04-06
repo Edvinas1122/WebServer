@@ -26,6 +26,13 @@ class	Connection: public Timer
 		Connection() {};
 		Connection(const int &fd): fd(fd) {};
 		Connection(const Connection &src): fd(src.fd), incoming(src.incoming), outgoing(src.outgoing) {};
+		Connection	&operator=(const Connection &src)
+		{
+			fd = src.fd;
+			incoming = src.incoming;
+			outgoing = src.outgoing;
+			return (*this);
+		};
 		~Connection() {};
 
 	virtual bool	sendPacket() = 0;
@@ -57,6 +64,9 @@ class	Connection: public Timer
 		void flushIncoming() {
 			incoming.clear();
 		};
+	bool	operator==(const Connection& other) const {
+		return (fd == other.fd);
+	}
 };
 
 #endif

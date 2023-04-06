@@ -76,20 +76,16 @@ class	HTTPFileSend : public HTTPParser, public FileSend
 		HTTPFileSend(const HTTPParser &process, std::string const &path):
 						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileSend(&theConnection(), path) {};
 		HTTPFileSend(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path):
-						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess), HTTPParser(process, followingProcess), FileSend(&theConnection(), followingProcess, path) {};
+						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess),
+						HTTPParser(process, followingProcess), FileSend(&theConnection(), followingProcess, path) {};
 		virtual ~HTTPFileSend() {};
 
 	bool	Handle();
-
-	protected:
-
-	ServiceProcess	*RequestParse(const HttpRequest &request);
-	// ServiceProcess	*RequestParse(HttpRequest const &request) { return (HTTPParser::RequestParse(request));};
 };
 
-class	FileReceive : public ServiceProcess
+class	FileReceive : virtual public ServiceProcess
 {
-	private:
+	protected:
 		File	fileToReceive;
 		size_t	lenght;
 	public:
@@ -103,7 +99,40 @@ class	FileReceive : public ServiceProcess
 		};
 		virtual ~FileReceive() {};
 
+	virtual bool	Handle();
+};
+
+class	HTTPFileReceiveReport : public ServiceProcess
+{
+	public:
+		HTTPFileReceiveReport(const ServiceProcess &src): ServiceProcess(src) {};
+		HTTPFileReceiveReport(const ServiceProcess &src, ServiceProcess *followingProcess): ServiceProcess(src, followingProcess) {};
+		virtual ~HTTPFileReceiveReport() {};
+
 	bool	Handle();
+};
+
+#include <Connection.hpp>
+
+class	HTTPFileReceive : public HTTPParser, public FileReceive
+{
+	private:
+		Buffer				buffer;
+		const std::string	delimiter;
+	public:
+		HTTPFileReceive(const HTTPParser &process, std::string const &path, size_t const &len, std::string const &delimiter):
+						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileReceive(&theConnection(), path, len), delimiter(delimiter) {};
+		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path, size_t const &len, std::string const &delimiter):
+						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess), HTTPParser(process, followingProcess),
+						FileReceive(&theConnection(), followingProcess, path, len), delimiter(delimiter) {};
+		virtual ~HTTPFileReceive() {};
+
+	bool	Handle();
+
+	HTTPFileReceive	&operator<<(Buffer &src) {
+		this->buffer << src;
+		return (*this);
+	};
 };
 
 #endif

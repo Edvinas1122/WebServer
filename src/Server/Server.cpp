@@ -51,9 +51,45 @@ void	Server::StartProcesses()
 		if (conn_it->second.downloadBufferReady() && FindProcess(&(conn_it->second)) == processes.end())
 		{
 			std::cout << "Inbounded" << std::endl;
+			HeartBeatIdleProcessesFromSameOrigin(conn_it->first);
 			CreateProcess(&(conn_it->second));
 		}
 		conn_it++;
+	}
+}
+
+#include <Processes.hpp>
+
+/*
+	Heart beat idle proccesses from same origin -> ip address
+*/
+void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &origin)
+{
+	listOfConnections	matchingOrigin = getConnectionsByOrigin(origin.ipAddress);
+	ProcessList::iterator	it = processes.begin();
+
+	std::cout << "testing origin" << std::endl;
+	while (it != processes.end())
+	{
+		HTTPParser	*ptr;
+
+		ptr = dynamic_cast<HTTPParser*>(*it);
+		if (ptr != NULL) {
+			std::cout << "testing idle process" << std::endl;
+			listOfConnections::iterator	it_origin = matchingOrigin.begin();
+
+			while (it_origin != matchingOrigin.end())
+			{
+				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second) {
+					ptr->HeartBeatIdleConnection();
+					std::cout << "idle process from same origin heart beat set" << std::endl;
+					break;
+				}
+				it_origin++;
+			}
+			
+		}
+		it++;
 	}
 }
 
@@ -225,6 +261,26 @@ void	Server::KillProcesses(ProcessList &deads)
 	}
 }
 
+ConnectionQueController::listOfConnections	Server::getConnectionsByOrigin(in_addr const &ipAddress)
+{
+	listOfConnections			mathcingOrigin;
+
+#ifndef C98
+	return (std::copy_if(Connections.begin(), Connections.end(),
+				std::inserter(mathcingOrigin, mathcingOrigin.end()), findByAddr(ipAddress)));
+#else
+	listOfConnections::iterator	it = Connections.begin();
+
+	while (it != Connections.end())
+	{
+		if (it->first.ipAddress.s_addr == ipAddress.s_addr)
+			mathcingOrigin[it->first] = it->second;
+		it++;
+	}
+	return (mathcingOrigin);
+#endif
+}
+
 /*
 	Connection Handling
 */
@@ -279,11 +335,3 @@ Server::~Server()
 	}
 	processes.clear();
 };
-
-
-bool	operator<(const ConnectionOrigin& left, const ConnectionOrigin& right)
-{
-	if (left.fd < right.fd)
-		return (true);
-	return (false);
-}

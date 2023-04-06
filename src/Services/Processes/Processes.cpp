@@ -15,10 +15,20 @@ bool	FileReceive::Handle()
 
 	theConnection() >> tst;
 	if (!tst.empty())
+	{
+		if (lenght <= fileToReceive.GetSize() + tst.length())
+		{
+			std::cout << fileToReceive.GetSize() << std::endl;
+			std::cout << tst.length() << std::endl;
+			tst = tst.substr(0, tst.length() - (fileToReceive.GetSize() + tst.length() - lenght));
+			tst >> fileToReceive;
+			return (false);
+		}
 		tst >> fileToReceive;
+	}
 	if (lenght <= fileToReceive.GetSize())
 	{
-		std::cout << "file received" << std::endl;
+		std::cout << "file received: size " << fileToReceive.GetSize() << std::endl;
 		return (false);
 	}
 	return (true);
@@ -121,7 +131,7 @@ static std::string	dirInfoHTTPFormat(const char *path, std::string const &url, b
 	}
 	info.append("</div>");
 	if (displayUpload)
-		info.append(UploadForm(path));
+		info.append(UploadForm(url.c_str()));
 	info.append("</body>");
 	return (info);
 }
@@ -171,36 +181,90 @@ static std::string	HTTPHeaderDirOK(std::string const &path, const std::string &u
 	return (header.str());
 }
 
+bool	allowedDir(std::string const &path)
+{
+	(void) path;
+	return (true);
+}
+
+static void	trimUntilFileBegin(Buffer &buffer)
+{
+	buffer = buffer.substr(buffer.find("Content-Type:"));
+	buffer = buffer.substr(buffer.find("\r\n") + 4);
+};
+
+static Buffer	unchunkBegining(Buffer buffer, std::string const &delimeter)
+{
+	size_t	begin;
+
+	begin = buffer.find(delimeter);
+	if (begin != std::numeric_limits<size_t>::max())
+		buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
+	begin = buffer.find(delimeter);
+	if (begin != std::numeric_limits<size_t>::max())
+		buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
+	return (buffer);
+};
+
+
+# define IS_CGI false
+# define CGI NULL
+# define DIR_LISTING_ALLOWED true
+# define TEST_LOCATION_DEFAULT_RESPONSES(x) ( x == "/home/WebServer/http/")
+
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
+	std::string	dir = std::string("/home/WebServer/http") + HttpRequest(request).getLocation();
+	// std::string dir = GET_DIR_FROM_(request.PRORT, request.LOCATION);
+	// TEST_FOR_PROXY_DIRS_(dir)
+		// dir modify 
 	if (HttpRequest(request).getMethod() == "GET")
 	{
-		std::string	dir = std::string("/home/WebServer/http") + HttpRequest(request).getLocation();
-
-		if (HttpRequest(request).getLocation() == "/")
-		{
-			std::string	defaultResponse = "index.html";
-			dir += defaultResponse;
-		}
-		if (!Access(dir))
-		{
+		if (!Access(dir)) {
 			theConnection() << "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
 			return (new HTTPParser(*this));
 		}
-		if (!isFile(dir))
-		{
+		if (!isFile(dir) && TEST_LOCATION_DEFAULT_RESPONSES(dir)) { // test for dir default responses
+			std::string	defaultResponse = "index.html";
+			dir += defaultResponse;
+		}
+		if (!isFile(dir) && DIR_LISTING_ALLOWED) {
 			theConnection() << HTTPHeaderDirOK(dir, std::string("http://46.101.198.64:10012") + HttpRequest(request).getLocation());
 			return (new HTTPParser(*this));
 		}
+		if (IS_CGI)
+			return (CGI);
 		theConnection() << HTTPHeaderFileOK(dir);
-		if (HttpRequest(request).getKeepAlive() == "close")
-		{
+		if (HttpRequest(request).getProtocolVersion() == "HTTP/1.0" || HttpRequest(request).getKeepAlive() == "close") {
 			std::cout << "requested with close" << std::endl;
 			return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), dir));
 		}
 		return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
+	} else if (HttpRequest(request).getMethod() == "POST")
+	{
+		if (!Access(dir))
+		{
+			theConnection() << "HTTP/1.1 404 Not Found\r\nConnection: keep-alive\r\nContent-Length: 0\r\n\r\n";
+			return (new HTTPParser(*this));
+		}
+		if (!isFile(dir) && allowedDir(dir))
+		{
+			size_t	fileSize = atoi((HttpRequest(request).getHeaders().at("Content-Length").c_str()));
+			HTTPFileReceive	*process;
+			Buffer	TrimRequestHead;
+
+			theConnection() >> TrimRequestHead;
+			fileSize -= unchunkBegining(TrimRequestHead, HttpRequest(request).getBoundry()).length() - 26;
+			std::cout << "File receive size: " << fileSize << std::endl;
+			process = new HTTPFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)),
+							dir + HttpRequest(request).getFilename(), fileSize, HttpRequest(request).getBoundry());
+			TrimRequestHead = unchunkBegining(TrimRequestHead, HttpRequest(request).getBoundry());
+			trimUntilFileBegin(TrimRequestHead);
+			*process << TrimRequestHead;
+			return (process);
+		}
 	}
-	return (new HTTPParser(*this));
+	return (new TerminateProcess(&theConnection()));
 };
 
 
@@ -212,7 +276,7 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 */
 bool	HTTPParser::Handle()
 {
-	if (!theConnection().downloadBufferReady() && theConnection().getElapsedTime() > 2)
+	if (!theConnection().downloadBufferReady() && theConnection().getElapsedTime() > 5)
 		HeartBeatIdleConnection();
 	return (MasterProcess::Handle());
 }
@@ -220,7 +284,7 @@ bool	HTTPParser::Handle()
 bool	HTTPParser::HeartBeatIdleConnection()
 {
 	std::cout << "test connection" << std::endl;
-	theConnection() << "200 OK\r\nConnection: keep-alive\r\n\r\n";
+	theConnection() << "200 OK\r\nConnection: keep-alive\r\n";
 	return (true);
 }
 
@@ -233,6 +297,38 @@ bool	HTTPFileSend::Handle()
 		HTTPParser::Handle();
 		return (true);
 	}
+}
+
+bool	HTTPFileReceiveReport::Handle()
+{
+	theConnection() << "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 27\r\n\r\n";
+	theConnection() << "File uploaded successfully.";
+	return (true);
+}
+
+// static void	unchunkEnd(Buffer &buffer, std::string const &delimeter)
+// {
+// 	buffer = buffer.substr(0, buffer.find(std::string("--") + delimeter));
+// 	buffer = buffer.substr(buffer.find_last("\r\n"));
+// }
+
+bool	HTTPFileReceive::Handle()
+{
+	if (!buffer.empty())
+		buffer >> fileToReceive;
+	// theConnection() >> buffer;
+	// if (buffer.find(delimiter) != std::string::npos)
+	// {
+	// 	unchunkEnd(buffer, delimiter);
+	// 	buffer >> fileToReceive;
+	// 	return (false);
+	// }
+	// if (!buffer.empty())
+	// 	buffer >> fileToReceive;
+	// return (true);
+	if (theConnection().downloadBufferReady())
+		return (FileReceive::Handle());
+	return (true);
 }
 
 // ServiceProcess	*HTTPFileSend::RequestParse(const HttpRequest &request)

@@ -14,10 +14,22 @@ class	TCP: public Connection
 		TCP(const int fd, struct sockaddr_in const &socketAddress, std::string const &port): Connection(fd), socketAddress(socketAddress), port(port) {};
 		TCP(const TCP &src): Connection(src), socketAddress(src.socketAddress), port(src.port) {};
 		TCP(const int &fd): Connection(fd) {};
+		TCP &operator=(const TCP &src)
+		{
+			if (this != &src) {
+				Connection::operator=(src);
+				socketAddress = src.socketAddress;
+			}
+			return (*this);
+		};
 		~TCP() {};
 
 	bool		sendPacket();
 	bool		receivePacket();
+
+	bool operator==(const Connection& other) const {
+		return (Connection::operator==(other));
+	}
 };
 
 #endif

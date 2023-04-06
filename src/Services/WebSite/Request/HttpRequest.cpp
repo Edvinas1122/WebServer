@@ -49,7 +49,7 @@ const std::string	HttpRequest::getBoundry() const
 
 const std::string	HttpRequest::getFilename() const
 {
-	return (substr(find("filename=") + 10, substr(find("filename=") + 11).find('"')));
+	return (substr(find("filename=") + 10, substr(find("filename=") + 11).find('"') + 1));
 }
 
 const std::string	HttpRequest::getBody() const

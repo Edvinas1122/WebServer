@@ -74,11 +74,43 @@ void	PortSockets::startPorts(std::list<std::string> (*parsingMethod)(PARSER &), 
 # include <TCP.hpp>
 #define TIMEOUT 10
 
+typedef	int	fd_t;
+struct TCPConnectionOrigin {
+	fd_t		fd;
+	in_addr		ipAddress;
+	std::string	port_number;
+	TCPConnectionOrigin(const fd_t &fd, const in_addr &ipAddress, const std::string &port_number):
+	fd(fd), ipAddress(ipAddress), port_number(port_number) {};
+};
+
+bool	operator<(const TCPConnectionOrigin& left, const TCPConnectionOrigin& right);
+
+struct findByFD
+{
+	fd_t	fd;
+	findByFD(const fd_t& fd) : fd(fd) {}
+	bool operator()(const std::pair<TCPConnectionOrigin, TCP> &pair) const
+	{
+		return (pair.first.fd == fd);
+	};
+};
+
+struct findByAddr
+{
+	in_addr	ipAddress;
+	findByAddr(const in_addr& ipAddress) : ipAddress(ipAddress) {}
+	bool operator()(const std::pair<TCPConnectionOrigin, TCP> &pair) const
+	{
+		return (pair.first.ipAddress.s_addr == ipAddress.s_addr);
+	};
+};
+
+
 class	ConnectionQueController: virtual public Observer
 {
 	public:
-		typedef	int					fd_t;
-		typedef	std::map<fd_t, TCP>	listOfConnections;
+		typedef	int									fd_t;
+		typedef	std::map<TCPConnectionOrigin, TCP>	listOfConnections;
 	protected:
 		listOfConnections	Connections;
 
@@ -94,7 +126,7 @@ class	ConnectionQueController: virtual public Observer
 		template <typename T>
 		void	action(void (*action)(Connection &, T), T);
 		template <typename T>
-		void	action(void (*action)(Connection &, T), T, fd_t);
+		void	action(void (*action)(Connection &, T), T, TCPConnectionOrigin);
 		void	action(void (*action)(Connection &));
 
 		void	closeConnection(Connection *);
@@ -116,7 +148,7 @@ void	ConnectionQueController::action(void (*action)(Connection &, T), T object)
 }
 
 template <typename T>
-void	ConnectionQueController::action(void (*action)(Connection &, T), T object, fd_t conn_id)
+void	ConnectionQueController::action(void (*action)(Connection &, T), T object, TCPConnectionOrigin conn_id)
 {
 	Connection connection = Connections.at(conn_id);
 
@@ -125,18 +157,12 @@ void	ConnectionQueController::action(void (*action)(Connection &, T), T object, 
 
 # include <Service.hpp>
 
-struct ConnectionOrigin {
-    ConnectionQueController::fd_t	fd;
-	in_addr							ipAddress;
-    std::string 					port_number;
-};
-
 class Server : public ConnectionQueController, public PortSockets
 {
 	public:
 		typedef std::list<Service*>			ServiceList; // interfaces
 		typedef std::list<ServiceProcess*>	ProcessList; //
-		// typedef std::map<ConnectionOrigin, ServiceProcess*>	ProcessList; //
+		// typedef std::map<TCPConnectionOrigin, ServiceProcess*>	ProcessList; //
 
 	private:
 		ServiceList		services;
@@ -164,6 +190,9 @@ class Server : public ConnectionQueController, public PortSockets
 	ProcessList::iterator	FindProcess(Connection *connection);
 	ProcessList::iterator	FindProcess(ServiceProcess *service);
 	void					closeOlderProcesses(const size_t &age, bool keepLatest = true);
+
+	ConnectionQueController::listOfConnections	getConnectionsByOrigin(in_addr const &ipAddress);
+	void										HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &);
 
 	static bool pullIncoming(Connection &client);
 	static bool pushOutgoing(Connection &client);

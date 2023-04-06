@@ -18,8 +18,9 @@ void	ConnectionQueController::setConnections(std::list<std::pair<std::string, in
 			clientFd = accept((*it).second, (struct sockaddr *) &socketAddress, &addrlen);
 			if (clientFd == -1)
 				break;
-			if (Connections.find(clientFd) == Connections.end()) {
-				Connections.insert(std::pair<int, TCP>(clientFd, TCP(clientFd, socketAddress, it->first)));
+			if (std::find_if(Connections.begin(), Connections.end(), findByFD(clientFd)) == Connections.end())
+			{
+				Connections.insert(std::pair<TCPConnectionOrigin, TCP>(TCPConnectionOrigin(clientFd, socketAddress.sin_addr, it->first), TCP(clientFd, socketAddress, it->first)));
 				insertFileDescriptor(clientFd);
 				std::cout << "new connection- size: " << Connections.size() << std::endl;
 			}
@@ -45,7 +46,7 @@ void	ConnectionQueController::closeConnection(Connection *connection)
 
 void	ConnectionQueController::closeConnection(listOfConnections::iterator &position)
 {
-	removeFileDescriptor(position->first);
+	removeFileDescriptor(position->first.fd);
 	Connections.erase(position);
 }
 
@@ -61,7 +62,7 @@ void	ConnectionQueController::ProcessQue(bool (*action)(Connection &client), con
 
 	while (it != Connections.end())
 	{
-		if (checkFd(it->first, observer_event) && action(it->second))
+		if (checkFd(it->first.fd, observer_event) && action(it->second))
 			it->second.updateTime();
 		it++;
 	}
@@ -78,32 +79,9 @@ void	ConnectionQueController::action(void (*action)(Connection &client))
 	}
 }
 
-// bool	ConnectionQueController::checkConnection(Connection *connection)
-// {
-// 	listOfConnections::iterator	conn_it = Connections.begin();
-
-// 	while (conn_it != Connections.end())
-// 	{
-// 		if (&(conn_it->second) == connection)
-// 			return (true);
-// 		conn_it++;
-// 	}
-// 	return (false);
-// }
-
-// void	ConnectionQueController::closeTimeOut()
-// {
-// 	listOfConnections::iterator	it = Connections.begin();
-
-// 	while (it != Connections.end())
-// 	{
-// 		if ((*it).second.getElapsedTime() > (*it).second.getTimeOutDurration())
-// 		{
-// 			closeConnection(it);
-// 			it = Connections.begin();
-// 			if (it == Connections.end())
-// 				break;
-// 		}
-// 		it++;
-// 	}
-// }
+bool	operator<(const TCPConnectionOrigin& left, const TCPConnectionOrigin& right)
+{
+	if (left.fd < right.fd)
+		return (true);
+	return (false);
+}

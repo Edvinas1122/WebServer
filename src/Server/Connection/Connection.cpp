@@ -49,9 +49,6 @@ Connection	&Connection::operator<<(File& src)
 std::ostream&	operator<<(std::ostream& os, Connection& obj)
 {
 	if (obj.incoming.length())
-	{
 		os << obj.incoming;
-		obj.flushIncoming();
-	}
 	return (os);
 };

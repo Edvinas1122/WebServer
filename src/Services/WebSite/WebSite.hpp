@@ -81,7 +81,7 @@ class	WebSite: public Service
 
 	ServiceProcess	*RequestParse(Connection *connection, std::string const &request)
 	{
-		if (request.find("GET") != std::string::npos)
+		if (request.find("GET") != std::string::npos || request.find("POST") != std::string::npos)
 		{
 			std::cout << "HTTP service detected" << std::endl;
 			return (new HTTPParser(connection, NULL));

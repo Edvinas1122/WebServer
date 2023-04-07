@@ -76,6 +76,7 @@ class	Terminal: public Service
 		~Terminal() {};
 
 	ServiceProcess	*RequestParse(Connection *connection, std::string const &request);
+	size_t	TimeOutAge() const {return (60);};
 
 };
 

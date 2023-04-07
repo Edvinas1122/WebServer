@@ -42,6 +42,7 @@ class	ServiceProcess: public TimeOut
 	virtual bool			Handle() = 0;
 	void					End();
 	virtual ServiceProcess	*NextProcess();
+	virtual bool			HeartBeat() {return (true);};
 	// protected:
 	Connection	&theConnection() {return (*connection);};
 	void	setTimeOutDurration(const int timeOutDurration);
@@ -57,6 +58,10 @@ class	Service
 		~Service() {};
 	
 	virtual ServiceProcess	*RequestParse(Connection *connection, std::string const &request) = 0;
+	
+	/* Name idle process types of a service */
+	virtual bool			DetermineIfIdleProcessType(ServiceProcess*) {return (false);};
+	virtual	size_t			TimeOutAge() const {return (20);};
 };
 
 #endif

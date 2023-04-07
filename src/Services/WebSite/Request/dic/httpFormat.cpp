@@ -1,20 +1,20 @@
-#include <httpFormat.hpp>
+#include "httpFormat.hpp"
 
-std::map<std::string, int>	getMethodMap()
+std::map<std::string, int>	validMethodMap()
 {
 	std::map<std::string, int>	map;
 
 	map["GET"] = GET_METHOD;
-	map["HEAD"] = HEAD_METHOD;
+	// map["HEAD"] = HEAD_METHOD;
 	map["POST"] = POST_METHOD;
-	map["DELETE"] = DELETE_METHOD;
-	map["TRACE"] = TRACE_METHOD;
-	map["CONNECT"] = CONNECT_METHOD;
-	map["OPTIONS"] = OPTIONS_METHOD;
+	// map["DELETE"] = DELETE_METHOD;
+	// map["TRACE"] = TRACE_METHOD;
+	// map["CONNECT"] = CONNECT_METHOD;
+	// map["OPTIONS"] = OPTIONS_METHOD;
 	return (map);
 }
 
-std::map<std::string, int>	getVersionsMap()
+std::map<std::string, int>	validVersionsMap()
 {
 	std::map<std::string, int>	map;
 

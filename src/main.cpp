@@ -30,6 +30,7 @@ int	main(void)
 	// startHttpServer(httpServer, "/home/WebServer/server.conf");
 	// virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
 	httpServer.startPort("10012");
+	// httpServer.startPorts();
 	// virtualServers.Info();
 	// webSite.SetVirtualServerMap(&virtualServers);
 #ifdef TERMINAL

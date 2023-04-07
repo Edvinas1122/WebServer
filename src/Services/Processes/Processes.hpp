@@ -33,30 +33,6 @@ class	MasterProcess : virtual public ServiceProcess
 	virtual ServiceProcess	*RequestParse(std::string const &request) = 0;
 };
 
-# include <HTTP.hpp>
-# include <VirtualServer.hpp>
-
-class	HTTPParser : virtual public MasterProcess
-{
-	private:
-		VirtualServers	*virtualServers;
-
-	public:
-		HTTPParser(Connection *connection, VirtualServers *vs): ServiceProcess(connection), MasterProcess(connection), virtualServers(vs) {};
-		HTTPParser(Connection *connection, ServiceProcess *followingProcess, VirtualServers *vs):
-					ServiceProcess(connection), MasterProcess(connection, followingProcess),  virtualServers(vs) {};
-		HTTPParser(const HTTPParser &src): ServiceProcess(src), MasterProcess(src), virtualServers(src.virtualServers) {};
-		HTTPParser(const HTTPParser &src, ServiceProcess *followingProcess):
-					ServiceProcess(src, followingProcess), MasterProcess(src, followingProcess), virtualServers(src.virtualServers) {};
-		virtual ~HTTPParser() {};
-
-	virtual	bool	Handle();
-	bool			HeartBeatIdleConnection();
-	protected:
-
-	virtual ServiceProcess	*RequestParse(std::string const &request);
-};
-
 class	FileSend : virtual public ServiceProcess
 {
 	private:
@@ -68,19 +44,6 @@ class	FileSend : virtual public ServiceProcess
 		virtual ~FileSend() {};
 
 	virtual bool	Handle();
-};
-
-class	HTTPFileSend : public HTTPParser, public FileSend
-{
-	public:
-		HTTPFileSend(const HTTPParser &process, std::string const &path):
-						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileSend(&theConnection(), path) {};
-		HTTPFileSend(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path):
-						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess),
-						HTTPParser(process, followingProcess), FileSend(&theConnection(), followingProcess, path) {};
-		virtual ~HTTPFileSend() {};
-
-	bool	Handle();
 };
 
 class	FileReceive : virtual public ServiceProcess
@@ -100,39 +63,6 @@ class	FileReceive : virtual public ServiceProcess
 		virtual ~FileReceive() {};
 
 	virtual bool	Handle();
-};
-
-class	HTTPFileReceiveReport : public ServiceProcess
-{
-	public:
-		HTTPFileReceiveReport(const ServiceProcess &src): ServiceProcess(src) {};
-		HTTPFileReceiveReport(const ServiceProcess &src, ServiceProcess *followingProcess): ServiceProcess(src, followingProcess) {};
-		virtual ~HTTPFileReceiveReport() {};
-
-	bool	Handle();
-};
-
-#include <Connection.hpp>
-
-class	HTTPFileReceive : public HTTPParser, public FileReceive
-{
-	private:
-		Buffer				buffer;
-		const std::string	delimiter;
-	public:
-		HTTPFileReceive(const HTTPParser &process, std::string const &path, size_t const &len, std::string const &delimiter):
-						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileReceive(&theConnection(), path, len), delimiter(delimiter) {};
-		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path, size_t const &len, std::string const &delimiter):
-						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess), HTTPParser(process, followingProcess),
-						FileReceive(&theConnection(), followingProcess, path, len), delimiter(delimiter) {};
-		virtual ~HTTPFileReceive() {};
-
-	bool	Handle();
-
-	HTTPFileReceive	&operator<<(Buffer &src) {
-		this->buffer << src;
-		return (*this);
-	};
 };
 
 #endif

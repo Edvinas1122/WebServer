@@ -20,8 +20,8 @@
 # define VERSION_1_0 1
 # define VERSION_1_1 2
 
-bool						validHttpMessage(std::string const &message);
-std::map<std::string, int>	getMethodMap();
-std::map<std::string, int>	getVersionsMap();
+
+std::map<std::string, int>	validMethodMap();
+std::map<std::string, int>	validVersionsMap();
 
 #endif

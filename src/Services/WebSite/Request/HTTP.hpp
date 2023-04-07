@@ -40,6 +40,7 @@ class	HttpRequest: public std::string
 		HttpRequest() {};
 		HttpRequest(std::string const &httpMessage): std::string(httpMessage) {};
 
+		bool				Validate() const;
 		const std::string	getMethod() const;
 		const UrlQuery		getLocation() const;
 		const std::string	getProtocolVersion() const;
@@ -57,26 +58,26 @@ class	HttpRequest: public std::string
 		// const std::string	getContentFileName() const;
 };
 
-class	HttpBody
-{
-	private:
-		std::string	string;
-	public:
-		HttpBody(HttpRequest request) {
-			string = request;
-			if (string.find(request.getBoundry()) != std::string::npos) {
-				string = string.substr(string.find(request.getBoundry()) + request.getBoundry().length());
-				string = string.substr(string.find(request.getBoundry()) + request.getBoundry().length());
-				string = string.substr(string.find('\n') + 1).substr(string.find('\n') + 1);
-				string = string.substr(string.find('\n') + 1);
-				string = string.substr(string.find('\n') + 1);
-				string = string.substr(string.find('\n') + 1);
-			}
-		};
+// class	HttpBody
+// {
+// 	private:
+// 		std::string	string;
+// 	public:
+// 		HttpBody(HttpRequest request) {
+// 			string = request;
+// 			if (string.find(request.getBoundry()) != std::string::npos) {
+// 				string = string.substr(string.find(request.getBoundry()) + request.getBoundry().length());
+// 				string = string.substr(string.find(request.getBoundry()) + request.getBoundry().length());
+// 				string = string.substr(string.find('\n') + 1).substr(string.find('\n') + 1);
+// 				string = string.substr(string.find('\n') + 1);
+// 				string = string.substr(string.find('\n') + 1);
+// 				string = string.substr(string.find('\n') + 1);
+// 			}
+// 		};
 
-		const std::string get() const {
-			return (string);
-		};
-};
+// 		const std::string get() const {
+// 			return (string);
+// 		};
+// };
 
 #endif

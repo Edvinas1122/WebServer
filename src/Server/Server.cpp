@@ -1,5 +1,17 @@
 #include "Server.hpp"
 
+Server::~Server()
+{
+	ProcessList::iterator	it = processes.begin();
+
+	while (it != processes.end())
+	{
+		delete	*it;
+		it++;
+	}
+	processes.clear();
+};
+
 /*
 	Main server Runtime execution loop
 */
@@ -12,7 +24,7 @@ void	Server::Run()
 	Serve(); // runs processes
 	ProcessQue(pushOutgoing, POLLOUT);
 	action(wipeIncomingBuffers);
-	TimeOutProcessLessConnections(3); // not too relevent for http only but check connectionless processes
+	TimeOutProcessLessConnections(3); // 
 };
 
 /*
@@ -37,11 +49,6 @@ void	Server::TimeOutProcessLessConnections(const int allowedInactiveDurration)
 	}
 }
 
-
-/*
-	Should hearbeat connections that are in idle process,  comming from an origin thats already in connection que
-	inefficient FindProcess function should be substituted with adding all connections to a process
-*/
 void	Server::StartProcesses()
 {
 	listOfConnections::iterator	conn_it = Connections.begin();
@@ -51,37 +58,30 @@ void	Server::StartProcesses()
 		if (conn_it->second.downloadBufferReady() && FindProcess(&(conn_it->second)) == processes.end())
 		{
 			std::cout << "Inbounded" << std::endl;
-			HeartBeatIdleProcessesFromSameOrigin(conn_it->first);
-			CreateProcess(&(conn_it->second));
+			CreateProcess(&(conn_it->second), conn_it->first);
 		}
 		conn_it++;
 	}
 }
 
-#include <Processes.hpp>
-
 /*
 	Heart beat idle proccesses from same origin -> ip address
 */
-void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &origin)
+
+void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &origin, Service *service)
 {
 	listOfConnections	matchingOrigin = getConnectionsByOrigin(origin.ipAddress);
 	ProcessList::iterator	it = processes.begin();
 
-	std::cout << "testing origin" << std::endl;
 	while (it != processes.end())
 	{
-		HTTPParser	*ptr;
-
-		ptr = dynamic_cast<HTTPParser*>(*it);
-		if (ptr != NULL) {
-			std::cout << "testing idle process" << std::endl;
+		if (service->DetermineIfIdleProcessType(*it)) {
 			listOfConnections::iterator	it_origin = matchingOrigin.begin();
 
 			while (it_origin != matchingOrigin.end())
 			{
 				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second) {
-					ptr->HeartBeatIdleConnection();
+					(*it)->HeartBeat();
 					std::cout << "idle process from same origin heart beat set" << std::endl;
 					break;
 				}
@@ -123,9 +123,11 @@ Server::ProcessList::iterator	Server::FindProcess(ServiceProcess *service)
 }
 
 /**
- *	Using interfaces assigns free connection to a process 
+ *	Using interfaces assigns free connection to a process
+ *	If process is created from a Connection we should hearbeat IDLE processes that are
+ *	from a same origin as a connection
  */
-void	Server::CreateProcess(Connection *connection)
+void	Server::CreateProcess(Connection *connection, TCPConnectionOrigin const &origin)
 {
 	ServiceList::iterator	it = services.begin();
 	ServiceProcess			*process;
@@ -135,7 +137,8 @@ void	Server::CreateProcess(Connection *connection)
 		process = (*it)->RequestParse(connection, connection->getMessage());
 		if (process != NULL)
 		{
-			process->setTimeOutDurration(20);
+			HeartBeatIdleProcessesFromSameOrigin(origin, *it);
+			process->setTimeOutDurration((*it)->TimeOutAge());
 			processes.push_back(process);
 			std::cout << "porcess addedd: " << processes.size() << std::endl;
 		}
@@ -155,7 +158,6 @@ void	Server::EndProcess(ServiceProcess *process)
 {
 	delete (process);
 	processes.remove(process);
-	std::cout << "after rm: " << processes.size() << std::endl;
 }
 
 void	Server::Serve() // check for loosening connections - connections with no process
@@ -176,7 +178,6 @@ void	Server::Serve() // check for loosening connections - connections with no pr
 					pullNewProcesses.push_back(*it);
 			}
 			catch(...) {
-				std::cout << "Handle aborted" << std::endl;
 				killProcesses.push_back(*it);
 			}
 		} else
@@ -225,7 +226,6 @@ void Server::CreateProcess(ServiceProcess *process)
 		closeOlderProcesses(3);
 	if (processes.size() > PROCESSES_LIMIT)
 		closeOlderProcesses(1, false);
-	std::cout << "after create: " << processes.size() << std::endl;
 };
 
 
@@ -320,18 +320,5 @@ void	Server::wipeIncomingBuffers(Connection &connection)
 {
 	if (connection.downloadBufferReady())
 		connection.flushIncoming();
-		// std::cout << connection;
 }
 
-
-Server::~Server()
-{
-	ProcessList::iterator	it = processes.begin();
-
-	while (it != processes.end())
-	{
-		delete	*it;
-		it++;
-	}
-	processes.clear();
-};

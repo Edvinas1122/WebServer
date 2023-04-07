@@ -1,4 +1,22 @@
 #include "HTTP.hpp"
+#include "dic/httpFormat.hpp"
+
+bool	HttpRequest::Validate() const
+{
+	try {
+		if (validMethodMap().at(getMethod()))
+		{
+			if (/*validVersionsMap().at(getProtocolVersion())*/true)
+				return (true);
+		}
+		return (false);
+	} catch (std::out_of_range &err)
+	{
+		(void) err;
+		return (false);
+	}
+		
+}
 
 const std::string	HttpRequest::getMethod() const
 {

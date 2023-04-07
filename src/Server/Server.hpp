@@ -179,7 +179,7 @@ class Server : public ConnectionQueController, public PortSockets
 
 	void					TimeOutProcessLessConnections(const int);
 	void					StartProcesses();
-	void					CreateProcess(Connection *connection);
+	void					CreateProcess(Connection *connection, TCPConnectionOrigin const &origin);
 	void					CreateProcess(ServiceProcess *process);
 	void					CreateProcesses(ProcessList &beginers);
 	void					KillProcesses(ProcessList &deads);
@@ -192,7 +192,7 @@ class Server : public ConnectionQueController, public PortSockets
 	void					closeOlderProcesses(const size_t &age, bool keepLatest = true);
 
 	ConnectionQueController::listOfConnections	getConnectionsByOrigin(in_addr const &ipAddress);
-	void										HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &);
+	void	HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &, Service*);
 
 	static bool pullIncoming(Connection &client);
 	static bool pushOutgoing(Connection &client);

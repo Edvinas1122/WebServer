@@ -54,6 +54,7 @@ class	PortSockets: virtual public Observer
 		void	startPorts(std::list<std::string> (*parsingMethod)(PARSER &), PARSER parser, bool asynch = true);
 		void	startPorts(std::list<std::string> ports, bool asynch = true);
 		void	startPort(std::string const &port, bool asynch = true);
+		void	infoPorts() const;
 	public:
 		void	setStartSocketMethod(int (*socketInitMethod)(char const *)) {
 			this->socketInitMethod = socketInitMethod;

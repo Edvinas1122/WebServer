@@ -89,6 +89,11 @@ class	WebSite: public Service
 	size_t			TimeOutAge() const {
 		return (timeoutAge);
 	};
+
+	void	SetVirtualServerMap(VirtualServers *virtualServers)
+	{
+		this->virtualServers = virtualServers;
+	};
 };
 
 #endif

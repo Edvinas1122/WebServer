@@ -27,7 +27,7 @@ static bool	signalEnd = false;
 static void handleSignal(int sigNum)
 {
 	(void) sigNum;
-	std::cout << "Signal Terminate Process" << std::endl;
+	std::cout << "\nSignal Terminate Process" << std::endl;
 	signalEnd = true;
 }
 
@@ -42,11 +42,11 @@ int	main(void)
 	Server			httpServer;
 
 	// startHttpServer(httpServer, "/home/WebServer/server.conf");
-	// virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
-	httpServer.startPort("10012");
-	// httpServer.startPorts();
+	virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
 	// virtualServers.Info();
-	// webSite.SetVirtualServerMap(&virtualServers);
+	httpServer.startPorts(virtualServers.getPortList());
+	httpServer.infoPorts();
+	webSite.SetVirtualServerMap(&virtualServers);
 	signal(SIGINT, handleSignal);
 	signal(SIGQUIT, handleSignal);
 #ifdef TERMINAL
@@ -65,5 +65,6 @@ int	main(void)
 		terminal.Input();
 #endif
 	}
+	std::cout << "Exiting..." << std::endl;
 	return (0);
 }

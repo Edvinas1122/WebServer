@@ -8,9 +8,17 @@ const std::string	UrlQuery::getFileName() const
 	size_t	begin = find_last_of(dir_delim) + 1;
 	size_t	end =  find_first_of(query_delim);
 
+	std::string	filename = substr(begin, end - begin);
+    std::string::size_type	pos = 0;
+
+    while ((pos = filename.find("%20", pos)) != std::string::npos)
+	{
+        filename.replace(pos, 3, " ");
+        pos += 1;
+    }
 	if (begin >= end)
 		return ("");
-	return (substr(begin, end - begin));
+	return (filename);
 }
 
 const std::string	UrlQuery::getDir() const
@@ -36,4 +44,9 @@ const std::string	UrlQuery::getQuery() const
 	if (begin >= end)
 		return ("");
 	return (substr(begin, end - begin));
+}
+
+const std::string	UrlQuery::getPath() const
+{
+	return (getDir() + getFileName());
 }

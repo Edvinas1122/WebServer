@@ -27,6 +27,8 @@ class	TCP: public Connection
 	bool		sendPacket();
 	bool		receivePacket();
 
+	const std::string	getPort() const {return (port);};
+
 	bool operator==(const Connection& other) const {
 		return (Connection::operator==(other));
 	}

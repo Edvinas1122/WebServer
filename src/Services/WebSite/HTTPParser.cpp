@@ -8,14 +8,14 @@
 
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
-	std::string	dir = std::string("/home/WebServer/http") + HttpRequest(request).getLocation();
-	// std::string dir = GET_DIR_FROM_(request.PRORT, request.LOCATION);
+	std::string	dir = virtualServer->getRoot() + std::string("/") + HttpRequest(request).getLocation().getPath();
+
 	// TEST_FOR_PROXY_DIRS_(dir)
 		// dir modify 
 	if (HttpRequest(request).getMethod() == "GET")
 	{
 		if (!Access(dir)) {
-			theConnection() << "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+			theConnection() << "HTTP/1.1 404 Not Found\r\nContent-Length: 14\r\n\r\nPage Not Found\n";
 			return (new HTTPParser(*this));
 		}
 		if (!isFile(dir) && TEST_LOCATION_DEFAULT_RESPONSES(dir)) { // test for dir default responses

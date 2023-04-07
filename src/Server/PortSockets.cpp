@@ -51,3 +51,14 @@ void	PortSockets::startPort(std::string const &port, bool asynch)
 	portSockets[port] = scoket_fd;
 	insertFileDescriptor(scoket_fd, POLLIN, asynch);
 }
+
+void	PortSockets::infoPorts() const
+{
+	std::map<std::string, int>::const_iterator	it = portSockets.begin();
+
+	while (it != portSockets.end())
+	{
+		std::cout << "Open Port: " << it->first << std::endl;
+		it++;
+	}
+}

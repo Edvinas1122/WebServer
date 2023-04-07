@@ -62,11 +62,13 @@ class VirtualServer {
 		VirtualServer(DescendParser parser);
 		// VirtualServer(const VirtualServer &src);
 		// VirtualServer& operator=(const VirtualServer& other);
-		const char	*getRoot() const;
+		std::string	getRoot() const;
 		Route		getLocation(std::string const &location); // <--- /jumper/tall/ > "null or /jumper/"
 		const char	*getHost() const;
 		const char	*getServerName() const;
 		void		displayInfo() const;
+
+		std::list<std::string>	getPorts() {return (port_number);};
 
 	public:
 		static bool	validServerName(std::string const &str);
@@ -86,9 +88,10 @@ class	VirtualServers {
 		VirtualServers() {};
 		~VirtualServers() {};
 
-	void				Info() const;
-	void				parseConfigurationFile(const char *path);
-	VirtualServer		&getServer(std::string const &port, std::string const &host);
+	void					Info() const;
+	void					parseConfigurationFile(const char *path);
+	VirtualServer			*getServer(std::string const &port, std::string const &host);
+	std::list<std::string>	getPortList();
 
 	public:
 		void parseServers(DescendParser &parser)

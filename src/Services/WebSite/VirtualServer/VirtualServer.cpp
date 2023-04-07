@@ -44,9 +44,9 @@ const char	*VirtualServer::getServerName() const
 	return (server_name.c_str());
 }
 
-const char	*VirtualServer::getRoot() const
+std::string	VirtualServer::getRoot() const
 {
-	return (root_dir.c_str());
+	return (root_dir);
 }
 
 void	VirtualServer::displayInfo() const
@@ -126,9 +126,29 @@ void	VirtualServers::Info() const
 	}
 }
 
-VirtualServer	&VirtualServers::getServer(std::string const &port, std::string const &host)
+VirtualServer	*VirtualServers::getServer(std::string const &port, std::string const &host)
 {
 	(void) host;
 	(void) port;
-	return (virtualServers.at("46.101.198.64"));
+	return (&virtualServers.at("default"));
+}
+
+std::list<std::string>	VirtualServers::getPortList()
+{
+	std::list<std::string>		portList;
+	virtualServerMap::iterator	it = virtualServers.begin(); 
+
+	while (it != virtualServers.end())
+	{
+		std::list<std::string> vsPortList = it->second.getPorts();
+		std::list<std::string>::iterator	vs_it = vsPortList.begin();
+		while (vs_it != vsPortList.end())
+		{
+			if (std::find(portList.begin(), portList.end(), *vs_it) == portList.end())
+				portList.push_back(*vs_it);
+			vs_it++;
+		}
+		it++;
+	}
+	return (portList);
 }

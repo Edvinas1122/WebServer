@@ -1,9 +1,14 @@
 #include "WebSite.hpp"
+#include <TCP.hpp>
 
 ServiceProcess	*WebSite::RequestParse(Connection *connection, std::string const &request)
 {
+	TCP	*_connection = dynamic_cast<TCP*>(connection);
+
+	if (_connection == NULL)
+		return (NULL);
 	if (HttpRequest(request).Validate())
-		return (new HTTPParser(connection, NULL));
+		return (new HTTPParser(connection, virtualServers->getServer("", _connection->getPort())));
 	return (NULL);
 }
 

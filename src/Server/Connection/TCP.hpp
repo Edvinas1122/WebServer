@@ -32,4 +32,37 @@ class	TCP: public Connection
 	}
 };
 
+
+typedef	int	fd_t;
+struct TCPConnectionOrigin {
+	fd_t		fd;
+	in_addr		ipAddress;
+	std::string	port_number;
+	TCPConnectionOrigin(const fd_t &fd, const in_addr &ipAddress, const std::string &port_number):
+	fd(fd), ipAddress(ipAddress), port_number(port_number) {};
+};
+
+bool	operator<(const TCPConnectionOrigin& left, const TCPConnectionOrigin& right);
+
+struct findByFD
+{
+	fd_t	fd;
+	findByFD(const fd_t& fd) : fd(fd) {}
+	bool operator()(const std::pair<TCPConnectionOrigin, TCP> &pair) const
+	{
+		return (pair.first.fd == fd);
+	};
+};
+
+struct findByAddr
+{
+	in_addr	ipAddress;
+	findByAddr(const in_addr& ipAddress) : ipAddress(ipAddress) {}
+	bool operator()(const std::pair<TCPConnectionOrigin, TCP> &pair) const
+	{
+		return (pair.first.ipAddress.s_addr == ipAddress.s_addr);
+	};
+};
+
+
 #endif

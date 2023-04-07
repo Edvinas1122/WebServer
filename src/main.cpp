@@ -22,9 +22,9 @@
 /*
 	Signal Termination for freeing memory
 */
-bool	signalEnd = false;
+static bool	signalEnd = false;
 
-void handleSignal(int sigNum)
+static void handleSignal(int sigNum)
 {
 	(void) sigNum;
 	std::cout << "Signal Terminate Process" << std::endl;

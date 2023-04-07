@@ -53,33 +53,3 @@ void Terminal::Input()
 			Parse(user_input);
 	}
 }
-
-// void	TerminalChat::clearMessage()
-// {
-// 	message.clear();
-// }
-
-// std::string	TerminalChat::extractMessage() const
-// {
-// 	return (message);
-// }
-
-// bool	TerminalChat::notEmpty() const
-// {
-// 	if (message.length())
-// 		return (true);
-// 	return (false);
-// }
-
-// bool	TerminalChat::Handle()
-// {
-// 	if (!terminal_interface())
-// 		return (false);
-// 	if (notEmpty()) {
-// 		theConnection() << extractMessage();
-// 		clearMessage();
-		
-// 		return (true);
-// 	}
-// 	return (true);
-// }

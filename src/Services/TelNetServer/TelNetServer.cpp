@@ -32,6 +32,10 @@ static std::string	dirInfo(const char *path)
 	return (info);
 }
 
+static std::string	logoGee()
+{
+	return("        __\n     __/o \\_\n     \\____  \\\n         /   \\\n   __   //\\   \\\n__/o \\-//--\\   \\_/\n\\____  ___  \\  |\n     ||   \\ |\\ |\n    _||   _||_||\n");
+}
 
 bool	TelNetServerParser::Handle()
 {
@@ -40,7 +44,8 @@ bool	TelNetServerParser::Handle()
 	{
 		if (request.find("Gay") != std::string::npos)
 		{
-			QueFollowingProcess(new FileSend(&theConnection(), new TelNetServerIntroduction(*this), "/home/WebServer/http/files/test.txt"));
+			theConnection() << logoGee();
+			QueFollowingProcess(new TelNetServerIntroduction(*this));
 			return (false);
 		}
 		if (request.find("Chat") != std::string::npos)
@@ -82,7 +87,7 @@ bool	TelNetServerParser::Handle()
 
 ServiceProcess	*TelNetServer::RequestParse(Connection *connection, std::string const &request)
 {
-	if (request.find("gay") != std::string::npos)
+	if (request.find("gaygay") != std::string::npos)
 		return (new TelNetServerIntroduction(connection, new TelNetServerParser(connection)));
 	return (NULL);
 }

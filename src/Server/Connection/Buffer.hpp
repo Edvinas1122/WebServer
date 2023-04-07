@@ -11,7 +11,7 @@ class	Buffer
 	private:
 		Vector	buffer;
 	public:
-		Buffer() {
+		Buffer(): buffer() {
 			buffer.reserve(1024);
 		};
 		Buffer(const Buffer &src): buffer(src.buffer) {};
@@ -114,7 +114,7 @@ class	Buffer
 			return (buffer.size());
 		};
 
-		size_t	find(std::string const &match, size_t offset = 0)
+		size_t	find(std::string const &match, const size_t offset = 0)
 		{
 			size_t	iterator = offset;
 
@@ -145,6 +145,8 @@ class	Buffer
 		{
 			size_t	iterator = 0;
 
+			if (buffer.empty() && !match.empty())
+				return (false);
 			while (iterator < len)
 			{
 				if ((char)buffer[offset + iterator] != match[iterator])

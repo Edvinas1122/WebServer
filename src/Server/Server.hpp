@@ -11,7 +11,7 @@ class	Observer
 		static const int TIMEOUT = 5000;
 	public:
 		Observer();
-		~Observer() {};
+		~Observer() {vector.clear();};
 
 		/*
 			Unix poll https://man7.org/linux/man-pages/man2/poll.2.html

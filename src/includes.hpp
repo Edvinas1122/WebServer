@@ -28,6 +28,7 @@
 # include <fstream>
 # include <limits>
 # include <dirent.h>
+# include <signal.h>
 
 #ifdef C98
 # define EXCEPTION throw(std::exception)

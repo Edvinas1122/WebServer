@@ -1,7 +1,8 @@
 #include <Service.hpp>
 #include <WebSite.hpp>
 #include <Server.hpp>
-#include <Terminal.hpp>
+#include <ProgramInterface.hpp>
+#include <TelnetServer.hpp>
 
 // #include <DescendParser.hpp>
 // #include <configurationFileFormat.hpp>
@@ -18,12 +19,25 @@
 
 // #include <VirtualServer.hpp>
 
+/*
+	Signal Termination for freeing memory
+*/
+bool	signalEnd = false;
+
+void handleSignal(int sigNum)
+{
+	(void) sigNum;
+	std::cout << "Signal Terminate Process" << std::endl;
+	signalEnd = true;
+}
+
 int	main(void)
 {
 #ifdef TERMINAL
-	Terminal	terminal;
+	Terminal		terminal;
+	TelNetServer	tns;
 #endif
-	// VirtualServers	virtualServers;
+	VirtualServers	virtualServers;
 	WebSite			webSite;
 	Server			httpServer;
 
@@ -33,18 +47,23 @@ int	main(void)
 	// httpServer.startPorts();
 	// virtualServers.Info();
 	// webSite.SetVirtualServerMap(&virtualServers);
+	signal(SIGINT, handleSignal);
+	signal(SIGQUIT, handleSignal);
 #ifdef TERMINAL
-	httpServer.addService(&terminal);
+	httpServer.addService(&tns);
 #endif
 	httpServer.addService(&webSite);
 
 #ifdef TERMINAL
-	while (42)
+	while (!terminal.EndProgram() && !signalEnd)
 #else
-	while (42)
+	while (!signalEnd)
 #endif
 	{
 		httpServer.Run();
+#ifdef TERMINAL
+		terminal.Input();
+#endif
 	}
 	return (0);
 }

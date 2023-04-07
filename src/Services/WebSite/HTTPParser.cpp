@@ -58,6 +58,7 @@ static std::string	dirInfoHTTPFormat(const char *path, std::string const &url, b
 	if (displayUpload)
 		info.append(UploadForm(url.c_str()));
 	info.append("</body>");
+	closedir(dir_ptr);
 	return (info);
 }
 
@@ -192,6 +193,14 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 	return (new TerminateProcess(&theConnection()));
 };
 
+// ServiceProcess	*VirtualServerHTTPParser::RequestParse(std::string const &request)
+// {
+// 	ServiceProcess	*process;
+// 	virtualServer = virtualServers.getServerConfig(theConnection().getPort(), request.getHost());
+
+// 	process = HTTPParser::RequestParse(request);
+
+// };
 
 /*
 	test idle connections 
@@ -206,7 +215,9 @@ bool	HTTPParser::Handle()
 		!theConnection().uploadBufferReady() && theConnection().getElapsedTime() > heartBeatRate)
 		return (HeartBeat());
 	else
+	{
 		return (MasterProcess::Handle());
+	}
 }
 
 bool	HTTPParser::HeartBeat()

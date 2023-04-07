@@ -11,16 +11,16 @@
 class	HTTPParser : virtual public MasterProcess
 {
 	private:
-		VirtualServers	*virtualServers;
+		VirtualServer		*virtualServer;
 		static const int	heartBeatRate = 10;
 
 	public:
-		HTTPParser(Connection *connection, VirtualServers *vs): ServiceProcess(connection), MasterProcess(connection), virtualServers(vs) {};
-		HTTPParser(Connection *connection, ServiceProcess *followingProcess, VirtualServers *vs):
-					ServiceProcess(connection), MasterProcess(connection, followingProcess),  virtualServers(vs) {};
-		HTTPParser(const HTTPParser &src): ServiceProcess(src), MasterProcess(src), virtualServers(src.virtualServers) {};
+		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), MasterProcess(connection), virtualServer(vs) {};
+		HTTPParser(Connection *connection, ServiceProcess *followingProcess, VirtualServer *vs):
+					ServiceProcess(connection), MasterProcess(connection, followingProcess),  virtualServer(vs) {};
+		HTTPParser(const HTTPParser &src): ServiceProcess(src), MasterProcess(src), virtualServer(src.virtualServer) {};
 		HTTPParser(const HTTPParser &src, ServiceProcess *followingProcess):
-					ServiceProcess(src, followingProcess), MasterProcess(src, followingProcess), virtualServers(src.virtualServers) {};
+					ServiceProcess(src, followingProcess), MasterProcess(src, followingProcess), virtualServer(src.virtualServer) {};
 		virtual ~HTTPParser() {};
 
 	virtual	bool	Handle();
@@ -28,8 +28,6 @@ class	HTTPParser : virtual public MasterProcess
 	protected:
 
 	virtual ServiceProcess	*RequestParse(std::string const &request);
-
-	private:
 	
 };
 
@@ -80,7 +78,8 @@ class	HTTPFileReceive : public HTTPParser, public FileReceive
 class	WebSite: public Service
 {
 	private:
-		VirtualServers	*virtualServers;
+		VirtualServers		*virtualServers;
+		static const int	timeoutAge = 30; 
 	public:
 		WebSite() {};
 		~WebSite() {};
@@ -88,7 +87,7 @@ class	WebSite: public Service
 	ServiceProcess	*RequestParse(Connection *connection, std::string const &request);
 	virtual bool	DetermineIfIdleProcessType(ServiceProcess *process);
 	size_t			TimeOutAge() const {
-		return (30);
+		return (timeoutAge);
 	};
 };
 

@@ -24,6 +24,7 @@ class Route
 		Route(DescendParser parser);
 
 		void	displayInfo(const char *append) const;
+		std::string	getResponseDir() const {return (response_dir);};
 };
 
 /*
@@ -62,13 +63,14 @@ class VirtualServer {
 		VirtualServer(DescendParser parser);
 		// VirtualServer(const VirtualServer &src);
 		// VirtualServer& operator=(const VirtualServer& other);
-		std::string	getRoot() const;
+		// std::string	getRoot() const;
 		Route		getLocation(std::string const &location); // <--- /jumper/tall/ > "null or /jumper/"
 		const char	*getHost() const;
 		const char	*getServerName() const;
 		void		displayInfo() const;
 
-		std::list<std::string>	getPorts() {return (port_number);};
+	const std::string		getSystemRoot(std::string const &urlDir);
+	std::list<std::string>	getPorts() {return (port_number);};
 
 	public:
 		static bool	validServerName(std::string const &str);

@@ -8,14 +8,14 @@
 
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
-	std::string	dir = virtualServer->getRoot() + std::string("/") + HttpRequest(request).getLocation().getPath();
+	std::string	dir = virtualServer->getSystemRoot(HttpRequest(request).getLocation().getDir()) + HttpRequest(request).getLocation().getFileName();
 
 	// TEST_FOR_PROXY_DIRS_(dir)
 		// dir modify 
 	if (HttpRequest(request).getMethod() == "GET")
 	{
 		if (!Access(dir)) {
-			theConnection() << "HTTP/1.1 404 Not Found\r\nContent-Length: 14\r\n\r\nPage Not Found\n";
+			theConnection () << "HTTP/1.1 404 Not Found\r\nContent-Length: 14\r\n\r\nPage Not Found\n";
 			return (new HTTPParser(*this));
 		}
 		if (!isFile(dir) && TEST_LOCATION_DEFAULT_RESPONSES(dir)) { // test for dir default responses
@@ -50,7 +50,8 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 
 				std::cout << theConnection() << std::endl;
 				std::cout << "File receive size: " << fileSize << std::endl;
-				process = new HTTPFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)),
+				// process = new HTTPFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)),
+				process = new HTTPFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())),
 								dir + HttpRequest(request).getFilename(), fileSize, HttpRequest(request).getBoundry());
 				theConnection() >> requestBuffered;
 				*process << requestBuffered;

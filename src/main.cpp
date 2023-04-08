@@ -4,23 +4,8 @@
 #include <ProgramInterface.hpp>
 #include <TelnetServer.hpp>
 
-// #include <DescendParser.hpp>
-// #include <configurationFileFormat.hpp>
-
-// void	startHttpServer(Server &server, const char *configPath)
-// {
-// 	DescendParser		parser;
-// 	FileProcessor		configurationFile;
-
-// 	configurationFile.Open(configPath);
-// 	parser.setContent(configurationFile.GetContents(removeComents));
-// 	server.startPorts<DescendParser>(wordMatchMethod, parser);
-// }
-
-// #include <VirtualServer.hpp>
-
 /*
-	Signal Termination for freeing memory
+	Signal Termination for exit with freeing allocated memory
 */
 static bool	signalEnd = false;
 
@@ -35,25 +20,29 @@ int	main(void)
 {
 #ifdef TERMINAL
 	Terminal		terminal;
-	TelNetServer	tns;
+	TelNetServer	TelNetController;
 #endif
 	VirtualServers	virtualServers;
 	WebSite			webSite;
 	Server			httpServer;
 
-	// startHttpServer(httpServer, "/home/WebServer/server.conf");
-	virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
-	// virtualServers.Info();
+	try {
+		virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
+		// virtualServers.Info(); // 
+	} catch (...) {
+		std::cout << "Configuration Read Failure" << std::endl;
+		return (EXIT_FAILURE);
+	}
 	httpServer.startPorts(virtualServers.getPortList());
 	httpServer.infoPorts();
 	webSite.SetVirtualServerMap(&virtualServers);
-	signal(SIGINT, handleSignal);
-	signal(SIGQUIT, handleSignal);
 #ifdef TERMINAL
-	httpServer.addService(&tns);
+	httpServer.addService(&TelNetController);
 #endif
 	httpServer.addService(&webSite);
 
+	signal(SIGINT, handleSignal); // setSig for ending leak free
+	signal(SIGQUIT, handleSignal);
 #ifdef TERMINAL
 	while (!terminal.EndProgram() && !signalEnd)
 #else
@@ -66,5 +55,5 @@ int	main(void)
 #endif
 	}
 	std::cout << "Exiting..." << std::endl;
-	return (0);
+	return (EXIT_SUCCESS);
 }

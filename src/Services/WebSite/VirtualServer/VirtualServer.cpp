@@ -44,11 +44,6 @@ const char	*VirtualServer::getServerName() const
 	return (server_name.c_str());
 }
 
-std::string	VirtualServer::getRoot() const
-{
-	return (root_dir);
-}
-
 void	VirtualServer::displayInfo() const
 {
 
@@ -95,6 +90,8 @@ void	VirtualServer::displayInfo() const
 	}
 	std::cout << "===" << std::endl;
 }
+
+
 
 #include <File.hpp>
 #include <configurationFileFormat.hpp>
@@ -151,4 +148,37 @@ std::list<std::string>	VirtualServers::getPortList()
 		it++;
 	}
 	return (portList);
+}
+
+static std::string	dirDescend(std::string const &dir, int level)
+{
+	if (level)
+		return (dirDescend(dir.substr(dir.find("/", 1)), level - 1));
+	return (dir.substr(0, dir.find("/", 1) + 1));
+}
+
+static std::string	dirTrim(std::string const &dir, int level)
+{
+	if (level)
+		return (dirTrim(dir.substr(dir.find("/", 1)), level - 1));
+	return (dir);
+}
+
+const std::string	VirtualServer::getSystemRoot(std::string const &urlDir)
+{
+	std::string	dirFixed;
+
+	if (urlDir.empty())
+		dirFixed = "/";
+	else if (urlDir.at(urlDir.length() - 1) != '/')
+		dirFixed = std::string("/") + urlDir + "/"; // not recognized by http parser as urldir
+	else
+		dirFixed = std::string("/") + urlDir;
+	
+	std::string	singleDir = dirDescend(dirFixed, 0);
+	if (locations.find(singleDir) == locations.end())
+		return (root_dir + dirFixed);
+	else if (!locations.find(singleDir)->second.getResponseDir().empty())
+		return (locations.find(singleDir)->second.getResponseDir() + dirTrim(dirFixed, 1));
+	return ("");
 }

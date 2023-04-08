@@ -28,7 +28,10 @@ class	HTTPParser : virtual public MasterProcess
 	protected:
 
 	virtual ServiceProcess	*RequestParse(std::string const &request);
-	
+
+	private:
+
+	ServiceProcess	*deleteRequest(std::string const &dir, HttpRequest const &request);
 };
 
 class	HTTPFileSend : public HTTPParser, public FileSend
@@ -59,12 +62,14 @@ class	HTTPFileReceive : public HTTPParser, public FileReceive
 	private:
 		Buffer				buffer;
 		const std::string	delimiter;
+		bool				beginTrimmed;
 	public:
 		HTTPFileReceive(const HTTPParser &process, std::string const &path, size_t const &len, std::string const &delimiter):
-						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileReceive(&theConnection(), path, len), delimiter(delimiter) {};
+						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileReceive(&theConnection(), path, len),
+						delimiter(delimiter), beginTrimmed(false) {};
 		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path, size_t const &len, std::string const &delimiter):
 						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess), HTTPParser(process, followingProcess),
-						FileReceive(&theConnection(), followingProcess, path, len), delimiter(delimiter) {};
+						FileReceive(&theConnection(), followingProcess, path, len), delimiter(delimiter), beginTrimmed(false) {};
 		virtual ~HTTPFileReceive() {};
 
 	bool	Handle();
@@ -73,6 +78,10 @@ class	HTTPFileReceive : public HTTPParser, public FileReceive
 		this->buffer << src;
 		return (*this);
 	};
+
+	private:
+
+	bool	BeginTrimHandle();
 };
 
 class	WebSite: public Service

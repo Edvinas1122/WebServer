@@ -68,6 +68,8 @@ void	Server::StartProcesses()
 	Heart beat idle proccesses from same origin -> ip address
 */
 
+#define	HEART_BEAT_SAFETY_TIME_MS 210 // single origin multiple connections at same time is better to substitute with type if connection were added via same list
+
 void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &origin, Service *service)
 {
 	listOfConnections	matchingOrigin = getConnectionsByOrigin(origin.ipAddress);
@@ -80,9 +82,12 @@ void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &ori
 
 			while (it_origin != matchingOrigin.end())
 			{
-				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second) {
-					(*it)->HeartBeat();
-					std::cout << "idle process from same origin heart beat set" << std::endl;
+				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second)
+				{
+					if ((*it)->ageTimedOut(HEART_BEAT_SAFETY_TIME_MS)) {
+						(*it)->HeartBeat();
+						std::cout << "idle process from same origin heart beat set" << std::endl;
+					}
 					break;
 				}
 				it_origin++;

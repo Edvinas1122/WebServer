@@ -18,20 +18,40 @@ bool	HTTPFileReceiveReport::Handle()
 	return (true);
 }
 
-// static void	unchunkEnd(Buffer &buffer, std::string const &delimeter)
-// {
-// 	buffer = buffer.substr(0, buffer.find(std::string("--") + delimeter));
-// 	buffer = buffer.substr(buffer.find_last("\r\n"));
-// }
-
 /*
 	Length Based transmision end determinant
 */
 bool	HTTPFileReceive::Handle()
 {
-	if (!buffer.empty())
-		buffer >> fileToReceive;
-	if (theConnection().downloadBufferReady())
+	if (!beginTrimmed)
+		return (BeginTrimHandle());
+	else if (theConnection().downloadBufferReady())
 		return (FileReceive::Handle());
 	return (true);
+}
+
+#include "mod/contentUtils.hpp"
+
+bool	HTTPFileReceive::BeginTrimHandle()
+{
+	std::string	header_tmp;
+
+	buffer >> header_tmp;
+	if (header_tmp.find(delimiter, header_tmp.find(delimiter) + 1) != std::string::npos)
+	{
+		lenght -= unchunkBegining(buffer, delimiter).length() + 4;
+		std::cout << "Receive length: " << lenght << std::endl;
+		buffer = unchunkBegining(buffer, delimiter);
+		trimUntilFileBegin(buffer);
+		buffer >> fileToReceive;
+		beginTrimmed = true;
+		return (FileReceive::Handle());
+	}
+	else {
+		Buffer	tmp;
+
+		theConnection() >> tmp;
+		buffer << tmp;
+		return (true);
+	}
 }

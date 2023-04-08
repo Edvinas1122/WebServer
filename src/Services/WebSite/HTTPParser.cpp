@@ -43,23 +43,39 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 		}
 		if (!isFile(dir) && allowedDir(dir))
 		{
-			size_t	fileSize = atoi((HttpRequest(request).getHeaders().at("Content-Length").c_str()));
-			HTTPFileReceive	*process;
-			Buffer	TrimRequestHead;
+			try {
+				size_t	fileSize = atoi((HttpRequest(request).getHeaders().at("Content-Length").c_str()));
+				HTTPFileReceive	*process;
+				Buffer			requestBuffered;
 
-			theConnection() >> TrimRequestHead;
-			fileSize -= unchunkBegining(TrimRequestHead, HttpRequest(request).getBoundry()).length() - 26;
-			std::cout << "File receive size: " << fileSize << std::endl;
-			process = new HTTPFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)),
-							dir + HttpRequest(request).getFilename(), fileSize, HttpRequest(request).getBoundry());
-			TrimRequestHead = unchunkBegining(TrimRequestHead, HttpRequest(request).getBoundry());
-			trimUntilFileBegin(TrimRequestHead);
-			*process << TrimRequestHead;
-			return (process);
+				std::cout << theConnection() << std::endl;
+				std::cout << "File receive size: " << fileSize << std::endl;
+				process = new HTTPFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)),
+								dir + HttpRequest(request).getFilename(), fileSize, HttpRequest(request).getBoundry());
+				theConnection() >> requestBuffered;
+				*process << requestBuffered;
+				return (process);
+			} catch (...) {
+				theConnection() << "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 14\r\n\r\nInternal Error";
+			}
 		}
+		if (request.find("_method=DELETE") != std::string::npos)
+			return (deleteRequest(dir, request));
 	}
 	return (new TerminateProcess(&theConnection()));
 };
+
+ServiceProcess	*HTTPParser::deleteRequest(std::string const &dir, HttpRequest const &request)
+{
+	if (access(dir.c_str(), W_OK) == 0)
+	{
+		std::remove(dir.c_str());
+		theConnection() << "HTTP/1.1 200 OK\r\nContent-Length: " << 18 + HttpRequest(request).getLocation().getFileName().length() << "\r\n\r\nResource Deleted: " << HttpRequest(request).getLocation().getFileName();
+	}
+	else
+		theConnection() << "HTTP/1.1 403 Forbidden\r\nContent-Length: 16\r\n\r\nRequest Forbiden";
+	return (new HTTPParser(*this));
+}
 
 // ServiceProcess	*VirtualServerHTTPParser::RequestParse(std::string const &request)
 // {

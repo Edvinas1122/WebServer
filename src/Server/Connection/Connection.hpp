@@ -14,6 +14,7 @@ class	Timer
 	
 	void	updateTime(const bool timedout = false);
 	time_t	getElapsedTime() const;
+	size_t	getElapsedTimeMS() const;
 };
 
 class	Connection: public Timer

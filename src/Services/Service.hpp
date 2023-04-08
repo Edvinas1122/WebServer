@@ -18,6 +18,7 @@ class	TimeOut
 
 	void	setTimeOutDurration(const int timeOutDurration);
 	bool	isTimedOut() const;
+	bool	ageTimedOut(const size_t &age);
 };
 
 class	ServiceProcess: public TimeOut

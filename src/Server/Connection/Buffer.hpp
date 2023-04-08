@@ -100,7 +100,7 @@ class	Buffer
 
 			for (size_t i = 0; i < data.size(); ++i)
 			{
-				str += (char)(data[i]);
+				str += (char)(data[i]); // while is ascii
 			}
 		}
 

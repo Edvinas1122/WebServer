@@ -20,3 +20,20 @@ time_t	Timer::getElapsedTime() const
 	gettimeofday(&currentTime, NULL);
 	return (currentTime.tv_sec - lst_msg_time.tv_sec);
 }
+
+static size_t	convertToMS(struct timeval const &time)
+{
+	size_t	timeMs;
+
+	timeMs = time.tv_sec * 1000;
+	timeMs = time.tv_usec / 1000;
+	return (timeMs);
+}
+
+size_t	Timer::getElapsedTimeMS() const
+{
+	struct timeval	currentTime;
+
+	gettimeofday(&currentTime, NULL);
+	return (convertToMS(currentTime) - convertToMS(lst_msg_time));
+}

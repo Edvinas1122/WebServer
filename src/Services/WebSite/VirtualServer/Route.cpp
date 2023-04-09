@@ -13,7 +13,8 @@
 	
 */
 
-Route::Route(DescendParser parser) 
+Route::Route(DescendParser parser): directory_listing_enabled(true), response_dir(""),
+				upload_dir(""), redirect(""), default_file("")
 {
 	try {
 		response_dir = parser.getValue("dir_route");

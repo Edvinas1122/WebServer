@@ -21,9 +21,8 @@ class Route
 		bool		forbit_methods[8];
 	public:
 		Route(): directory_listing_enabled(true), response_dir(""),
-				upload_dir(""), redirect(""), response_dir(""), default_file("") {};
-		Route(DescendParser parser): directory_listing_enabled(true), response_dir(""),
-				upload_dir(""), redirect(""), response_dir(""), default_file("");
+				upload_dir(""), redirect(""), default_file("") {};
+		Route(DescendParser parser);
 
 		void	displayInfo(const char *append) const;
 		const std::string	getResponseDir() const {return (response_dir);};

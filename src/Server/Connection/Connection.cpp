@@ -14,7 +14,7 @@ void	Connection::sendBytes(void *buf, size_t len)
 	outgoing.append((char *)buf, len);
 }
 
-bool	Connection::uploadBufferReady() const
+bool	Connection::uploadBufferReady() const // inverted logic ???
 {
 	return (!outgoing.empty());
 }

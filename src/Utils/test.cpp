@@ -13,6 +13,9 @@ int	main()
 	memset(buf, 0, 300);
 	read(pipe_read, buf, 300);
 	std::cout << buf << std::endl;
+	memset(buf, 0, 300);
+	read(pipe_read, buf, 300);
+	std::cout << buf << std::endl;
 	close(pipe_read);
 	return (0);
 }

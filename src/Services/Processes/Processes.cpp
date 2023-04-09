@@ -91,25 +91,28 @@ bool	PipeSend::Handle()
 	}
 	else
 	{
-		if (theConnection().uploadBufferReady())
+		if (!theConnection().uploadBufferReady())
 			return (false); // client received data
 		return (true); // buffer still uploading
 	}
 }
 
+#define PIPE_READ_BUFF_SIZE	1024
+
 void	PipeSend::bufferConnection()
 {
-	char	buf[1024];
+	char	buf[PIPE_READ_BUFF_SIZE];
 	int		bytes_read;
 
-	memset(buf, 0, 1024);
-	bytes_read = 1;
-	while (bytes_read > 0)
+	while (42)
 	{
-		bytes_read = read(fd, buf, 1024);
+		memset(buf, 0, PIPE_READ_BUFF_SIZE);
+		bytes_read = read(fd, buf, PIPE_READ_BUFF_SIZE);
 		if (bytes_read == -1)
 			throw std::exception();
 		if (bytes_read > 0)
 			theConnection().sendBytes(buf, bytes_read);
+		if (bytes_read != PIPE_READ_BUFF_SIZE)
+			break;
 	}
 }

@@ -18,13 +18,17 @@ class Route
 		std::string	upload_dir;
 		std::string	redirect;
 		std::string	default_file;
-		short		forbit_methods[8];
+		bool		forbit_methods[8];
 	public:
-		Route() {};
-		Route(DescendParser parser);
+		Route(): directory_listing_enabled(true), response_dir(""),
+				upload_dir(""), redirect(""), response_dir(""), default_file("") {};
+		Route(DescendParser parser): directory_listing_enabled(true), response_dir(""),
+				upload_dir(""), redirect(""), response_dir(""), default_file("");
 
 		void	displayInfo(const char *append) const;
-		std::string	getResponseDir() const {return (response_dir);};
+		const std::string	getResponseDir() const {return (response_dir);};
+		const std::string	getDefaultFile(std::string const &filename);
+		const std::string	getRedirect() const { return (redirect);};
 };
 
 /*
@@ -69,8 +73,13 @@ class VirtualServer {
 		const char	*getServerName() const;
 		void		displayInfo() const;
 
-	const std::string		getSystemRoot(std::string const &urlDir);
+	const std::string		getSystemPath(std::string const &dir, std::string const &filename);
+	const std::string		getRedirectMessage(std::string const &dir);
+
 	std::list<std::string>	getPorts() {return (port_number);};
+
+	private:
+		const std::string	getSystemRoot(std::string const &urlDir);
 
 	public:
 		static bool	validServerName(std::string const &str);

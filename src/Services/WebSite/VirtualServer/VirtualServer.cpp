@@ -164,7 +164,7 @@ static std::string	dirTrim(std::string const &dir, int level)
 	return (dir);
 }
 
-const std::string	VirtualServer::getSystemRoot(std::string const &urlDir)
+const std::string	fixDir(std::string const &urlDir)
 {
 	std::string	dirFixed;
 
@@ -174,11 +174,54 @@ const std::string	VirtualServer::getSystemRoot(std::string const &urlDir)
 		dirFixed = std::string("/") + urlDir + "/"; // not recognized by http parser as urldir
 	else
 		dirFixed = std::string("/") + urlDir;
-	
-	std::string	singleDir = dirDescend(dirFixed, 0);
+	return (dirFixed);
+}
+
+const std::string	VirtualServer::getSystemRoot(std::string const &urlDir)
+{
+	std::string	singleDir = dirDescend(fixDir(urlDir), 0);
+
 	if (locations.find(singleDir) == locations.end())
-		return (root_dir + dirFixed);
+		return (root_dir + fixDir(urlDir));
 	else if (!locations.find(singleDir)->second.getResponseDir().empty())
-		return (locations.find(singleDir)->second.getResponseDir() + dirTrim(dirFixed, 1));
+		return (locations.find(singleDir)->second.getResponseDir() + dirTrim(fixDir(urlDir), 1));
 	return ("");
+}
+
+const std::string	Route::getDefaultFile(std::string const &filename)
+{
+	if (default_file.empty())
+		return (filename);
+	return (default_file);
+};
+
+
+const std::string	VirtualServer::getSystemPath(std::string const &dir, std::string const &filename)
+{
+	Route		*route = &locations.find(dirDescend(fixDir(dir), 0))->second;
+	std::string	systemPath;
+
+	if (!route->getRedirect().empty())
+		return ("");
+	if (locations.find(dirDescend(fixDir(dir), 0)) == locations.end()) // No Route
+	{
+		if (dir == "")
+			systemPath = root_dir + "/" + index;
+		else
+			systemPath = root_dir + fixDir(dir) + filename;
+		return (systemPath);
+	}
+	systemPath = getSystemRoot(dir) + route->getDefaultFile(filename);
+	return (systemPath);
+}
+
+const std::string	VirtualServer::getRedirectMessage(std::string const &dir)
+{
+	std::string	redirectMessage;
+
+	redirectMessage = "HTTP/1.1 302 Found\r\n";
+	redirectMessage += "Location: ";
+	redirectMessage += locations.find(dirDescend(fixDir(dir), 0))->second.getRedirect();
+	redirectMessage += "\r\n\r\n";
+	return (redirectMessage);
 }

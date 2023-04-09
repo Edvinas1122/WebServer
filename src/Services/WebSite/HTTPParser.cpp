@@ -8,19 +8,18 @@
 
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
-	std::string	dir = virtualServer->getSystemRoot(HttpRequest(request).getLocation().getDir()) + HttpRequest(request).getLocation().getFileName();
+	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
 
-	// TEST_FOR_PROXY_DIRS_(dir)
-		// dir modify 
 	if (HttpRequest(request).getMethod() == "GET")
 	{
-		if (!Access(dir)) {
-			theConnection () << "HTTP/1.1 404 Not Found\r\nContent-Length: 14\r\n\r\nPage Not Found\n";
+		if (dir.empty())
+		{
+			theConnection() << virtualServer->getRedirectMessage(HttpRequest(request).getLocation().getDir());
 			return (new HTTPParser(*this));
 		}
-		if (!isFile(dir) && TEST_LOCATION_DEFAULT_RESPONSES(dir)) { // test for dir default responses
-			std::string	defaultResponse = "index.html";
-			dir += defaultResponse;
+		if (!Access(dir)) {
+			theConnection() << "HTTP/1.1 404 Not Found\r\nContent-Length: 14\r\n\r\nPage Not Found\n";
+			return (new HTTPParser(*this));
 		}
 		if (!isFile(dir) && DIR_LISTING_ALLOWED) {
 			theConnection() << HTTPHeaderDirOK(dir, std::string("http://46.101.198.64:10012") + HttpRequest(request).getLocation());

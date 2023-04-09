@@ -15,8 +15,31 @@
 
 Route::Route(DescendParser parser) 
 {
-	response_dir = parser.getValue("dir_route");
+	try {
+		response_dir = parser.getValue("dir_route");
+	} catch (...) { response_dir = ""; }
+	
+	try {
+		default_file = parser.getValue("default_file");
+	} catch (...) { default_file = ""; }
 
+	try {
+		if (parser.getValue("dir_listing") == "enable")
+			directory_listing_enabled = true;
+		else
+			directory_listing_enabled = false;
+	} catch (...) { directory_listing_enabled = true; }
+	try {
+		if (parser.getValue("forbid") == "GET")
+			forbit_methods[0] = true;
+	} catch (...) { forbit_methods[0] = false; }
+
+	try {
+		upload_dir = parser.getValue("upload_dir");
+	} catch (...) { upload_dir = ""; }
+	try {
+		redirect = parser.getValue("redirect");
+	} catch (...) { upload_dir = ""; }
 }
 
 

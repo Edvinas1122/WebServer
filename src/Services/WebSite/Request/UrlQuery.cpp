@@ -3,22 +3,27 @@
 const char* UrlQuery::dir_delim = "/";
 const char* UrlQuery::query_delim = "?\0";
 
-const std::string	UrlQuery::getFileName() const
+static const std::string	removeHexSpaces(std::string const &string)
 {
-	size_t	begin = find_last_of(dir_delim) + 1;
-	size_t	end =  find_first_of(query_delim);
-
-	std::string	filename = substr(begin, end - begin);
-    std::string::size_type	pos = 0;
+	std::string				filename = string;
+	std::string::size_type	pos = 0;
 
     while ((pos = filename.find("%20", pos)) != std::string::npos)
 	{
         filename.replace(pos, 3, " ");
         pos += 1;
     }
+	return (filename);
+}
+
+const std::string	UrlQuery::getFileName() const
+{
+	size_t	begin = find_last_of(dir_delim) + 1;
+	size_t	end =  find_first_of(query_delim);
+
 	if (begin >= end)
 		return ("");
-	return (filename);
+	return (removeHexSpaces(substr(begin, end - begin)));
 }
 
 const std::string	UrlQuery::getDir() const
@@ -28,7 +33,7 @@ const std::string	UrlQuery::getDir() const
 
 	if (begin >= end)
 		return ("");
-	return (substr(begin, end - begin));
+	return (removeHexSpaces(substr(begin, end - begin)));
 }
 
 const std::string	UrlQuery::getFileExtension() const

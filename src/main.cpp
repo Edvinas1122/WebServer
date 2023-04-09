@@ -26,6 +26,8 @@ int	main(void)
 	WebSite			webSite;
 	Server			httpServer;
 
+	signal(SIGINT, handleSignal); // setSig for ending leak free
+	signal(SIGQUIT, handleSignal);
 	try {
 		virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
 		// virtualServers.Info(); // 
@@ -41,8 +43,6 @@ int	main(void)
 #endif
 	httpServer.addService(&webSite);
 
-	signal(SIGINT, handleSignal); // setSig for ending leak free
-	signal(SIGQUIT, handleSignal);
 #ifdef TERMINAL
 	while (!terminal.EndProgram() && !signalEnd)
 #else

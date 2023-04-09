@@ -43,6 +43,7 @@ class	Connection: public Timer
 	bool				uploadBufferReady() const;
 	bool				downloadBufferReady() const;
 
+	void		sendBytes(void *buf, size_t len);
 	Connection	&operator<<(const std::string& str);
 	Connection	&operator<<(const char * str);
 	Connection	&operator<<(const size_t &number);

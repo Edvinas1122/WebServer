@@ -65,4 +65,36 @@ class	FileReceive : virtual public ServiceProcess
 	virtual bool	Handle();
 };
 
+class	PipeSend: virtual public ServiceProcess
+{
+	private:
+		const int	fd;
+	public:
+		PipeSend(Connection *connection, const int &fd): ServiceProcess(connection), fd(fd), wait(false) {};
+		PipeSend(Connection *connection, ServiceProcess *followingProcess, const int &fd): ServiceProcess(connection, followingProcess), fd(fd), wait(false) {};
+		~PipeSend() {};
+
+	bool Handle();
+	private:
+	bool	wait;
+	void	bufferConnection();
+};
+
+#include <Executor.hpp>
+
+class	ExecuteFile : virtual public ServiceProcess
+{
+	private:
+		ServiceProcess	*followingProcess;
+		Executor 		executor;
+	public:
+		ExecuteFile(Connection *connection, std::string const &path):
+						ServiceProcess(connection), followingProcess(NULL), executor(path) {};
+		ExecuteFile(Connection *connection, ServiceProcess *followingProcess, std::string const &path):
+						ServiceProcess(connection), followingProcess(followingProcess), executor(path, open("/home/WebServer/http/files/gay.txt", O_RDONLY), STDOUT_FILENO) {};
+		virtual ~ExecuteFile();
+
+	bool Handle();
+};
+
 #endif

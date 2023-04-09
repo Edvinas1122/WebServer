@@ -9,6 +9,11 @@ const std::string	Connection::getMessage() const {
 // 	return (fd);
 // };
 
+void	Connection::sendBytes(void *buf, size_t len)
+{
+	outgoing.append((char *)buf, len);
+}
+
 bool	Connection::uploadBufferReady() const
 {
 	return (!outgoing.empty());

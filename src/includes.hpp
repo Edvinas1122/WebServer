@@ -24,6 +24,7 @@
 # include <sys/types.h>
 # include <algorithm>
 # include <sys/wait.h>
+# include <sys/types.h>
 # include <sys/time.h>
 # include <fstream>
 # include <limits>

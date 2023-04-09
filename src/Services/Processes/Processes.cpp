@@ -65,3 +65,51 @@ bool	FileReceive::Handle()
 	}
 	return (true);
 }
+
+bool	ExecuteFile::Handle()
+{
+	if (followingProcess)
+		QueFollowingProcess(new	PipeSend(&theConnection(), followingProcess, executor.executeToOutPut()));
+	else
+		QueFollowingProcess(new	PipeSend(&theConnection(), executor.executeToOutPut()));
+	followingProcess = NULL;
+	return (false);
+}
+
+ExecuteFile::~ExecuteFile()
+{
+	if (followingProcess)
+		delete (followingProcess);
+}
+
+bool	PipeSend::Handle()
+{
+	if (!wait) {
+		bufferConnection();
+		wait = true;
+		return (true);
+	}
+	else
+	{
+		if (theConnection().uploadBufferReady())
+			return (false); // client received data
+		return (true); // buffer still uploading
+	}
+}
+
+void	PipeSend::bufferConnection()
+{
+	char	buf[1024];
+	int		bytes_read;
+
+	memset(buf, 0, 1024);
+	bytes_read = 1;
+	while (bytes_read > 0)
+	{
+		bytes_read = read(fd, buf, 1024);
+		if (bytes_read == -1)
+			throw std::exception();
+		if (bytes_read > 0)
+			theConnection().sendBytes(buf, bytes_read);
+	}
+}

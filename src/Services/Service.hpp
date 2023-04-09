@@ -50,6 +50,7 @@ class	ServiceProcess: public TimeOut
 	protected:
 
 	virtual void	QueFollowingProcess(ServiceProcess *);
+	//ServicePorcess	*getFollowingProcess(); // list structure
 };
 
 class	Service

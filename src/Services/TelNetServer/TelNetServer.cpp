@@ -80,6 +80,11 @@ bool	TelNetServerParser::Handle()
 		{
 			throw	std::exception();
 		}
+		if (request.find("Exec") != std::string::npos)
+		{
+			QueFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerIntroduction(*this), "/usr/bin/cat"));
+			return (false);
+		}
 	}
 	return (true);
 }

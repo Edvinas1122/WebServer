@@ -27,7 +27,7 @@ class	TelNetServerIntroduction : public ServiceProcess
 		virtual ~TelNetServerIntroduction() {};
 
 	bool	Handle() {
-		theConnection() << "Command list:\n 1. Gay\n 2. Chat\n 3. Get\n 4. Exit\n 5. Close\n 6. Post\n";
+		theConnection() << "Command list:\n 1. Gay\n 2. Chat\n 3. Get\n 4. Exit\n 5. Close\n 6. Post\n 7. Execute - Exec\n";
 		return (false);
 	};
 };

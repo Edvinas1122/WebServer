@@ -77,17 +77,14 @@ void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &ori
 
 	while (it != processes.end())
 	{
-		if (service->DetermineIfIdleProcessType(*it)) {
+		if ((*it)->ageTimedOut(HEART_BEAT_SAFETY_TIME_MS) && service->DetermineIfIdleProcessType(*it)) {
 			listOfConnections::iterator	it_origin = matchingOrigin.begin();
 
 			while (it_origin != matchingOrigin.end())
 			{
-				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second)
-				{
-					if ((*it)->ageTimedOut(HEART_BEAT_SAFETY_TIME_MS)) {
-						(*it)->HeartBeat();
-						std::cout << "idle process from same origin heart beat set" << std::endl;
-					}
+				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second) {
+					(*it)->HeartBeat();
+					std::cout << "idle process from same origin heart beat set" << std::endl;
 					break;
 				}
 				it_origin++;

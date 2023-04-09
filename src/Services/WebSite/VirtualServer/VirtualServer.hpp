@@ -70,11 +70,12 @@ class VirtualServer {
 		Route		getLocation(std::string const &location); // <--- /jumper/tall/ > "null or /jumper/"
 		const char	*getHost() const;
 		const char	*getServerName() const;
-		void		displayInfo() const;
+	void		displayInfo() const;
 
 	const std::string		getSystemPath(std::string const &dir, std::string const &filename);
 	const std::string		getRedirectMessage(std::string const &dir);
-
+	bool					isCGI(std::string const &fileExtention);
+	std::string				CGIexecutableDir(std::string const &fileExtention);
 	std::list<std::string>	getPorts() {return (port_number);};
 
 	private:

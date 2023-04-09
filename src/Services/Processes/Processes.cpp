@@ -66,22 +66,6 @@ bool	FileReceive::Handle()
 	return (true);
 }
 
-bool	ExecuteFile::Handle()
-{
-	if (followingProcess)
-		QueFollowingProcess(new	PipeSend(&theConnection(), followingProcess, executor.executeToOutPut()));
-	else
-		QueFollowingProcess(new	PipeSend(&theConnection(), executor.executeToOutPut()));
-	followingProcess = NULL;
-	return (false);
-}
-
-ExecuteFile::~ExecuteFile()
-{
-	if (followingProcess)
-		delete (followingProcess);
-}
-
 bool	PipeSend::Handle()
 {
 	if (!wait) {

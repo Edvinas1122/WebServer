@@ -72,7 +72,7 @@ class	PipeSend: virtual public ServiceProcess
 	public:
 		PipeSend(Connection *connection, const int &fd): ServiceProcess(connection), fd(fd), wait(false) {};
 		PipeSend(Connection *connection, ServiceProcess *followingProcess, const int &fd): ServiceProcess(connection, followingProcess), fd(fd), wait(false) {};
-		~PipeSend() {};
+		~PipeSend() {close(fd);};
 
 	bool Handle();
 	private:
@@ -85,13 +85,14 @@ class	PipeSend: virtual public ServiceProcess
 class	ExecuteFile : virtual public ServiceProcess
 {
 	private:
-		ServiceProcess	*followingProcess;
-		Executor 		executor;
+		ServiceProcess		*followingProcess;
+		Executor 			executor;
+		const std::string	scriptPath;
 	public:
-		ExecuteFile(Connection *connection, std::string const &path):
-						ServiceProcess(connection), followingProcess(NULL), executor(path) {};
-		ExecuteFile(Connection *connection, ServiceProcess *followingProcess, std::string const &path):
-						ServiceProcess(connection), followingProcess(followingProcess), executor(path, open("/home/WebServer/http/files/gay.txt", O_RDONLY), STDOUT_FILENO) {};
+		ExecuteFile(Connection *connection, std::string const &executablePath,
+						std::string const &scriptPath);
+		ExecuteFile(Connection *connection, ServiceProcess *followingProcess,
+						std::string const &executablePath, std::string const &scriptPath);
 		virtual ~ExecuteFile();
 
 	bool Handle();

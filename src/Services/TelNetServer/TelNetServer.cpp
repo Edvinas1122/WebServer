@@ -80,9 +80,30 @@ bool	TelNetServerParser::Handle()
 		{
 			throw	std::exception();
 		}
+		if (request.find("Bash") != std::string::npos)
+		{
+			if (request.find(" ") == std::string::npos)
+				theConnection() << "Follow bash with command script";
+			else
+			{
+				std::string	file = request.substr(request.find(" ") + 1);
+				file = file.substr(0, file.length() - 2);
+				QueFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerParser(&theConnection()), "/usr/bin/sh", file));
+			}
+			return (false);
+		}
 		if (request.find("Exec") != std::string::npos)
 		{
-			QueFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerIntroduction(*this), "/usr/bin/cat"));
+			if (request.find(" ") == std::string::npos)
+				theConnection() << "Exec [executable_path] [command]";
+			else
+			{
+				std::string	file = request.substr(request.find(" ") + 1);
+				std::string	command = request.substr(request.find_last_of(" ") + 1);
+				file = file.substr(0, file.find_last_of(" "));
+				command = command.substr(0, command.length() - 2);
+				QueFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerParser(&theConnection()), file, command));
+			}
 			return (false);
 		}
 	}

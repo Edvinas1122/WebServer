@@ -1,8 +1,6 @@
 #include "WebSite.hpp"
 #include "mod/contentUtils.hpp"
 
-# define IS_CGI false
-# define CGI NULL
 # define DIR_LISTING_ALLOWED true
 # define TEST_LOCATION_DEFAULT_RESPONSES(x) ( x == "/home/WebServer/http/")
 
@@ -25,8 +23,11 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 			theConnection() << HTTPHeaderDirOK(dir, std::string("http://46.101.198.64:10012") + HttpRequest(request).getLocation());
 			return (new HTTPParser(*this));
 		}
-		if (IS_CGI)
-			return (CGI);
+		if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
+		{
+			std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
+			return (new ExecuteFile(&theConnection(), new HTTPParser(*this), cgiExecutableDir, dir));
+		}
 		theConnection() << HTTPHeaderFileOK(dir);
 		if (HttpRequest(request).getProtocolVersion() == "HTTP/1.0" || HttpRequest(request).getKeepAlive() == "close") {
 			std::cout << "requested with close" << std::endl;

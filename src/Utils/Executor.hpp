@@ -8,7 +8,7 @@ class	Executor
 {
 	private:
 		const std::string	file;
-		const int			input_fd;
+		int					input_fd;
 		int					output_fd;
 		std::vector<char*>	commands;
 		std::vector<char*>	environment;
@@ -22,10 +22,15 @@ class	Executor
 	void	execute(std::list<std::string> const &param);
 	void	execute(int count, ...);
 	void	execute();
+
+	int		executeToOutPut(int count, ...);
 	int		executeToOutPut();
 
 	void	setEnv(std::list<std::string> const &param);
 	void	setEnv(int count, ...);
+
+	void	setInputFd(const int &fd) {input_fd = fd;};
+	void	setOutputFd(const int &fd) {output_fd = fd;};
 
 	private:
 	void	execute(std::string const &param);

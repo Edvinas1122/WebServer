@@ -225,3 +225,15 @@ const std::string	VirtualServer::getRedirectMessage(std::string const &dir)
 	redirectMessage += "\r\n\r\n";
 	return (redirectMessage);
 }
+
+bool	VirtualServer::isCGI(std::string const &fileExtention)
+{
+	if (cgi_response.find(fileExtention) != cgi_response.end())
+		return (true);
+	return (false);
+}
+
+std::string	VirtualServer::CGIexecutableDir(std::string const &fileExtention)
+{
+	return (cgi_response.find(fileExtention)->second);
+}

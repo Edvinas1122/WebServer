@@ -74,6 +74,21 @@ void	Executor::execute()
 	return;
 }
 
+int		Executor::executeToOutPut(int count, ...)
+{
+	int	pipe_fd[2];
+	va_list	args;
+
+	va_start(args, count);
+    while (count--)
+		setCommandParam(va_arg(args, const char*));
+	va_end(args);
+	pipe(pipe_fd);
+	output_fd = pipe_fd[1];
+	execute();
+	return (pipe_fd[0]);
+}
+
 int		Executor::executeToOutPut()
 {
 	int	pipe_fd[2];

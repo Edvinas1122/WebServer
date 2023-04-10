@@ -42,28 +42,7 @@ class	TelNetServerChat: public ServiceProcess, public Terminal
 							ServiceProcess(connection, followingService) {};
 		~TelNetServerChat() {};
 	
-	bool	Handle() {
-
-		if (theConnection().downloadBufferReady())
-		{
-			std::string	buf;
-			theConnection() >> buf;
-			if (!buf.empty())
-			{
-				if (buf.find("terminate") != std::string::npos)
-				{
-					std::cout << "Terminating" << std::endl;
-					ProgramInterface::Terminate();
-				}
-				else if (buf.find("end") != std::string::npos)
-					End();
-				std::cout << buf << std::endl;
-			}
-		}
-		theConnection() << DataFeed();
-		return (true);
-	};
-
+	bool	Handle();
 };
 
 class	TelNetServer: public Service

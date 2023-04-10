@@ -5,9 +5,11 @@
 
 class	ProgramInterface
 {
+	public:
+		typedef std::map<std::string, std::map<std::string, std::string> > SysMessageQueMap;
 	protected:
-		static bool			run;
-		static std::string	data;
+		static bool				run;
+		static SysMessageQueMap	data;
 	public:
 		ProgramInterface() {};
 		virtual ~ProgramInterface() {};
@@ -16,16 +18,44 @@ class	ProgramInterface
 	virtual bool		EndProgram() {
 		return (!run);
 	};
-	virtual std::string	DataFeed() {
-		std::string	outside = data;
-		data.clear();
-		return (outside);
-	};
+	// virtual bool	DataFeed(std::string const &match) {
+	// 	std::string	outside = data;
+	// 	data.clear();
+	// 	return (outside);
+	// };
 
 	protected:
 
+	virtual std::string	DataFeed(std::string const &id, std::string const &info_type)
+	{
+		std::map<std::string, std::string>	outside = data[id];
+
+		data[id].clear();
+		if (info_type.empty())
+			return (outside.begin()->second);
+		if (outside.find(info_type) != outside.end())
+			return (outside.find(info_type)->second);
+		return ("");
+	};
+
+	void	addSystemMessage(std::string const &operator_id, std::string const &info_type, std::string const &message)
+	{
+		data[operator_id][info_type] = message;
+	}
+
 	void	Terminate() {run = false;};
 };
+
+// class	NetworkControll : public ProgramInterface
+// {
+// 	private:
+// 		std::string	data;
+// 	public:
+// 		NetworkControll() {};
+// 		~NetworkControll() {};
+	
+// 	void	Input();
+// }
 
 class	Terminal : public ProgramInterface
 {

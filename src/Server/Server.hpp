@@ -48,13 +48,16 @@ class	PortSockets: virtual public Observer
 		PortSockets() {
 			this->socketInitMethod = openPortSocket;
 		};
-		~PortSockets() {};
+		~PortSockets();
 
 		template <typename PARSER>
 		void	startPorts(std::list<std::string> (*parsingMethod)(PARSER &), PARSER parser, bool asynch = true);
 		void	startPorts(std::list<std::string> ports, bool asynch = true);
 		void	startPort(std::string const &port, bool asynch = true);
+	
 		void	infoPorts() const;
+	protected:
+		void	closePorts();
 	public:
 		void	setStartSocketMethod(int (*socketInitMethod)(char const *)) {
 			this->socketInitMethod = socketInitMethod;
@@ -124,6 +127,7 @@ void	ConnectionQueController::action(void (*action)(Connection &, T), T object, 
 }
 
 # include <Service.hpp>
+# include <ProgramInterface.hpp>
 
 class Server : public ConnectionQueController, public PortSockets
 {

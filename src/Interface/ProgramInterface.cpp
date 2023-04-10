@@ -1,7 +1,7 @@
 #include "ProgramInterface.hpp"
 
-std::string	ProgramInterface::data;
-bool		ProgramInterface::run = true;
+ProgramInterface::SysMessageQueMap	ProgramInterface::data;
+bool								ProgramInterface::run = true;
 
 static void	display_information()
 {
@@ -23,7 +23,7 @@ void	Terminal::Parse(std::string const &user_input)
 	if (!user_input.compare(0, 4, "help"))
 		display_information();
 	else if (!user_input.compare(0, 3, "say"))
-		data.append(user_input.substr(4));
+		addSystemMessage("terminal_chat", "message", user_input.substr(4));
 	else if (!user_input.compare(0, 3, "end"))
 	{
 		end_program_message();

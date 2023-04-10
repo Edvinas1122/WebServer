@@ -20,13 +20,15 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 			return (new HTTPParser(*this));
 		}
 		if (!isFile(dir) && DIR_LISTING_ALLOWED) {
-			theConnection() << HTTPHeaderDirOK(dir, std::string("http://46.101.198.64:10012") + HttpRequest(request).getLocation());
+			theConnection() << HTTPHeaderDirOK(dir, std::string("http://") + HttpRequest(request).getHost() + HttpRequest(request).getLocation());
 			return (new HTTPParser(*this));
 		}
 		if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
 		{
 			std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
-			return (new ExecuteFile(&theConnection(), new HTTPParser(*this), cgiExecutableDir, dir));
+
+			theConnection() << "HTTP/1.1 200 OK\r\nConnection: close\r\n";
+			return (new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir));
 		}
 		theConnection() << HTTPHeaderFileOK(dir);
 		if (HttpRequest(request).getProtocolVersion() == "HTTP/1.0" || HttpRequest(request).getKeepAlive() == "close") {

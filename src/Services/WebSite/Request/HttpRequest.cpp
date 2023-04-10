@@ -69,19 +69,3 @@ const std::string	HttpRequest::getFilename() const
 {
 	return (substr(find("filename=") + 10, substr(find("filename=") + 11).find('"') + 1));
 }
-
-const std::string	HttpRequest::getBody() const
-{
-	std::string	string;
-
-	return (string);
-}
-
-// const std::string	HttpRequest::getContentFileName() const
-// {
-// 	std::string	contentInfo = getHeaders().at("Content-Disposition");
-// 	size_t	begin = contentInfo.find("filename=") + strlen("filename=") + 1;
-// 	size_t	end = contentInfo.length() - begin - 1;
-
-// 	return (contentInfo.substr(begin, end));
-// }

@@ -53,7 +53,7 @@ static struct addrinfo *get_socket_address_info_list(const struct addrinfo *TCP_
 	if (gai_error_code != SUCESS) {
 		perror("getaddrinfo:\n");
 		perror(gai_strerror(gai_error_code));
-        exit(EXIT_FAILURE);
+    	throw BindFailure();
 	}
 	return (result_addr_list);
 }
@@ -79,7 +79,7 @@ static int bind_kernel_socket(const struct addrinfo *desired_TCP_service_info, c
 	catch (...)
 	{
 		std::cerr << "cannot bind" << std::endl;
-		exit(EXIT_FAILURE);
+		throw BindFailure();
 	}
 }
 

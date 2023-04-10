@@ -2,6 +2,8 @@
 
 Executor::Executor(std::string const &path): file(path), input_fd(STDIN_FILENO), output_fd(STDOUT_FILENO)
 {
+	if (access(path.c_str(), X_OK))
+		throw std::exception();
 	setCommandParam(path.substr(path.find_last_of("/") + 1));
 };
 
@@ -63,6 +65,9 @@ void	Executor::execute()
 		close(input_fd);
 		dup2(output_fd, STDOUT_FILENO);
 		execve(file.c_str(), getCommand(), getEnv());
+		std::cerr << "Exec Command Failure in Forked sub process, ending forked sub Process.." << std::endl;
+		close(output_fd);
+		exit(EXIT_FAILURE);
 	} else {
 		// write(pipe_fd[1], input_data, strlen(input_data));
 

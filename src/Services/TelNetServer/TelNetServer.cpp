@@ -117,3 +117,42 @@ ServiceProcess	*TelNetServer::RequestParse(Connection *connection, std::string c
 		return (new TelNetServerIntroduction(connection, new TelNetServerParser(connection)));
 	return (NULL);
 }
+
+static void	startBackground()
+{
+	int	pid = fork();
+
+	if (pid != 0)
+	{
+		exit(EXIT_SUCCESS);
+	}
+	close(STDOUT_FILENO);
+}
+
+bool	TelNetServerChat::Handle()
+{
+	if (theConnection().downloadBufferReady())
+	{
+		std::string	buf;
+		theConnection() >> buf;
+		if (!buf.empty())
+		{
+			if (buf.find("terminate") != std::string::npos)
+			{
+				std::cout << "Terminating" << std::endl;
+				ProgramInterface::Terminate();
+			}
+			else if (buf.find("background") != std::string::npos)
+			{
+				addSystemMessage("telnetServer", "command", "background");
+				startBackground();
+				End();
+			}
+			else if (buf.find("end") != std::string::npos)
+				End();
+			std::cout << buf << std::endl;
+		}
+	}
+	theConnection() << ProgramInterface::DataFeed("terminal_chat", "message");
+	return (true);
+};

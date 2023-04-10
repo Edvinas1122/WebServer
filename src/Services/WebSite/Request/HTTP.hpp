@@ -51,7 +51,7 @@ class	HttpRequest: public std::string
 		const std::string	getKeepAlive() const;
 		const std::string	getBoundry() const;
 		const std::string	getFilename() const;
-		const std::string	getBody() const;
+		// const std::string	getBody() const;
 
 		// /*
 		// 	Body and File related

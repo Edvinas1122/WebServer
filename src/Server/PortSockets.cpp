@@ -1,8 +1,13 @@
 #include <Server.hpp>
 
+PortSockets::~PortSockets()
+{
+	closePorts();
+};
+
 std::list<std::pair<std::string, int> >	PortSockets::getLoudSockets(const int events)
 {
-	std::map<std::string, int>::iterator	it = portSockets.begin();
+	socketMap::iterator	it = portSockets.begin();
 	std::list<std::pair<std::string, int> >	loudSocketList;
 
 	while (it != portSockets.end())
@@ -47,7 +52,11 @@ void	PortSockets::startPort(std::string const &port, bool asynch)
 
 	if (portSockets.find(port) != portSockets.end())
 		return ;
-	scoket_fd = this->socketInitMethod(port.c_str());
+	try {
+		scoket_fd = this->socketInitMethod(port.c_str());
+	} catch (...) {
+		throw std::exception();
+	}
 	portSockets[port] = scoket_fd;
 	insertFileDescriptor(scoket_fd, POLLIN, asynch);
 }
@@ -61,4 +70,16 @@ void	PortSockets::infoPorts() const
 		std::cout << "Open Port: " << it->first << std::endl;
 		it++;
 	}
+}
+
+void	PortSockets::closePorts()
+{
+	socketMap::iterator	it = portSockets.begin();
+
+	while (it != portSockets.end())
+	{
+		removeFileDescriptor(it->second);
+		it++;
+	}
+	portSockets.clear();
 }

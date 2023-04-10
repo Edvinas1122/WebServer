@@ -35,7 +35,12 @@ int	main(void)
 		std::cout << "Configuration Read Failure" << std::endl;
 		return (EXIT_FAILURE);
 	}
-	httpServer.startPorts(virtualServers.getPortList());
+	try {
+		httpServer.startPorts(virtualServers.getPortList());
+	} catch (...) {
+		std::cout << "Port Bind Failure" << std::endl;
+		return (EXIT_FAILURE);
+	}
 	httpServer.infoPorts();
 	webSite.SetVirtualServerMap(&virtualServers);
 #ifdef TERMINAL

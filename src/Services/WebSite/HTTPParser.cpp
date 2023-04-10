@@ -25,20 +25,20 @@ ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
 	{
 		if (close_connection)
 		{
-			theConnection() << headerMessage(version, code, getHttpExplanation(code).length(), !close_connection) << getHttpExplanation(code);
+			theConnection() << headerMessage(version, code, getHttpExplanation(code).length(), close_connection) << getHttpExplanation(code);
 			return (new TerminateProcess(&theConnection()));
 		} else {
-			theConnection() << headerMessage(version, code, getHttpExplanation(code).length(), close_connection) << getHttpExplanation(code);
+			theConnection() << headerMessage(version, code, getHttpExplanation(code).length(), !close_connection) << getHttpExplanation(code);
 			return (new HTTPParser(*this));
 		}
 	} else {
 		size_t	fileSize = File(virtualServer->errorPage(code).c_str()).GetSize();
 		if (close_connection)
 		{
-			theConnection() << headerMessage(version, code, fileSize, !close_connection) << getHttpExplanation(code);
+			theConnection() << headerMessage(version, code, fileSize, close_connection) << getHttpExplanation(code);
 			return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), virtualServer->errorPage(code)));
 		} else {
-			theConnection() << headerMessage(version, code, fileSize, close_connection) << getHttpExplanation(code);
+			theConnection() << headerMessage(version, code, fileSize, !close_connection) << getHttpExplanation(code);
 			return (new HTTPFileSend(*this, new HTTPParser(*this), virtualServer->errorPage(code)));
 		}
 	}

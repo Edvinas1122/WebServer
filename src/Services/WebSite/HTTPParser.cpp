@@ -4,20 +4,61 @@
 # define DIR_LISTING_ALLOWED true
 # define TEST_LOCATION_DEFAULT_RESPONSES(x) ( x == "/home/WebServer/http/")
 
+const std::string	HTTPParser::headerMessage(const int &method_version, const int &code, const int content_len, bool keep_alive)
+{
+	std::stringstream	message;
+
+	message << "HTTP/1." << method_version << " " << code << " " << getHttpExplanation(code) << "\r\n";
+	message << "Connection: " << (keep_alive ? "keep-alive" : "close") << "\r\n";
+	if (keep_alive)
+		message << "Content-Length: " << content_len << "\r\n";
+	// message << "Date: ";
+	message << "\r\n";
+	return (message.str());
+}
+
+ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
+{
+	unsigned int	version = (close_connection ? 1 : 0);
+
+	if ((virtualServer->errorPage(code)).empty())
+	{
+		if (close_connection)
+		{
+			theConnection() << headerMessage(version, code, getHttpExplanation(code).length(), !close_connection) << getHttpExplanation(code);
+			return (new TerminateProcess(&theConnection()));
+		} else {
+			theConnection() << headerMessage(version, code, getHttpExplanation(code).length(), close_connection) << getHttpExplanation(code);
+			return (new HTTPParser(*this));
+		}
+	} else {
+		size_t	fileSize = File(virtualServer->errorPage(code).c_str()).GetSize();
+		if (close_connection)
+		{
+			theConnection() << headerMessage(version, code, fileSize, !close_connection) << getHttpExplanation(code);
+			return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), virtualServer->errorPage(code)));
+		} else {
+			theConnection() << headerMessage(version, code, fileSize, close_connection) << getHttpExplanation(code);
+			return (new HTTPFileSend(*this, new HTTPParser(*this), virtualServer->errorPage(code)));
+		}
+	}
+}
+
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
 	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
 
 	if (HttpRequest(request).getMethod() == "GET")
 	{
+		if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), "GET"))
+			return (ErrorRespone(405));
 		if (dir.empty())
 		{
 			theConnection() << virtualServer->getRedirectMessage(HttpRequest(request).getLocation().getDir());
 			return (new HTTPParser(*this));
 		}
 		if (!Access(dir)) {
-			theConnection() << "HTTP/1.1 404 Not Found\r\nContent-Length: 14\r\n\r\nPage Not Found\n";
-			return (new HTTPParser(*this));
+			return (ErrorRespone(404));
 		}
 		if (!isFile(dir) && DIR_LISTING_ALLOWED) {
 			theConnection() << HTTPHeaderDirOK(dir, std::string("http://") + HttpRequest(request).getHost() + HttpRequest(request).getLocation());
@@ -63,12 +104,12 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 			}
 		}
 		if (request.find("_method=DELETE") != std::string::npos)
-			return (deleteRequest(dir, request));
+			return (handleDeleteRequest(dir, request));
 	}
 	return (new TerminateProcess(&theConnection()));
 };
 
-ServiceProcess	*HTTPParser::deleteRequest(std::string const &dir, HttpRequest const &request)
+ServiceProcess	*HTTPParser::handleDeleteRequest(std::string const &dir, HttpRequest const &request)
 {
 	if (access(dir.c_str(), W_OK) == 0)
 	{

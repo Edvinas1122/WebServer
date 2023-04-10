@@ -1,17 +1,56 @@
 #include <VirtualServer.hpp>
 
-/*
-	Contradicting attributes
+#define METHOD_COUNT 9
 
-	redirect
-	default_file
-
-	- after this
-
-	Turn on or off directory listing.
-	Set a default file to answer if the request is a directory.
+const std::string	&httpMethodsList(const unsigned int& iterator)
+{
+    static const std::string http_methods_str[] = \
+		{ "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH", "" };
 	
-*/
+	if (iterator > METHOD_COUNT)
+			return (http_methods_str[10]);
+    return (http_methods_str[iterator]);
+}
+
+void	Route::ParseAllowedMethods(DescendParser &parser)
+{
+	size_t	iterator = 0;
+
+	while (METHOD_COUNT > iterator)
+	{
+		try {
+			if (parser.getValue("allow") == httpMethodsList(iterator))
+				forbit_methdods[httpMethodsList(iterator)] = false;
+		} catch (...) {}
+		iterator++;
+	}
+}
+
+void	Route::ParseForbidMethods(DescendParser &parser)
+{
+	size_t	iterator = 0;
+
+	while (METHOD_COUNT > iterator)
+	{
+		try {
+			if (parser.getValue("forbid") == httpMethodsList(iterator))
+				forbit_methdods[httpMethodsList(iterator)] = true;
+		} catch (...) {}
+		iterator++;
+	}
+}
+
+void	Route::SetMethodsDefault()
+{
+	size_t	iterator = 1;
+
+	forbit_methdods["GET"] = true;
+	while (METHOD_COUNT > iterator)
+	{
+		
+		iterator++;
+	}
+}
 
 Route::Route(DescendParser parser): directory_listing_enabled(true), response_dir(""),
 				upload_dir(""), redirect(""), default_file("")
@@ -30,17 +69,16 @@ Route::Route(DescendParser parser): directory_listing_enabled(true), response_di
 		else
 			directory_listing_enabled = false;
 	} catch (...) { directory_listing_enabled = true; }
-	try {
-		if (parser.getValue("forbid") == "GET")
-			forbit_methods[0] = true;
-	} catch (...) { forbit_methods[0] = false; }
+	SetMethodsDefault();
+	ParseAllowedMethods(parser);
+	ParseForbidMethods(parser);
 
 	try {
 		upload_dir = parser.getValue("upload_dir");
 	} catch (...) { upload_dir = ""; }
 	try {
 		redirect = parser.getValue("redirect");
-	} catch (...) { upload_dir = ""; }
+	} catch (...) { redirect = ""; }
 }
 
 

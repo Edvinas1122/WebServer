@@ -8,6 +8,8 @@
 # include <VirtualServer.hpp>
 # include <HTTP.hpp>
 
+const std::string getHttpExplanation(const unsigned int code);
+
 class	HTTPParser : virtual public MasterProcess
 {
 	private:
@@ -30,8 +32,9 @@ class	HTTPParser : virtual public MasterProcess
 	virtual ServiceProcess	*RequestParse(std::string const &request);
 
 	private:
-
-	ServiceProcess	*deleteRequest(std::string const &dir, HttpRequest const &request);
+	const std::string	headerMessage(const int &method_version, const int &code, const int content_len, bool keep_alive);
+	ServiceProcess		*ErrorRespone(const int code, bool close_connection = false);
+	ServiceProcess		*handleDeleteRequest(std::string const &dir, HttpRequest const &request);
 };
 
 class	HTTPFileSend : public HTTPParser, public FileSend

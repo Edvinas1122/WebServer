@@ -13,21 +13,30 @@
 class Route
 {
 	private:
-		bool		directory_listing_enabled;
-		std::string	response_dir;
-		std::string	upload_dir;
-		std::string	redirect;
-		std::string	default_file;
-		bool		forbit_methods[8];
+		bool						directory_listing_enabled;
+		std::string					response_dir;
+		std::string					upload_dir;
+		std::string					redirect;
+		std::string					default_file;
+		std::map<std::string, bool>	forbit_methdods;
 	public:
 		Route(): directory_listing_enabled(true), response_dir(""),
 				upload_dir(""), redirect(""), default_file("") {};
 		Route(DescendParser parser);
 
 		void	displayInfo(const char *append) const;
-		const std::string	getResponseDir() const {return (response_dir);};
-		const std::string	getDefaultFile(std::string const &filename);
-		const std::string	getRedirect() const { return (redirect);};
+	const std::string	getResponseDir() const {return (response_dir);};
+	const std::string	getDefaultFile(std::string const &filename);
+	const std::string	getRedirect() const { return (redirect);};
+	bool	MethodPermited(std::string const &method) const {
+		return (!forbit_methdods.at(method));
+	};
+
+	private:
+
+	void	ParseAllowedMethods(DescendParser &parser);
+	void	ParseForbidMethods(DescendParser &parser);
+	void	SetMethodsDefault(); // all forbid except GET
 };
 
 /*
@@ -49,6 +58,17 @@ class Route
 
 */
 
+// class HTTPErrorMessage
+// {
+// 	private:
+// 		std::map<int, std::string>	errorPageResponseList;
+// 	public:
+// 		HTTPErrors() {};
+// 		~HTTPErrors() {};
+
+// 	std::string	getError(const int &error) const;
+// };
+
 class VirtualServer {
 	private:
 		std::string							host;
@@ -60,6 +80,7 @@ class VirtualServer {
 		std::list<std::string>				port_number;
 		std::map<std::string, Route>		locations;
 		size_t								max_body_size;
+		std::map<unsigned int, std::string>	ErrorResponsePages;
 		// std::map<std::string, CGI>			cgi_map;
 	public:
 		VirtualServer() {};
@@ -72,11 +93,13 @@ class VirtualServer {
 		const char	*getServerName() const;
 	void		displayInfo() const;
 
+	bool					methodPermited(std::string const &dir, std::string const &method);
 	const std::string		getSystemPath(std::string const &dir, std::string const &filename);
 	const std::string		getRedirectMessage(std::string const &dir);
 	bool					isCGI(std::string const &fileExtention);
 	std::string				CGIexecutableDir(std::string const &fileExtention);
 	std::list<std::string>	getPorts() {return (port_number);};
+	const std::string		errorPage(const unsigned int &error_number);
 
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);

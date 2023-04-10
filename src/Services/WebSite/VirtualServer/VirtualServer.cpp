@@ -201,8 +201,6 @@ const std::string	VirtualServer::getSystemPath(std::string const &dir, std::stri
 	Route		*route = &locations.find(dirDescend(fixDir(dir), 0))->second;
 	std::string	systemPath;
 
-	if (!route->getRedirect().empty())
-		return ("");
 	if (locations.find(dirDescend(fixDir(dir), 0)) == locations.end()) // No Route
 	{
 		if (dir == "")
@@ -211,6 +209,8 @@ const std::string	VirtualServer::getSystemPath(std::string const &dir, std::stri
 			systemPath = root_dir + fixDir(dir) + filename;
 		return (systemPath);
 	}
+	if (!route->getRedirect().empty())
+		return ("");
 	systemPath = getSystemRoot(dir) + route->getDefaultFile(filename);
 	return (systemPath);
 }
@@ -236,4 +236,23 @@ bool	VirtualServer::isCGI(std::string const &fileExtention)
 std::string	VirtualServer::CGIexecutableDir(std::string const &fileExtention)
 {
 	return (cgi_response.find(fileExtention)->second);
+}
+
+bool	VirtualServer::methodPermited(std::string const &dir, std::string const &method)
+{
+	if (locations.find(dirDescend(fixDir(dir), 0)) == locations.end())
+	{
+		if (method == "GET")
+			return (true); // root dir methods
+		return (false);
+	}
+	Route		*route = &locations.find(dirDescend(fixDir(dir), 0))->second;
+	return (route->MethodPermited(method));
+}
+
+const std::string	VirtualServer::errorPage(const unsigned int &error_number)
+{
+	if (ErrorResponsePages.find(error_number) != ErrorResponsePages.end())
+		return (ErrorResponsePages.at(error_number));
+	return ("");
 }

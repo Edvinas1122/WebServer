@@ -23,10 +23,22 @@ void	Server::Run()
 	StartProcesses(); // runs interfaces
 	Serve(); // runs processes
 	ProcessQue(pushOutgoing, POLLOUT);
+	if (outputInbound)
+		action(printIncoming);
 	action(wipeIncomingBuffers);
 	TimeOutProcessLessConnections(3);
 	// idleProcessCount();
 };
+
+void	Server::CommandParse(std::string const &data)
+{
+	if (data.empty())
+		return;
+	if (data.find("print") != std::string::npos)
+		outputInbound = outputInbound ? false : true;
+	if (data.find("runtime") != std::string::npos)
+		printRunTimeInfo = printRunTimeInfo ? false : true;
+}
 
 /*
 	FindProcess ineficient loop
@@ -58,7 +70,8 @@ void	Server::StartProcesses()
 	{
 		if (conn_it->second.downloadBufferReady() && FindProcess(&(conn_it->second)) == processes.end())
 		{
-			std::cout << "Inbounded" << std::endl;
+			if (printRunTimeInfo)
+				std::cout << "Inbounded" << std::endl;
 			CreateProcess(&(conn_it->second), conn_it->first);
 		}
 		conn_it++;
@@ -85,7 +98,8 @@ void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &ori
 			{
 				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second) {
 					(*it)->HeartBeat();
-					std::cout << "idle process from same origin heart beat set" << std::endl;
+					if (printRunTimeInfo)
+						std::cout << "idle process from same origin heart beat set" << std::endl;
 					break;
 				}
 				it_origin++;
@@ -163,7 +177,8 @@ void	Server::CreateProcess(Connection *connection, TCPConnectionOrigin const &or
 			HeartBeatIdleProcessesFromSameOrigin(origin, *it);
 			process->setTimeOutDurration((*it)->TimeOutAge());
 			processes.push_back(process);
-			std::cout << "porcess addedd: " << processes.size() << std::endl;
+			if (printRunTimeInfo)
+				std::cout << "porcess addedd: " << processes.size() << std::endl;
 		}
 		it++;
 	}
@@ -174,7 +189,8 @@ void	Server::KillProcess(ServiceProcess *process)
 	closeConnection(&(process->theConnection()));
 	delete (process);
 	processes.remove(process);
-	std::cout << "after kill: " << processes.size() << std::endl;
+	if (printRunTimeInfo)
+		std::cout << "after kill: " << processes.size() << std::endl;
 }
 
 void	Server::EndProcess(ServiceProcess *process)
@@ -331,7 +347,6 @@ bool	Server::pushOutgoing(Connection &connection)
 		try {
 			return (connection.sendPacket());
 		} catch(const std::exception& e) {
-			std::cout << "Connection Failed - client closed it" << std::endl;
 			connection.updateTime(CLOSE_CLIENT);
 			return (false);
 		}	
@@ -345,3 +360,8 @@ void	Server::wipeIncomingBuffers(Connection &connection)
 		connection.flushIncoming();
 }
 
+void	Server::printIncoming(Connection &connection)
+{
+	if (connection.downloadBufferReady())
+		std::cout << connection << std::endl;
+}

@@ -60,6 +60,7 @@ int	main(int argc, char **args)
 		httpServer.Run();
 #ifdef TERMINAL
 		terminal.Input();
+		httpServer.CommandParse(terminal.DataGet("command"));
 #endif
 	}
 	std::cout << "Exiting..." << std::endl;

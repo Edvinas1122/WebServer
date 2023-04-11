@@ -22,7 +22,6 @@ void	ConnectionQueController::setConnections(std::list<std::pair<std::string, in
 			{
 				Connections.insert(std::pair<TCPConnectionOrigin, TCP>(TCPConnectionOrigin(clientFd, socketAddress.sin_addr, it->first), TCP(clientFd, socketAddress, it->first)));
 				insertFileDescriptor(clientFd);
-				std::cout << "new connection- size: " << Connections.size() << std::endl;
 			}
 			it++;
 		}

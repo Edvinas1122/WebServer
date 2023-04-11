@@ -106,6 +106,21 @@ bool	TelNetServerParser::Handle()
 			}
 			return (false);
 		}
+		if (request.find("Pipe") != std::string::npos)
+		{
+			if (request.find(" ") == std::string::npos)
+				theConnection() << "Pipe [php script path] [post request]";
+			else
+			{
+				std::string	script_path = request.substr(request.find(" ") + 1);
+				std::string	post_request = request.substr(request.find_last_of(" ") + 1);
+
+				script_path = script_path.substr(0, script_path.find_last_of(" "));
+				post_request = post_request.substr(0, post_request.length() - 2);
+				SetFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerParser(&theConnection()), script_path, post_request));
+			}
+			return (false);
+		}
 	}
 	return (true);
 }
@@ -149,12 +164,28 @@ bool	TelNetServerChat::Handle()
 			}
 			else if (buf.find("background") != std::string::npos)
 			{
-				addSystemMessage("telnetServer", "command", "background");
+				addSystemMessage("Terminal", "command", "background");
 				startBackground();
 				End();
+				return (false);
+			}
+			else if (buf.find("print") != std::string::npos)
+			{
+				addSystemMessage("Terminal", "command", "print");
+				End();
+				return (false);
+			}
+			else if (buf.find("runtime") != std::string::npos)
+			{
+				addSystemMessage("Terminal", "command", "runtime");
+				End();
+				return (false);
 			}
 			else if (buf.find("end") != std::string::npos)
+			{
 				End();
+				return (false);
+			}
 			std::cout << buf << std::endl;
 		}
 	}

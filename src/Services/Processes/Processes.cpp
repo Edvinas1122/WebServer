@@ -28,7 +28,6 @@ bool	FileSend::Handle()
 	theConnection() << fileToSend;
 	if (fileToSend.GetRemainingLen())
 		return (true);
-	std::cout << "send completed" << std::endl;
 	return (false);
 }
 
@@ -53,18 +52,12 @@ bool	FileReceive::Handle()
 			std::cout << tst.length() << std::endl;
 			tst = tst.substr(0, tst.length() - (fileToReceive.GetSize() + tst.length() - lenght));
 			tst >> fileToReceive;
-			std::cout << "file received: size " << fileToReceive.GetSize() << std::endl;
 			return (false);
 		}
 		tst >> fileToReceive;
-		std::cout << "Packet received: size: " << fileToReceive.GetSize() << " expected size: " << lenght << std::endl;
-
 	}
 	if (lenght <= fileToReceive.GetSize())
-	{
-		std::cout << "file received: size " << fileToReceive.GetSize() << std::endl;
 		return (false);
-	}
 	return (true);
 }
 

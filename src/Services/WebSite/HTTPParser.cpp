@@ -158,7 +158,6 @@ bool	HTTPParser::Handle()
 
 bool	HTTPParser::HeartBeat()
 {
-	std::cout << "HeartBeat Connection..." << std::endl;
 	theConnection() << "200 OK\r\nConnection: keep-alive\r\n";
 	return (true);
 }

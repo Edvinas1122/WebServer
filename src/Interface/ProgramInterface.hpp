@@ -6,7 +6,8 @@
 class	ProgramInterface
 {
 	public:
-		typedef std::map<std::string, std::map<std::string, std::string> > SysMessageQueMap;
+		typedef std::map<std::string, std::list<std::string> >	SysCommandQue;
+		typedef std::map<std::string, SysCommandQue> SysMessageQueMap;
 	protected:
 		static bool				run;
 		static SysMessageQueMap	data;
@@ -26,21 +27,28 @@ class	ProgramInterface
 
 	protected:
 
-	virtual std::string	DataFeed(std::string const &id, std::string const &info_type)
+	std::string	DataFeed(std::string const &id, std::string const &info_type)
 	{
-		std::map<std::string, std::string>	outside = data[id];
-
-		data[id].clear();
-		if (info_type.empty())
-			return (outside.begin()->second);
-		if (outside.find(info_type) != outside.end())
-			return (outside.find(info_type)->second);
+		if (!data.empty() && data.find(id) != data.end() && data.at(id).find(info_type) != data.at(id).end())
+		{
+			std::list<std::string>	outside = data.at(id).at(info_type);
+			std::list<std::string>::const_iterator	it = outside.begin();
+			std::string		dataReturn;
+			
+			while (it != outside.end())
+			{
+				dataReturn.append(*it);
+				it++;
+			}
+			data[id].clear();
+			return (dataReturn);
+		}
 		return ("");
 	};
 
 	void	addSystemMessage(std::string const &operator_id, std::string const &info_type, std::string const &message)
 	{
-		data[operator_id][info_type] = message;
+		data[operator_id][info_type].push_back(message);
 	}
 
 	void	Terminate() {run = false;};
@@ -64,6 +72,9 @@ class	Terminal : public ProgramInterface
 		virtual ~Terminal() {};
 
 	void	Input();
+	std::string	DataGet(std::string const &info_type) {
+		return (ProgramInterface::DataFeed("Terminal", info_type));
+	};
 
 	private:
 	void	Parse(std::string const &user_input);

@@ -41,7 +41,7 @@ class	ServiceProcess: public TimeOut
 	bool					id(Connection *address) const;
 	virtual bool			Finished() const;
 	virtual bool			Handle() = 0;
-	void					End();
+	virtual void			End();
 	virtual ServiceProcess	*NextProcess();
 	virtual bool			HeartBeat() {return (true);};
 	// protected:

@@ -141,11 +141,12 @@ class Server : public ConnectionQueController, public PortSockets
 		ProcessList		processes;
 
 	public:
-		Server() {};
+		Server(): outputInbound(false), printRunTimeInfo(true) {};
 		~Server();
 		
 	void	Run();
 	void	addService(Service *service);
+	void	CommandParse(std::string const &data);
 
 	private:
 
@@ -170,6 +171,11 @@ class Server : public ConnectionQueController, public PortSockets
 	static bool pullIncoming(Connection &client);
 	static bool pushOutgoing(Connection &client);
 	static void wipeIncomingBuffers(Connection &client);
+	static void	printIncoming(Connection &connection);
+
+	private:
+		bool	outputInbound;
+		bool	printRunTimeInfo;
 };
 
 #endif

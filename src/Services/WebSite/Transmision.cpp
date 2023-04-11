@@ -40,7 +40,6 @@ bool	HTTPFileReceive::BeginTrimHandle()
 	if (header_tmp.find(delimiter, header_tmp.find(delimiter) + 1) != std::string::npos)
 	{
 		lenght -= unchunkBegining(buffer, delimiter).length() + 4;
-		std::cout << "Receive length: " << lenght << std::endl;
 		buffer = unchunkBegining(buffer, delimiter);
 		trimUntilFileBegin(buffer);
 		buffer >> fileToReceive;

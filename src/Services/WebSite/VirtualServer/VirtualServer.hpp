@@ -31,6 +31,7 @@ class Route
 	bool	MethodPermited(std::string const &method) const {
 		return (!forbit_methdods.at(method));
 	};
+	bool	DirListingPermiter() {return (directory_listing_enabled);};
 
 	private:
 
@@ -85,15 +86,14 @@ class VirtualServer {
 	public:
 		VirtualServer() {};
 		VirtualServer(DescendParser parser);
-		// VirtualServer(const VirtualServer &src);
-		// VirtualServer& operator=(const VirtualServer& other);
-		// std::string	getRoot() const;
+
 		Route		getLocation(std::string const &location); // <--- /jumper/tall/ > "null or /jumper/"
 		const char	*getHost() const;
 		const char	*getServerName() const;
 	void		displayInfo() const;
 
 	bool					methodPermited(std::string const &dir, std::string const &method);
+	bool					dirListingPermited(std::string const &dir);
 	const std::string		getSystemPath(std::string const &dir, std::string const &filename);
 	const std::string		getRedirectMessage(std::string const &dir);
 	bool					isCGI(std::string const &fileExtention);

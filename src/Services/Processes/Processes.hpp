@@ -85,9 +85,13 @@ class	PipeSend: virtual public ServiceProcess
 class	ExecuteFile : virtual public ServiceProcess
 {
 	private:
-		ServiceProcess		*followingProcess;
-		Executor 			executor;
-		const std::string	scriptPath;
+		ServiceProcess			*followingProcess;
+		Executor 				executor;
+		const std::string		scriptPath;
+		int						inputToExec;
+		int						writeEndToInputOfExec;
+		std::list<std::string>	environmnet;
+
 	public:
 		ExecuteFile(Connection *connection, std::string const &executablePath,
 						std::string const &scriptPath);
@@ -95,7 +99,15 @@ class	ExecuteFile : virtual public ServiceProcess
 						std::string const &executablePath, std::string const &scriptPath);
 		virtual ~ExecuteFile();
 
-	bool Handle();
+	bool	Handle();
+
+
+	int		WriteBufferToExecutorInput(void *buffer, size_t len);
+	void	SetEnvVariable(std::string const &env);
+
+	private:
+
+	int		PipeIntoExec();
 };
 
 #endif

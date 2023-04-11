@@ -16,7 +16,7 @@ static void handleSignal(int sigNum)
 	signalEnd = true;
 }
 
-int	main(void)
+int	main(int argc, char **args)
 {
 #ifdef TERMINAL
 	Terminal		terminal;
@@ -29,7 +29,10 @@ int	main(void)
 	signal(SIGINT, handleSignal); // setSig for ending leak free
 	signal(SIGQUIT, handleSignal);
 	try {
-		virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
+		if (argc == 1)
+			virtualServers.parseConfigurationFile("/home/WebServer/server.conf");
+		else
+			virtualServers.parseConfigurationFile(args[1]);
 		// virtualServers.Info(); // 
 	} catch (...) {
 		std::cout << "Configuration Read Failure" << std::endl;

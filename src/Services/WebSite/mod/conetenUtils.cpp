@@ -69,7 +69,7 @@ std::string	dirInfoHTTPFormat(const char *path, std::string const &url, bool dis
 		info.append(typeInfo(std::string(path) + std::string("/") + std::string(entry->d_name)));
 		info.append(entry->d_name);
 		info.append("</a></div>");
-		if (std::string(entry->d_name) != ".." && std::string(entry->d_name) != ".")
+		if (displayUpload && std::string(entry->d_name) != ".." && std::string(entry->d_name) != ".")
 			info.append(DeleteForm(std::string(path) + std::string("/") + std::string(entry->d_name), fullUrl));
 		fullUrl.clear();
 	}
@@ -106,32 +106,26 @@ bool	Access(const std::string &path)
 	return (true);
 }
 
-std::string	HTTPHeaderFileOK(std::string const &path)
-{
-	std::stringstream	header;
+// std::string	HTTPHeaderFileOK(std::string const &path)
+// {
+// 	std::stringstream	header;
 
-	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
-	header << "Content-Length: " << File(path.c_str()).GetSize() << "\r\n";
-	header << "\r\n";
-	return (header.str());
-}
+// 	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
+// 	header << "Content-Length: " << File(path.c_str()).GetSize() << "\r\n";
+// 	header << "\r\n";
+// 	return (header.str());
+// }
 
-std::string	HTTPHeaderDirOK(std::string const &path, const std::string &url)
-{
-	std::stringstream	header;
+// std::string	HTTPHeaderDirOK(std::string const &path, const std::string &url)
+// {
+// 	std::stringstream	header;
 
-	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
-	header << "Content-Length: " << dirInfoHTTPFormat(path.c_str(), url.c_str(), true).length() << "\r\n";
-	header << "\r\n";
-	header << dirInfoHTTPFormat(path.c_str(), url.c_str(), true);
-	return (header.str());
-}
-
-bool	allowedDir(std::string const &path)
-{
-	(void) path;
-	return (true);
-}
+// 	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
+// 	header << "Content-Length: " << dirInfoHTTPFormat(path.c_str(), url.c_str(), true).length() << "\r\n";
+// 	header << "\r\n";
+// 	header << dirInfoHTTPFormat(path.c_str(), url.c_str(), true);
+// 	return (header.str());
+// }
 
 void	trimUntilFileBegin(Buffer &buffer)
 {

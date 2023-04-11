@@ -73,10 +73,13 @@ void	Executor::execute()
 
 	}
 	waitpid(pid, &status, 0);
+	clearCommands();
 	if (input_fd != STDIN_FILENO)
 		close(input_fd);
-	clearCommands();
-	return;
+	if (WEXITSTATUS(status)) {
+		close(output_fd);
+		throw ExecutionFailed();
+	}
 }
 
 int		Executor::executeToOutPut(int count, ...)

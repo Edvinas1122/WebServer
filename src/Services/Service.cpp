@@ -14,7 +14,7 @@ ServiceProcess	*ServiceProcess::NextProcess()
 	return (tmp);
 };
 
-void	ServiceProcess::QueFollowingProcess(ServiceProcess *followingProcess)
+void	ServiceProcess::SetFollowingProcess(ServiceProcess *followingProcess)
 {
 	if (this->followingProcess)
 		delete (this->followingProcess);

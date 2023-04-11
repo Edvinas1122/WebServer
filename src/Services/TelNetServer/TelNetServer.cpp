@@ -45,13 +45,13 @@ bool	TelNetServerParser::Handle()
 		if (request.find("Gay") != std::string::npos)
 		{
 			theConnection() << logoGee();
-			QueFollowingProcess(new TelNetServerIntroduction(*this));
+			SetFollowingProcess(new TelNetServerIntroduction(*this));
 			return (false);
 		}
 		if (request.find("Chat") != std::string::npos)
 		{
 			theConnection() << "Chat started\ntype end to disconect\n";
-			QueFollowingProcess(new TelNetServerChat(&theConnection(), new TelNetServerIntroduction(*this)));
+			SetFollowingProcess(new TelNetServerChat(&theConnection(), new TelNetServerIntroduction(*this)));
 			return (false);
 		}
 		if (request.find("Get") != std::string::npos)
@@ -62,13 +62,13 @@ bool	TelNetServerParser::Handle()
 				request.clear();
 				return (true);
 			}
-			QueFollowingProcess(new FileSend(&theConnection(), new TelNetServerIntroduction(*this), std::string("/home/WebServer/http/files/") + request.substr(4, request.length() - 6)));
+			SetFollowingProcess(new FileSend(&theConnection(), new TelNetServerIntroduction(*this), std::string("/home/WebServer/http/files/") + request.substr(4, request.length() - 6)));
 			return (false);
 		}
 		if (request.find("Post") != std::string::npos)
 		{
 			theConnection() << "Please write 4 characters..." << "\n";
-			QueFollowingProcess(new FileReceive(&theConnection(), new TelNetServerIntroduction(*this), "/home/WebServer/http/files/utest.txt", 4));
+			SetFollowingProcess(new FileReceive(&theConnection(), new TelNetServerIntroduction(*this), "/home/WebServer/http/files/utest.txt", 4));
 			return (false);
 		}
 		if (request.find("Close") != std::string::npos)
@@ -88,7 +88,7 @@ bool	TelNetServerParser::Handle()
 			{
 				std::string	file = request.substr(request.find(" ") + 1);
 				file = file.substr(0, file.length() - 2);
-				QueFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerParser(&theConnection()), "/usr/bin/sh", file));
+				SetFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerParser(&theConnection()), "/usr/bin/sh", file));
 			}
 			return (false);
 		}
@@ -102,14 +102,13 @@ bool	TelNetServerParser::Handle()
 				std::string	command = request.substr(request.find_last_of(" ") + 1);
 				file = file.substr(0, file.find_last_of(" "));
 				command = command.substr(0, command.length() - 2);
-				QueFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerParser(&theConnection()), file, command));
+				SetFollowingProcess(new ExecuteFile(&theConnection(), new TelNetServerParser(&theConnection()), file, command));
 			}
 			return (false);
 		}
 	}
 	return (true);
 }
-
 
 ServiceProcess	*TelNetServer::RequestParse(Connection *connection, std::string const &request)
 {
@@ -118,6 +117,7 @@ ServiceProcess	*TelNetServer::RequestParse(Connection *connection, std::string c
 	return (NULL);
 }
 
+#include <sys/prctl.h>
 static void	startBackground()
 {
 	int	pid = fork();
@@ -127,6 +127,11 @@ static void	startBackground()
 		exit(EXIT_SUCCESS);
 	}
 	close(STDOUT_FILENO);
+	prctl(PR_SET_NAME, "BackGround Server Process", 0, 0, 0);
+	if (setsid() < 0) {
+		perror("setsid failed");
+		exit(1);
+	}
 }
 
 bool	TelNetServerChat::Handle()

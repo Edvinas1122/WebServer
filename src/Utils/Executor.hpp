@@ -43,6 +43,9 @@ class	Executor
 	void	setCommandParams(std::list<std::string> const &param);
 	void	clearCommands();
 
+	public:
+
+	class ExecutionFailed : public std::exception {};
 };
 
 #endif

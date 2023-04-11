@@ -4,7 +4,8 @@ Observer::Observer()
 {
 	vector.reserve(MAX_CONNECTIONS);
 #ifdef TERMINAL
-	insertFileDescriptor(STDIN_FILENO);
+	setAsNonBlocking(STDIN_FILENO);
+	// insertFileDescriptor(STDIN_FILENO);
 #endif
 }
 

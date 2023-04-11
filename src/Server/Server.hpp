@@ -7,7 +7,7 @@ class	Observer
 {
 	private:
 		std::vector<struct pollfd>	vector;
-		static const int MAX_CONNECTIONS = 10; // attribute do not limit connections
+		static const int MAX_CONNECTIONS = 10; // attribute does not limit connections
 		static const int TIMEOUT = 5000;
 	public:
 		Observer();
@@ -165,6 +165,7 @@ class Server : public ConnectionQueController, public PortSockets
 
 	ConnectionQueController::listOfConnections	getConnectionsByOrigin(in_addr const &ipAddress);
 	void	HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &, Service*);
+	// void	idleProcessCount();
 
 	static bool pullIncoming(Connection &client);
 	static bool pushOutgoing(Connection &client);

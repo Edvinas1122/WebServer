@@ -44,15 +44,15 @@ void	Route::SetMethodsDefault()
 {
 	size_t	iterator = 1;
 
-	forbit_methdods["GET"] = true;
+	forbit_methdods["GET"] = false;
 	while (METHOD_COUNT > iterator)
 	{
-		
+		forbit_methdods[httpMethodsList(iterator)] = true;
 		iterator++;
 	}
 }
 
-Route::Route(DescendParser parser): directory_listing_enabled(true), response_dir(""),
+Route::Route(DescendParser parser): directory_listing_enabled(false), response_dir(""),
 				upload_dir(""), redirect(""), default_file("")
 {
 	try {

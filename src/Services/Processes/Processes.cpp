@@ -15,7 +15,7 @@ bool	MasterProcess::Handle()
 		}
 		if (followingProcess != NULL)
 		{
-			QueFollowingProcess(followingProcess);
+			SetFollowingProcess(followingProcess);
 			return (false);
 		}
 		throw (std::exception()); // undefined syntax
@@ -42,6 +42,8 @@ bool	FileReceive::Handle()
 {
 	Buffer	tst;
 
+	if (!theConnection().downloadBufferReady())
+		return (true);
 	theConnection() >> tst;
 	if (!tst.empty())
 	{

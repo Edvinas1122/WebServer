@@ -49,7 +49,7 @@ class	ServiceProcess: public TimeOut
 	void	setTimeOutDurration(const int timeOutDurration);
 	protected:
 
-	virtual void	QueFollowingProcess(ServiceProcess *);
+	virtual void	SetFollowingProcess(ServiceProcess *);
 	//ServicePorcess	*getFollowingProcess(); // list structure
 };
 

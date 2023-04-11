@@ -250,9 +250,18 @@ bool	VirtualServer::methodPermited(std::string const &dir, std::string const &me
 	return (route->MethodPermited(method));
 }
 
+bool	VirtualServer::dirListingPermited(std::string const &dir)
+{
+	if (locations.find(dirDescend(fixDir(dir), 0)) == locations.end())
+		return (false);
+	Route		*route = &locations.find(dirDescend(fixDir(dir), 0))->second;
+	return (route->DirListingPermiter());
+}
+
 const std::string	VirtualServer::errorPage(const unsigned int &error_number)
 {
 	if (ErrorResponsePages.find(error_number) != ErrorResponsePages.end())
 		return (ErrorResponsePages.at(error_number));
 	return ("");
 }
+

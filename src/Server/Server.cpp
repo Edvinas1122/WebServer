@@ -24,7 +24,8 @@ void	Server::Run()
 	Serve(); // runs processes
 	ProcessQue(pushOutgoing, POLLOUT);
 	action(wipeIncomingBuffers);
-	TimeOutProcessLessConnections(3); // 
+	TimeOutProcessLessConnections(3);
+	// idleProcessCount();
 };
 
 /*
@@ -89,11 +90,30 @@ void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &ori
 				}
 				it_origin++;
 			}
-			
 		}
 		it++;
 	}
 }
+
+// void	Server::idleProcessCount()
+// {
+// 	ServiceList::iterator	it_service = services.begin();
+// 	ProcessList::iterator	it = processes.begin();
+// 	size_t					count = 0;
+
+// 	while (it_service != services.end())
+// 	{
+// 		while (it != processes.end())
+// 		{
+// 			if (it_service->DetermineIfIdleProcessType(*it))
+// 				count++;
+// 		}
+// 		it_service++;
+// 	}
+// 	if (count == processes.end() && count != 0)
+// 		usleep (5000 / count);
+// 	std::cout << "idle: " << cout << " total: " << processes.size() << std::endl;
+// }
 
 Server::ProcessList::iterator	Server::FindProcess(Connection *connection)
 {
@@ -139,6 +159,7 @@ void	Server::CreateProcess(Connection *connection, TCPConnectionOrigin const &or
 		process = (*it)->RequestParse(connection, connection->getMessage());
 		if (process != NULL)
 		{
+			(void)origin;
 			HeartBeatIdleProcessesFromSameOrigin(origin, *it);
 			process->setTimeOutDurration((*it)->TimeOutAge());
 			processes.push_back(process);

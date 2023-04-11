@@ -31,10 +31,14 @@ class	HTTPParser : virtual public MasterProcess
 
 	virtual ServiceProcess	*RequestParse(std::string const &request);
 
+	protected:
+	const std::string	headerMessage(const int &method_version, const int &code, const size_t content_len = std::numeric_limits<size_t>::max());
+
 	private:
-	const std::string	headerMessage(const int &method_version, const int &code, const int content_len, bool keep_alive);
 	ServiceProcess		*ErrorRespone(const int code, bool close_connection = false);
 	ServiceProcess		*handleDeleteRequest(std::string const &dir, HttpRequest const &request);
+	ServiceProcess		*handleGetRequest(std::string const &dir, HttpRequest const &request);
+	ServiceProcess		*handleUploadRequest(std::string const &dir, HttpRequest const &request);
 };
 
 class	HTTPFileSend : public HTTPParser, public FileSend
@@ -47,7 +51,7 @@ class	HTTPFileSend : public HTTPParser, public FileSend
 						HTTPParser(process, followingProcess), FileSend(&theConnection(), followingProcess, path) {};
 		virtual ~HTTPFileSend() {};
 
-	bool	Handle();
+	virtual bool	Handle();
 };
 
 class	HTTPFileReceiveReport : public ServiceProcess

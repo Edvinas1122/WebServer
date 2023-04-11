@@ -25,7 +25,7 @@ bool	HTTPFileReceive::Handle()
 {
 	if (!beginTrimmed)
 		return (BeginTrimHandle());
-	else if (theConnection().downloadBufferReady())
+	else
 		return (FileReceive::Handle());
 	return (true);
 }

@@ -63,7 +63,7 @@ bool	FileReceive::Handle()
 
 bool	PipeSend::Handle()
 {
-	if (!wait) {
+	if (!wait) { //implament timer to wait before sending determined by size
 		bufferConnection();
 		wait = true;
 		return (true);
@@ -95,3 +95,8 @@ void	PipeSend::bufferConnection()
 			break;
 	}
 }
+
+// bool	BufferReceive::Handle()
+// {
+	
+// }

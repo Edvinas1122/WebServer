@@ -132,23 +132,6 @@ ServiceProcess	*TelNetServer::RequestParse(Connection *connection, std::string c
 	return (NULL);
 }
 
-#include <sys/prctl.h>
-static void	startBackground()
-{
-	int	pid = fork();
-
-	if (pid != 0)
-	{
-		exit(EXIT_SUCCESS);
-	}
-	close(STDOUT_FILENO);
-	prctl(PR_SET_NAME, "BackGround Server Process", 0, 0, 0);
-	if (setsid() < 0) {
-		perror("setsid failed");
-		exit(1);
-	}
-}
-
 bool	TelNetServerChat::Handle()
 {
 	if (theConnection().downloadBufferReady())
@@ -165,7 +148,6 @@ bool	TelNetServerChat::Handle()
 			else if (buf.find("background") != std::string::npos)
 			{
 				addSystemMessage("Terminal", "command", "background");
-				startBackground();
 				End();
 				return (false);
 			}
@@ -178,6 +160,12 @@ bool	TelNetServerChat::Handle()
 			else if (buf.find("runtime") != std::string::npos)
 			{
 				addSystemMessage("Terminal", "command", "runtime");
+				End();
+				return (false);
+			}
+			else if (buf.find("file_pr") != std::string::npos)
+			{
+				addSystemMessage("Terminal", "command", "file_pr");
 				End();
 				return (false);
 			}

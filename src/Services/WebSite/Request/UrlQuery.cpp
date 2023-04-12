@@ -1,7 +1,7 @@
 #include "HTTP.hpp"
 
 const char* UrlQuery::dir_delim = "/";
-const char* UrlQuery::query_delim = "?\0";
+const char* UrlQuery::query_delim = "?\0\r";
 
 static const std::string	removeHexSpaces(std::string const &string)
 {
@@ -39,6 +39,16 @@ const std::string	UrlQuery::getDir() const
 const std::string	UrlQuery::getFileExtension() const
 {
 	return (getFileName().substr(getFileName().find_first_of(".")));
+}
+
+const std::string	UrlQuery::getCGIPathInfo() const
+{
+	size_t	begin = find(getFileExtension()) + getFileExtension().length();
+	size_t	end = find_last_of(query_delim);
+
+	if (begin >= end)
+		return ("");
+	return (removeHexSpaces(substr(begin, end - begin)));
 }
 
 const std::string	UrlQuery::getQuery() const

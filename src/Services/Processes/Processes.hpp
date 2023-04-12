@@ -80,6 +80,21 @@ class	PipeSend: virtual public ServiceProcess
 	void	bufferConnection();
 };
 
+#include <Buffer.hpp>
+
+// class	BufferReceive: virtual public ServiceProcess
+// {
+// 	private:
+// 		const int	size;
+// 		Buffer		receive;
+// 	public:
+// 		BufferReceive(Connection *connection, const int size): ServiceProcess(connection) {};
+// 		BufferReceive(Connection *connection, ServiceProcess *followingProcess, const int size): ServiceProcess(connection, followingProcess) {};
+// 		~BufferReceive() {};
+
+// 	bool Handle();
+// };
+
 #include <Executor.hpp>
 
 class	ExecuteFile : virtual public ServiceProcess

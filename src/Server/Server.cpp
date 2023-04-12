@@ -30,14 +30,42 @@ void	Server::Run()
 	// idleProcessCount();
 };
 
+static void	dupToFile(std::string const &path)
+{
+	int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
+	dup2(fd, STDOUT_FILENO);
+	dup2(fd, STDERR_FILENO);
+	close(fd);
+}
+
+#include <sys/prctl.h>
+static void	startBackground()
+{
+	int	pid = fork();
+
+	if (pid != 0)
+	{
+		exit(EXIT_SUCCESS);
+	}
+	prctl(PR_SET_NAME, "BackGround Server Process", 0, 0, 0);
+	if (setsid() < 0) {
+		perror("setsid failed");
+		exit(1);
+	}
+}
+
 void	Server::CommandParse(std::string const &data)
 {
 	if (data.empty())
 		return;
 	if (data.find("print") != std::string::npos)
 		outputInbound = outputInbound ? false : true;
+	if (data.find("file_pr") != std::string::npos)
+		dupToFile("/home/WebServer/serverLog.txt");
 	if (data.find("runtime") != std::string::npos)
 		printRunTimeInfo = printRunTimeInfo ? false : true;
+	if (data.find("background") != std::string::npos)
+		startBackground();
 }
 
 /*

@@ -5,7 +5,7 @@ bool								ProgramInterface::run = true;
 
 static void	display_information()
 {
-	std::cout << "Command list:\n 1. end - ends program\n 2. say - message telnet service clients\n" << std::endl;
+	std::cout << "Command list:\n 1. end - ends program\n 2. say - message telnet service clients\n 3. background - move process to background" << std::endl;
 }
 
 static void display_assitant_info()
@@ -29,6 +29,8 @@ void	Terminal::Parse(std::string const &user_input)
 		end_program_message();
 		run = false;
 	}
+	else if (!user_input.compare(0, 10, "background"))
+		addSystemMessage("Terminal", "command", "background");
 	else
 		display_assitant_info();
 }
@@ -39,6 +41,8 @@ void Terminal::Input()
 	ssize_t bytes_read = 0;
 	std::string	user_input;
 
+	if (!available)
+		return;
 	bytes_read = read(STDIN_FILENO, &c, 1);
 	if (bytes_read > 0)
 	{

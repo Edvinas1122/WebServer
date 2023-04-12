@@ -190,9 +190,11 @@ const std::string	VirtualServer::getSystemRoot(std::string const &urlDir)
 
 const std::string	Route::getDefaultFile(std::string const &filename)
 {
-	if (default_file.empty())
+	if (!filename.empty())
 		return (filename);
-	return (default_file);
+	if (!default_file.empty())
+		return (default_file);
+	return ("");
 };
 
 

@@ -69,6 +69,13 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 	return (new TerminateProcess(&theConnection()));
 };
 
+const std::string	setVar(std::string const &key, std::string const &value)
+{
+	if (value.empty())
+		return (key);
+	return (key + "=" + value);
+}
+
 ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest const &request)
 {
 	if (!isFile(dir)) { // dirrectory listing handle
@@ -86,8 +93,14 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension())) { // Handle CGI
 		std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
 
-		theConnection() << "HTTP/1.1 200 OK\r\nConnection: close\r\n";
-		return (new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir));
+		ExecuteFile	*exec = new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir);
+		exec->SetEnvVariable(setVar("REQUEST_METHOD", request.getMethod()));
+		exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion().substr(0, 8)));
+		// exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
+		exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
+		exec->SetEnvVariable(setVar("SCRIPT_NAME", request.getLocation().getFileName()));
+		theConnection() << "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n";
+		return (exec);
 	}
 	if (request.getProtocolVersion() == "HTTP/1.0" || request.getKeepAlive() == "close") {
 		theConnection() << headerMessage(0, 200);

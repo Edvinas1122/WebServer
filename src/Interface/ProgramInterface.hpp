@@ -68,16 +68,25 @@ class	ProgramInterface
 class	Terminal : public ProgramInterface
 {
 	public:
-		Terminal(): ProgramInterface() {};
+		Terminal(): ProgramInterface(), available(true) {};
 		virtual ~Terminal() {};
 
 	void	Input();
 	std::string	DataGet(std::string const &info_type) {
-		return (ProgramInterface::DataFeed("Terminal", info_type));
+		std::string	data = ProgramInterface::DataFeed("Terminal", info_type);
+
+		if (!data.empty())
+		{
+			if (data.find("background")) {
+				available = false;
+			}
+		}
+		return (data);
 	};
 
 	private:
 	void	Parse(std::string const &user_input);
+	bool	available;
 };
 
 #endif

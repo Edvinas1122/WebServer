@@ -16,6 +16,7 @@ class	UrlQuery: public std::string
 		const std::string	getFileName() const;
 		const std::string	getPath() const;
 		const std::string	getFileExtension() const;
+		const std::string	getCGIPathInfo() const;
 		const std::string	getQuery() const;
 };
 

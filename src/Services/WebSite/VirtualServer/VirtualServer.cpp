@@ -12,9 +12,21 @@ VirtualServer::VirtualServer(DescendParser parser)
 
 	port_number = parser.getValuesList("listen", this->isPositiveNumber);
 	root_dir = parser.getValue("root", 1, this->pathcheck);
-	index = parser.getValue("index");
-	server_name = parser.getValue("server_name");
-	host = parser.getValue("host");
+	try {
+		index = parser.getValue("index");
+	} catch (DescendParser::NoKeyExcept &e) {
+		index = "";
+	}
+	try {
+		server_name = parser.getValue("server_name");
+	} catch (DescendParser::NoKeyExcept &e) {
+		server_name = "Serv1122";
+	}
+	try {
+		host = parser.getValue("host");
+	} catch (DescendParser::NoKeyExcept &e) {
+		host = "default";
+	}
 	while (parser.count("location") >= iterator)
 	{
 		locations.insert(parser.getMaped<Route>("location", iterator));
@@ -188,15 +200,22 @@ const std::string	VirtualServer::getSystemRoot(std::string const &urlDir)
 	return ("");
 }
 
-const std::string	Route::getDefaultFile(std::string const &filename)
+const std::string	Route::getDefaultFile()
 {
-	if (!filename.empty())
-		return (filename);
 	if (!default_file.empty())
 		return (default_file);
 	return ("");
 };
 
+#include "../mod/contentUtils.hpp"
+
+const std::string	VirtualServer::determinePathEndFile(std::string const &path, std::string const &lastPathOperand, Route *route)
+{
+	if (isFile(path + lastPathOperand))
+		return (path + lastPathOperand);
+	else
+		return (path + lastPathOperand + "/" + route->getDefaultFile());
+}
 
 const std::string	VirtualServer::getSystemPath(std::string const &dir, std::string const &filename)
 {
@@ -213,7 +232,8 @@ const std::string	VirtualServer::getSystemPath(std::string const &dir, std::stri
 	}
 	if (!route->getRedirect().empty())
 		return ("");
-	systemPath = getSystemRoot(dir) + route->getDefaultFile(filename);
+	systemPath = getSystemRoot(dir);
+	systemPath = determinePathEndFile(systemPath, filename, route);
 	return (systemPath);
 }
 

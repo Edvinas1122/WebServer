@@ -19,7 +19,7 @@ const std::string	HTTPParser::headerMessage(const int &method_version, const int
 
 ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
 {
-	unsigned int	version = (close_connection ? 1 : 0);
+	unsigned int	version = (close_connection ? 0 : 1);
 
 	if ((virtualServer->errorPage(code)).empty())
 	{
@@ -48,14 +48,14 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
 	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
 
-	if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getMethod()))
-		return (ErrorRespone(405));
 	if (dir.empty()) { // handles Redirect
 		theConnection() << virtualServer->getRedirectMessage(HttpRequest(request).getLocation().getDir());
 		return (new HTTPParser(*this));
 	}
 	if (!Access(dir))
 		return (ErrorRespone(404));
+	if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getMethod()))
+		return (ErrorRespone(405));
 	if (HttpRequest(request).getMethod() == "GET")
 		return (handleGetRequest(dir, request));
 	else if (HttpRequest(request).getMethod() == "POST" || HttpRequest(request).getMethod() == "PUT")
@@ -88,7 +88,7 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 			theConnection() << DirList;
 			return (new HTTPParser(*this));
 		} else
-			return (ErrorRespone(403));
+			return (ErrorRespone(200));
 	}
 	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension())) { // Handle CGI
 		std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());

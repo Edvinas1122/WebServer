@@ -26,7 +26,7 @@ class Route
 
 		void	displayInfo(const char *append) const;
 	const std::string	getResponseDir() const {return (response_dir);};
-	const std::string	getDefaultFile(std::string const &filename);
+	const std::string	getDefaultFile();
 	const std::string	getRedirect() const { return (redirect);};
 	bool	MethodPermited(std::string const &method) const {
 		return (!forbit_methdods.at(method));
@@ -103,7 +103,7 @@ class VirtualServer {
 
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);
-
+		const std::string	determinePathEndFile(std::string const &path, std::string const &filename, Route *route);
 	public:
 		static bool	validServerName(std::string const &str);
 		static bool	validIndexFile(std::string const &str);

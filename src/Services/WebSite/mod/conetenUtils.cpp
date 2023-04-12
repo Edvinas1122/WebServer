@@ -97,13 +97,39 @@ bool	isFile(const std::string &path)
 	}	
 }
 
+// enum class FileType { FILE, DIRECTORY, OTHER };
+
+// FileType GetFileType(const std::string& path)
+// {
+//     struct stat path_stat;
+//     if (stat(path.c_str(), &path_stat) != 0)
+//     {
+// 		throw (std::exception());
+//         return FileType::OTHER;
+//     }
+//     if (S_ISREG(path_stat.st_mode))
+//         return FileType::FILE;
+//     if (S_ISDIR(path_stat.st_mode))
+//         return FileType::DIRECTORY;
+//     return FileType::OTHER;
+// }
+
+// bool	Access(const std::string &path)
+// {
+// 	struct stat path_stat;
+
+// 	if (stat(path.c_str(), &path_stat) != 0)
+// 		return (false);
+// 	if (S_ISREG(path_stat.st_mode) || S_ISDIR(path_stat.st_mode))
+// 		return (true);
+// 	return (false);
+// }
+
 bool	Access(const std::string &path)
 {
-	struct stat path_stat;
-
-	if (stat(path.c_str(), &path_stat) != 0)
-		return (false);
-	return (true);
+	int	accessCode = access(path.c_str(), R_OK);
+	// ENOENT(accessCode);
+	return (!(accessCode));
 }
 
 // std::string	HTTPHeaderFileOK(std::string const &path)

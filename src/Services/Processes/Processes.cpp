@@ -1,13 +1,14 @@
 #include "Processes.hpp"
 
-bool	MasterProcess::Handle()
+bool	BufferRequest::Handle()
 {
 	ServiceProcess	*followingProcess;
 
 	if (!theConnection().getMessage().empty())
 	{
+		requestBuffer.append(theConnection().getMessage());
 		try {
-			followingProcess = RequestParse(theConnection().getMessage());
+			followingProcess = RequestParse(requestBuffer);
 		} catch (...)
 		{
 			std::cerr << "Parcing failure" << std::endl;
@@ -18,7 +19,7 @@ bool	MasterProcess::Handle()
 			SetFollowingProcess(followingProcess);
 			return (false);
 		}
-		throw (std::exception()); // undefined syntax
+		// throw (std::exception()); // undefined syntax
 	}
 	return (true);
 };

@@ -43,6 +43,7 @@ class	HttpRequest: public std::string
 		HttpRequest(std::string const &httpMessage): std::string(httpMessage) {};
 
 		bool				Validate() const;
+		bool				Completed() const;
 		const std::string	getMethod() const;
 		const UrlQuery		getLocation() const;
 		const std::string	getProtocolVersion() const;

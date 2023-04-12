@@ -44,8 +44,12 @@ ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
 	}
 }
 
+#define MAX_REQUEST_LEN 2048
+
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
+	if (!HttpRequest(request).Completed())
+		return (NULL);
 	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
 
 	if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getMethod()))
@@ -96,8 +100,8 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 		ExecuteFile	*exec = new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir);
 		exec->SetEnvVariable(setVar("REQUEST_METHOD", request.getMethod()));
 		exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion().substr(0, 8)));
-		// exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
 		exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
+		// exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getPath()));
 		exec->SetEnvVariable(setVar("SCRIPT_NAME", request.getLocation().getFileName()));
 		theConnection() << "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n";
 		return (exec);
@@ -165,7 +169,7 @@ bool	HTTPParser::Handle()
 		return (HeartBeat());
 	else
 	{
-		return (MasterProcess::Handle());
+		return (BufferRequest::Handle());
 	}
 }
 

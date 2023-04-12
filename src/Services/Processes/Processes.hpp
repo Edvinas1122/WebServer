@@ -15,22 +15,26 @@ class	TerminateProcess: public ServiceProcess
 	bool	Handle() {throw (std::exception());};
 };
 
-class	MasterProcess : virtual public ServiceProcess
+class	BufferRequest : virtual public ServiceProcess
 {
 	public:
-		MasterProcess(Connection *connection): ServiceProcess(connection) {};
-		MasterProcess(Connection *connection, ServiceProcess *followingProcess):
+		BufferRequest(Connection *connection): ServiceProcess(connection) {};
+		BufferRequest(Connection *connection, ServiceProcess *followingProcess):
 						ServiceProcess(connection, followingProcess) {};
-		MasterProcess(const MasterProcess &src): ServiceProcess(src) {};
-		MasterProcess(const MasterProcess &src, ServiceProcess *followingProcess):
+		BufferRequest(const BufferRequest &src): ServiceProcess(src) {};
+		BufferRequest(const BufferRequest &src, ServiceProcess *followingProcess):
 						ServiceProcess(src, followingProcess) {};
-		virtual ~MasterProcess() {};
+		virtual ~BufferRequest() {};
 
 	virtual bool	Handle();
 
 	protected:
 
 	virtual ServiceProcess	*RequestParse(std::string const &request) = 0;
+
+	private:
+
+	std::string	requestBuffer;
 };
 
 class	FileSend : virtual public ServiceProcess

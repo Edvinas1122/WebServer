@@ -10,19 +10,19 @@
 
 const std::string getHttpExplanation(const unsigned int code);
 
-class	HTTPParser : virtual public MasterProcess
+class	HTTPParser : virtual public BufferRequest
 {
 	private:
 		VirtualServer		*virtualServer;
 		static const int	heartBeatRate = 10;
 
 	public:
-		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), MasterProcess(connection), virtualServer(vs) {};
+		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), BufferRequest(connection), virtualServer(vs) {};
 		HTTPParser(Connection *connection, ServiceProcess *followingProcess, VirtualServer *vs):
-					ServiceProcess(connection), MasterProcess(connection, followingProcess),  virtualServer(vs) {};
-		HTTPParser(const HTTPParser &src): ServiceProcess(src), MasterProcess(src), virtualServer(src.virtualServer) {};
+					ServiceProcess(connection), BufferRequest(connection, followingProcess),  virtualServer(vs) {};
+		HTTPParser(const HTTPParser &src): ServiceProcess(src), BufferRequest(src), virtualServer(src.virtualServer) {};
 		HTTPParser(const HTTPParser &src, ServiceProcess *followingProcess):
-					ServiceProcess(src, followingProcess), MasterProcess(src, followingProcess), virtualServer(src.virtualServer) {};
+					ServiceProcess(src, followingProcess), BufferRequest(src, followingProcess), virtualServer(src.virtualServer) {};
 		virtual ~HTTPParser() {};
 
 	virtual	bool	Handle();
@@ -45,9 +45,9 @@ class	HTTPFileSend : public HTTPParser, public FileSend
 {
 	public:
 		HTTPFileSend(const HTTPParser &process, std::string const &path):
-						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileSend(&theConnection(), path) {};
+						ServiceProcess(process), BufferRequest(process), HTTPParser(process), FileSend(&theConnection(), path) {};
 		HTTPFileSend(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path):
-						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess),
+						ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
 						HTTPParser(process, followingProcess), FileSend(&theConnection(), followingProcess, path) {};
 		virtual ~HTTPFileSend() {};
 
@@ -72,10 +72,10 @@ class	HTTPFileReceive : public HTTPParser, public FileReceive
 		bool				beginTrimmed;
 	public:
 		HTTPFileReceive(const HTTPParser &process, std::string const &path, size_t const &len, std::string const &delimiter):
-						ServiceProcess(process), MasterProcess(process), HTTPParser(process), FileReceive(&theConnection(), path, len),
+						ServiceProcess(process), BufferRequest(process), HTTPParser(process), FileReceive(&theConnection(), path, len),
 						delimiter(delimiter), beginTrimmed(false) {};
 		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path, size_t const &len, std::string const &delimiter):
-						ServiceProcess(process, followingProcess), MasterProcess(process, followingProcess), HTTPParser(process, followingProcess),
+						ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess), HTTPParser(process, followingProcess),
 						FileReceive(&theConnection(), followingProcess, path, len), delimiter(delimiter), beginTrimmed(false) {};
 		virtual ~HTTPFileReceive() {};
 

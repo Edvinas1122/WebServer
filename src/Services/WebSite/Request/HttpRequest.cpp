@@ -18,6 +18,11 @@ bool	HttpRequest::Validate() const
 		
 }
 
+bool	HttpRequest::Completed() const
+{
+	return ((find("\r\n\r\n") == std::string::npos ? false : true));
+}
+
 const std::string	HttpRequest::getMethod() const
 {
 	return (substr(0, find_first_of(' ')));

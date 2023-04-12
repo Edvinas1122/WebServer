@@ -31,6 +31,7 @@ class	BufferRequest : virtual public ServiceProcess
 	protected:
 
 	virtual ServiceProcess	*RequestParse(std::string const &request) = 0;
+	virtual bool			RequestCompleted(std::string const &request) = 0;
 
 	private:
 

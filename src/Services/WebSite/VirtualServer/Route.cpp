@@ -68,7 +68,7 @@ Route::Route(DescendParser parser): directory_listing_enabled(false), response_d
 			directory_listing_enabled = true;
 		else
 			directory_listing_enabled = false;
-	} catch (...) { directory_listing_enabled = true; }
+	} catch (...) { directory_listing_enabled = false; }
 	SetMethodsDefault();
 	ParseAllowedMethods(parser);
 	ParseForbidMethods(parser);

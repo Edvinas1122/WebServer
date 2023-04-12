@@ -30,6 +30,7 @@ class	HTTPParser : virtual public BufferRequest
 	protected:
 
 	virtual ServiceProcess	*RequestParse(std::string const &request);
+	virtual bool			RequestCompleted(std::string const &request);
 
 	protected:
 	const std::string	headerMessage(const int &method_version, const int &code, const size_t content_len = std::numeric_limits<size_t>::max());

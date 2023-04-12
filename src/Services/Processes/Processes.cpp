@@ -7,8 +7,11 @@ bool	BufferRequest::Handle()
 	if (!theConnection().getMessage().empty())
 	{
 		requestBuffer.append(theConnection().getMessage());
+		if (!RequestCompleted(requestBuffer))
+			return (true);
 		try {
 			followingProcess = RequestParse(requestBuffer);
+			requestBuffer.clear();
 		} catch (...)
 		{
 			std::cerr << "Parcing failure" << std::endl;

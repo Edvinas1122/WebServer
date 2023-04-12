@@ -44,12 +44,8 @@ ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
 	}
 }
 
-#define MAX_REQUEST_LEN 2048
-
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
-	if (!HttpRequest(request).Completed())
-		return (NULL);
 	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
 
 	if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getMethod()))
@@ -103,7 +99,7 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 		exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
 		// exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getPath()));
 		exec->SetEnvVariable(setVar("SCRIPT_NAME", request.getLocation().getFileName()));
-		theConnection() << "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n";
+		theConnection() << headerMessage(0, 200);
 		return (exec);
 	}
 	if (request.getProtocolVersion() == "HTTP/1.0" || request.getKeepAlive() == "close") {
@@ -177,4 +173,13 @@ bool	HTTPParser::HeartBeat()
 {
 	theConnection() << "200 OK\r\nConnection: keep-alive\r\n";
 	return (true);
+}
+
+#define MAX_REQUEST_LEN 2048
+
+bool	HTTPParser::RequestCompleted(std::string const &request)
+{
+	if (request.length() > MAX_REQUEST_LEN)
+		throw (std::exception());
+	return (HttpRequest(request).Completed());
 }

@@ -30,7 +30,7 @@ bool	Access(const std::string &path);
 /*
 	Trim buffers
 */
-void	trimUntilFileBegin(Buffer &buffer);
-Buffer	unchunkBegining(Buffer buffer, std::string const &delimeter);
+// void	trimUntilFileBegin(Buffer &buffer);
+// Buffer	unchunkBegining(Buffer buffer, std::string const &delimeter);
 
 #endif

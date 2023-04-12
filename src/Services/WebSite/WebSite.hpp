@@ -34,12 +34,15 @@ class	HTTPParser : virtual public BufferRequest
 
 	protected:
 	const std::string	headerMessage(const int &method_version, const int &code, const size_t content_len = std::numeric_limits<size_t>::max());
+	ServiceProcess		*ErrorRespone(const int code, bool close_connection = false);
 
 	private:
-	ServiceProcess		*ErrorRespone(const int code, bool close_connection = false);
 	ServiceProcess		*handleDeleteRequest(std::string const &dir, HttpRequest const &request);
 	ServiceProcess		*handleGetRequest(std::string const &dir, HttpRequest const &request);
 	ServiceProcess		*handleUploadRequest(std::string const &dir, HttpRequest const &request);
+
+	protected:
+		size_t	max_receive_size;
 };
 
 class	HTTPFileSend : public HTTPParser, public FileSend
@@ -65,31 +68,61 @@ class	HTTPFileReceiveReport : public ServiceProcess
 	bool	Handle();
 };
 
-class	HTTPFileReceive : public HTTPParser, public FileReceive
+class	HTTPBufferReceive : public HTTPParser
 {
-	private:
+	protected:
 		Buffer				buffer;
-		const std::string	delimiter;
-		bool				beginTrimmed;
+		bool				chunkTrimmed;
+
 	public:
-		HTTPFileReceive(const HTTPParser &process, std::string const &path, size_t const &len, std::string const &delimiter):
-						ServiceProcess(process), BufferRequest(process), HTTPParser(process), FileReceive(&theConnection(), path, len),
-						delimiter(delimiter), beginTrimmed(false) {};
-		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path, size_t const &len, std::string const &delimiter):
-						ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess), HTTPParser(process, followingProcess),
-						FileReceive(&theConnection(), followingProcess, path, len), delimiter(delimiter), beginTrimmed(false) {};
-		virtual ~HTTPFileReceive() {};
+		HTTPBufferReceive(const HTTPParser &process):
+						ServiceProcess(process), BufferRequest(process), HTTPParser(process), chunkTrimmed(false) {};
+		HTTPBufferReceive(const HTTPParser &process, ServiceProcess *followingProcess):
+						ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
+						HTTPParser(process, followingProcess), chunkTrimmed(false) {};
+		virtual ~HTTPBufferReceive() {};
 
-	bool	Handle();
+	virtual bool	Handle();
 
-	HTTPFileReceive	&operator<<(Buffer &src) {
+	HTTPBufferReceive	&operator<<(Buffer &src) {
 		this->buffer << src;
 		return (*this);
 	};
 
+	protected:
+	virtual	bool	CheckChunkHeader() = 0;
+	virtual void	ChunkBeginTrimHandle() = 0;
+	virtual bool	CheckChunkEnd() = 0;
+	virtual void	ChunkEndHandle() = 0;
+};
+
+class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
+{
+	private:
+		File		file;
+		std::string	delimiter;
+		std::string	directory;
+
+	public:
+		HTTPDelimiterChunkedFileReceive(const HTTPParser &process,
+											std::string const &delimiter, std::string const &dir):
+					ServiceProcess(process), BufferRequest(process), HTTPBufferReceive(process),
+					delimiter(delimiter), directory(dir) {};
+
+		HTTPDelimiterChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess,
+											std::string const &delimiter, std::string const &dir):
+					ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
+					HTTPBufferReceive(process, followingProcess), delimiter(delimiter), directory(dir) {};
+		virtual ~HTTPDelimiterChunkedFileReceive() {};
+
+	bool	Handle();
+
 	private:
 
-	bool	BeginTrimHandle();
+	virtual bool	CheckChunkHeader();
+	virtual void	ChunkBeginTrimHandle();
+	virtual bool	CheckChunkEnd();
+	virtual void	ChunkEndHandle();
 };
 
 class	WebSite: public Service

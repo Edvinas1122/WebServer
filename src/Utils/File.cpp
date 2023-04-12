@@ -9,6 +9,8 @@ void	File::Create(const char *path)
 	}
 	this->path = path;
 	std::fstream::open(path, std::ios::out | std::ios::binary | std::ios::trunc);
+	if (!std::fstream::is_open())
+		throw (std::exception());
 };
 
 bool	File::Open(const char *path)

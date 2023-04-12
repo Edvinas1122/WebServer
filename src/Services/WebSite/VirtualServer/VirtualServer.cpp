@@ -27,6 +27,11 @@ VirtualServer::VirtualServer(DescendParser parser)
 	} catch (DescendParser::NoKeyExcept &e) {
 		host = "default";
 	}
+	try {
+		max_body_size = atol(parser.getValue("max_body_size").c_str());
+	} catch (DescendParser::NoKeyExcept &e) {
+		max_body_size = 2000000; //default 2 mb
+	}
 	while (parser.count("location") >= iterator)
 	{
 		locations.insert(parser.getMaped<Route>("location", iterator));

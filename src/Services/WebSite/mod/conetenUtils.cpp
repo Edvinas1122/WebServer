@@ -152,22 +152,3 @@ bool	Access(const std::string &path)
 // 	header << dirInfoHTTPFormat(path.c_str(), url.c_str(), true);
 // 	return (header.str());
 // }
-
-void	trimUntilFileBegin(Buffer &buffer)
-{
-	buffer = buffer.substr(buffer.find("Content-Type:"));
-	buffer = buffer.substr(buffer.find("\r\n") + 4);
-};
-
-Buffer	unchunkBegining(Buffer buffer, std::string const &delimeter)
-{
-	size_t	begin;
-
-	begin = buffer.find(delimeter);
-	if (begin != std::numeric_limits<size_t>::max())
-		buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
-	begin = buffer.find(delimeter);
-	if (begin != std::numeric_limits<size_t>::max())
-		buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
-	return (buffer);
-};

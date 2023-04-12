@@ -57,6 +57,11 @@ class	FileReceive : virtual public ServiceProcess
 		File	fileToReceive;
 		size_t	lenght;
 	public:
+		FileReceive(Connection *connection): ServiceProcess(connection) {};
+		FileReceive(Connection *connection, ServiceProcess *followingService):
+						ServiceProcess(connection, followingService) {};
+		FileReceive(FileReceive const &src): ServiceProcess(src) {};
+		FileReceive(FileReceive const &src, ServiceProcess *followingService): ServiceProcess(src, followingService) {};
 		FileReceive(Connection *connection, std::string const &path, size_t const &len):
 						ServiceProcess(connection), fileToReceive(path.c_str()), lenght(len) {
 			fileToReceive.Create();
@@ -65,9 +70,14 @@ class	FileReceive : virtual public ServiceProcess
 						ServiceProcess(connection, followingProcess), fileToReceive(path.c_str()), lenght(len) {
 			fileToReceive.Create();
 		};
+		// FileReceive(FileReceive const &process):
+		// 				ServiceProcess(process), fileToReceive(process.fileToReceive), lenght(process.lenght) {};
+		// FileReceive(FileReceive const &process, ServiceProcess *followingProcess):
+		// 				ServiceProcess(process, followingProcess), fileToReceive(process.fileToReceive), lenght(process.lenght) {};
 		virtual ~FileReceive() {};
 
 	virtual bool	Handle();
+	void			CreateFile(std::string const &filename);
 };
 
 class	PipeSend: virtual public ServiceProcess

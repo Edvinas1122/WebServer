@@ -7,6 +7,7 @@ std::map<std::string, int>	validMethodMap()
 	map["GET"] = GET_METHOD;
 	map["HEAD"] = HEAD_METHOD;
 	map["POST"] = POST_METHOD;
+	map["PUT"] = PUT_METHOD;
 	map["DELETE"] = DELETE_METHOD;
 	map["TRACE"] = TRACE_METHOD;
 	map["CONNECT"] = CONNECT_METHOD;

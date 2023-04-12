@@ -11,7 +11,6 @@ bool	BufferRequest::Handle()
 			return (true);
 		try {
 			followingProcess = RequestParse(requestBuffer);
-			requestBuffer.clear();
 		} catch (...)
 		{
 			std::cerr << "Parcing failure" << std::endl;
@@ -19,6 +18,7 @@ bool	BufferRequest::Handle()
 		}
 		if (followingProcess != NULL)
 		{
+			requestBuffer.clear();
 			SetFollowingProcess(followingProcess);
 			return (false);
 		}
@@ -52,8 +52,6 @@ bool	FileReceive::Handle()
 	{
 		if (lenght <= fileToReceive.GetSize() + tst.length())
 		{
-			std::cout << fileToReceive.GetSize() << std::endl;
-			std::cout << tst.length() << std::endl;
 			tst = tst.substr(0, tst.length() - (fileToReceive.GetSize() + tst.length() - lenght));
 			tst >> fileToReceive;
 			return (false);

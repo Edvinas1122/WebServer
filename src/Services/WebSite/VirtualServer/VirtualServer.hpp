@@ -100,6 +100,7 @@ class VirtualServer {
 	std::string				CGIexecutableDir(std::string const &fileExtention);
 	std::list<std::string>	getPorts() {return (port_number);};
 	const std::string		errorPage(const unsigned int &error_number);
+	size_t					maxRecevieSize() {return (max_body_size);};
 
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);

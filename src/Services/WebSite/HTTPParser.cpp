@@ -52,19 +52,24 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 		theConnection() << virtualServer->getRedirectMessage(HttpRequest(request).getLocation().getDir());
 		return (new HTTPParser(*this));
 	}
-	if (!Access(dir))
-		return (ErrorRespone(404));
 	if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getMethod()))
 		return (ErrorRespone(405));
 	if (HttpRequest(request).getMethod() == "GET")
 		return (handleGetRequest(dir, request));
-	else if (HttpRequest(request).getMethod() == "POST" || HttpRequest(request).getMethod() == "PUT")
+	else if (HttpRequest(request).getMethod() == "POST")
 	{
+		max_receive_size = virtualServer->maxRecevieSize();
 		if (!isFile(dir))
 			return (handleUploadRequest(dir, request));
 		if (request.find("_method=DELETE") != std::string::npos)
 			return (handleDeleteRequest(dir, request));
 		// if () CGI
+	}
+	else if (HttpRequest(request).getMethod() == "PUT")
+	{
+		max_receive_size = virtualServer->maxRecevieSize();
+		if (!isFile(dir))
+			return (handleUploadRequest(dir, request));
 	}
 	return (new TerminateProcess(&theConnection()));
 };
@@ -78,6 +83,8 @@ const std::string	setVar(std::string const &key, std::string const &value)
 
 ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest const &request)
 {
+	if (!Access(dir))
+		return (ErrorRespone(404));
 	if (!isFile(dir)) { // dirrectory listing handle
 		if (virtualServer->dirListingPermited(request.getLocation().getDir()))
 		{
@@ -123,19 +130,34 @@ ServiceProcess	*HTTPParser::handleDeleteRequest(std::string const &dir, HttpRequ
 	return (ErrorRespone(403));
 }
 
+Buffer	*removeHeader(Buffer *tmp)
+{
+	std::string	header_tmp;
+
+	*tmp >> header_tmp;
+	*tmp = tmp->substr(header_tmp.find("\r\n\r\n") + 4);
+	return (tmp);
+}
+
+void	appendToBuffer(Connection *connection, Buffer *buffer)
+{
+	Buffer	tmp;
+
+	*connection >> tmp;
+	*buffer << tmp;
+}
+
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
 	try {
-		size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
-		HTTPFileReceive	*process;
-		Buffer			requestBuffered;
+		// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
+		HTTPBufferReceive	*process;
+		Buffer				requestBuffered;
 
-		std::cout << theConnection() << std::endl;
-		std::cout << "File receive size: " << fileSize << std::endl;
-		process = new HTTPFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())),
-						dir + request.getFilename(), fileSize, request.getBoundry());
-		theConnection() >> requestBuffered;
-		*process << requestBuffered;
+		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this), request.getBoundry(), dir);
+		requestBuffered << std::string(request);
+		appendToBuffer(&theConnection(), &requestBuffered);
+		*process << *removeHeader(&requestBuffered);
 		return (process);
 	} catch (...) {
 		return (ErrorRespone(500));

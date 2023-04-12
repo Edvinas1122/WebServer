@@ -84,6 +84,17 @@ class	Buffer
 			return (*this);
 		};
 
+		Buffer	&operator<<(const std::string &src)
+		{
+			std::vector<unsigned char>	&data = buffer;
+
+			for (size_t i = 0; i < src.length(); ++i)
+			{
+				data.push_back((unsigned char)src.at(i));
+			}
+			return (*this);
+		};
+
 		friend std::ostream& operator<<(std::ostream& os, const Buffer& buffer) {
 			const std::vector<unsigned char>	&data = buffer.buffer;
 
@@ -95,6 +106,16 @@ class	Buffer
 		};
 
 		friend void	operator>>(Buffer &buffer, std::string& str)
+		{
+			const std::vector<unsigned char>	&data = buffer.buffer;
+
+			for (size_t i = 0; i < data.size(); ++i)
+			{
+				str += (char)(data[i]); // while is ascii
+			}
+		}
+
+		friend void	operator>>(Buffer const &buffer, std::string& str)
 		{
 			const std::vector<unsigned char>	&data = buffer.buffer;
 
@@ -126,6 +147,19 @@ class	Buffer
 			}
 			return (std::numeric_limits<size_t>::max());
 		};
+
+		// size_t	find(std::string const &match, const size_t offset = 0) const
+		// {
+		// 	size_t	iterator = offset;
+
+		// 	while (iterator < buffer.size() + match.length())
+		// 	{
+		// 		if (testMatch(match, iterator, match.length()))
+		// 			return (iterator);
+		// 		iterator++;
+		// 	}
+		// 	return (std::numeric_limits<size_t>::max());
+		// };
 
 		size_t	find_last(std::string const &match)
 		{

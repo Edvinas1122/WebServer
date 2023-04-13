@@ -71,7 +71,7 @@ const std::string getHttpExplanation(const unsigned int code) {
         case 412:
             return "Precondition Failed";
         case 413:
-            return "Payload Too Large";
+            return "Content Too Large";
         case 414:
             return "URI Too Long";
         case 415:

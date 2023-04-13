@@ -30,7 +30,10 @@ void	Terminal::Parse(std::string const &user_input)
 		run = false;
 	}
 	else if (!user_input.compare(0, 10, "background"))
+	{
 		addSystemMessage("Terminal", "command", "background");
+		ProgramInterface::run = false;
+	}
 	else
 		display_assitant_info();
 }

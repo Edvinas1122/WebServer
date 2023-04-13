@@ -101,7 +101,7 @@ class VirtualServer {
 	std::list<std::string>	getPorts() {return (port_number);};
 	const std::string		errorPage(const unsigned int &error_number);
 	size_t					maxRecevieSize() {return (max_body_size);};
-
+	const std::string		getDefaulFile(std::string const &dir);
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);
 		const std::string	determinePathEndFile(std::string const &path, std::string const &filename, Route *route);

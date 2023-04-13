@@ -17,12 +17,20 @@ class	HTTPParser : virtual public BufferRequest
 		static const int	heartBeatRate = 10;
 
 	public:
-		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), BufferRequest(connection), virtualServer(vs) {};
+		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), BufferRequest(connection), virtualServer(vs)
+		{
+			setMaxReceiveSize(virtualServer->maxRecevieSize());
+		};
 		HTTPParser(Connection *connection, ServiceProcess *followingProcess, VirtualServer *vs):
-					ServiceProcess(connection), BufferRequest(connection, followingProcess),  virtualServer(vs) {};
-		HTTPParser(const HTTPParser &src): ServiceProcess(src), BufferRequest(src), virtualServer(src.virtualServer) {};
+					ServiceProcess(connection), BufferRequest(connection, followingProcess),  virtualServer(vs)
+		{
+			setMaxReceiveSize(virtualServer->maxRecevieSize());
+		};
+		HTTPParser(const HTTPParser &src): ServiceProcess(src), BufferRequest(src), virtualServer(src.virtualServer),
+											max_receive_size(src.max_receive_size) {};
 		HTTPParser(const HTTPParser &src, ServiceProcess *followingProcess):
-					ServiceProcess(src, followingProcess), BufferRequest(src, followingProcess), virtualServer(src.virtualServer) {};
+					ServiceProcess(src, followingProcess), BufferRequest(src, followingProcess),
+					virtualServer(src.virtualServer), max_receive_size(src.max_receive_size) {};
 		virtual ~HTTPParser() {};
 
 	virtual	bool	Handle();
@@ -33,8 +41,8 @@ class	HTTPParser : virtual public BufferRequest
 	virtual bool			RequestCompleted(std::string const &request);
 
 	protected:
-	const std::string	headerMessage(const int &method_version, const int &code, const size_t content_len = std::numeric_limits<size_t>::max());
-	ServiceProcess		*ErrorRespone(const int code, bool close_connection = false);
+	const std::string		headerMessage(const int &method_version, const int &code, const size_t content_len = std::numeric_limits<size_t>::max());
+	virtual ServiceProcess	*ErrorRespone(const int code, bool close_connection = false);
 
 	private:
 	ServiceProcess		*handleDeleteRequest(std::string const &dir, HttpRequest const &request);
@@ -42,7 +50,11 @@ class	HTTPParser : virtual public BufferRequest
 	ServiceProcess		*handleUploadRequest(std::string const &dir, HttpRequest const &request);
 
 	protected:
+		bool	allowInsert(const size_t newInsertSize);
+	private:
+		void	setMaxReceiveSize(const size_t value);
 		size_t	max_receive_size;
+		size_t	received;
 };
 
 class	HTTPFileSend : public HTTPParser, public FileSend
@@ -90,17 +102,21 @@ class	HTTPBufferReceive : public HTTPParser
 	};
 
 	protected:
+	void			Continue();
 	virtual	bool	CheckChunkHeader() = 0;
-	virtual void	ChunkBeginTrimHandle() = 0;
+	virtual bool	ChunkBeginTrimHandle() = 0;
 	virtual bool	CheckChunkEnd() = 0;
 	virtual void	ChunkEndHandle() = 0;
+
+	public:
+	class	ExceededMaximumLen: public std::exception {};
 };
 
 class	WebSite: public Service
 {
 	private:
 		VirtualServers		*virtualServers;
-		static const int	timeoutAge = 30; 
+		static const int	timeoutAge = 3000; 
 	public:
 		WebSite() {};
 		~WebSite() {};

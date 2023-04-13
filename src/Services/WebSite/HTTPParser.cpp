@@ -20,7 +20,7 @@ bool	HTTPParser::Handle()
 
 bool	HTTPParser::HeartBeat()
 {
-	theConnection() << "200 OK\r\nConnection: keep-alive\r\n";
+	theConnection() << "200 OK\r\nConnection: keep-alive\r\n\r\n";
 	return (true);
 }
 
@@ -60,19 +60,13 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 		return (handleGetRequest(dir, request));
 	else if (HttpRequest(request).getMethod() == "POST")
 	{
-		max_receive_size = virtualServer->maxRecevieSize();
-		if (!isFile(dir))
-			return (handleUploadRequest(dir, request));
 		if (request.find("_method=DELETE") != std::string::npos)
 			return (handleDeleteRequest(dir, request));
+		return (handleUploadRequest(dir, request));
 		// if () CGI
 	}
 	else if (HttpRequest(request).getMethod() == "PUT")
-	{
-		max_receive_size = virtualServer->maxRecevieSize();
-		if (!isFile(dir))
-			return (handleUploadRequest(dir, request));
-	}
+		return (handleUploadRequest(dir, request));
 	return (new TerminateProcess(&theConnection()));
 };
 
@@ -129,13 +123,14 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension())) { // Handle CGI
 		std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
 
+		// ExecuteFile	*exec = new ExecuteFile(&theConnection(), new HTTPParser(*this), cgiExecutableDir, dir);
 		ExecuteFile	*exec = new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir);
 		exec->SetEnvVariable(setVar("REQUEST_METHOD", request.getMethod()));
 		exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion().substr(0, 8)));
 		exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
-		// exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getPath()));
 		exec->SetEnvVariable(setVar("SCRIPT_NAME", request.getLocation().getFileName()));
 		theConnection() << headerMessage(0, 200);
+		// theConnection() << "Status: 500 Internal Server Error\r\nContent-Type: text/html; charset=utf-8\r\n\r\nPATH_INFO not found\r\n\r\n";
 		return (exec);
 	}
 	if (request.getProtocolVersion() == "HTTP/1.0" || request.getKeepAlive() == "close") {
@@ -185,7 +180,7 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 	// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
 
 	if (chunkedFileUploadRequest(request.getHeaders()))
-		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
+		process = new HTTPLenChunkedFileReceive(*this, updateDirIfFileExists(dir));
 	else
 		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
 	*process << removeHeader(std::string(request));
@@ -200,3 +195,15 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 // 	process = HTTPParser::RequestParse(request);
 
 // };
+
+void	HTTPParser::setMaxReceiveSize(const size_t value)
+{
+	received = 0;
+	max_receive_size = value;
+}
+
+bool	HTTPParser::allowInsert(const size_t newInsertSize)
+{
+	received += newInsertSize;
+	return ((received < max_receive_size));
+}

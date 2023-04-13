@@ -28,7 +28,35 @@ class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
 	private:
 
 	virtual bool	CheckChunkHeader();
-	virtual void	ChunkBeginTrimHandle();
+	virtual bool	ChunkBeginTrimHandle();
+	virtual bool	CheckChunkEnd();
+	virtual void	ChunkEndHandle();
+};
+
+class	HTTPLenChunkedFileReceive : public HTTPBufferReceive
+{
+	private:
+		File		file;
+		size_t		length;
+		std::string	directory;
+
+	public:
+		HTTPLenChunkedFileReceive(const HTTPParser &process, const std::string &filepath):
+					ServiceProcess(process), BufferRequest(process), HTTPBufferReceive(process),
+					directory(filepath) {file.Create(directory.c_str());};
+
+		// HTTPLenChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess,
+		// 									std::string const &delimiter, std::string const &dir):
+		// 			ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
+		// 			HTTPBufferReceive(process, followingProcess), delimiter(delimiter), directory(dir) {};
+		virtual ~HTTPLenChunkedFileReceive() {};
+
+	bool	Handle();
+
+	private:
+
+	virtual bool	CheckChunkHeader();
+	virtual bool	ChunkBeginTrimHandle();
 	virtual bool	CheckChunkEnd();
 	virtual void	ChunkEndHandle();
 };

@@ -50,7 +50,10 @@ class	ServiceProcess: public TimeOut
 	protected:
 
 	virtual void	SetFollowingProcess(ServiceProcess *);
-	//ServicePorcess	*getFollowingProcess(); // list structure
+	virtual void	PushBackFollowingProcess(ServiceProcess *);
+
+	private:
+	ServiceProcess	*GetLastProcess();
 };
 
 class	Service

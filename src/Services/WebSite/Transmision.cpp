@@ -29,19 +29,30 @@ static void	appendToBuffer(Connection *connection, Buffer *buffer)
 bool	HTTPBufferReceive::Handle()
 {
 	appendToBuffer(&theConnection(), &buffer);
+	if (buffer.empty())
+		return (true);
+	if (!allowInsert(buffer.length()))
+	{
+		SetFollowingProcess(ErrorRespone(413));
+		throw ExceededMaximumLen();
+	}
 	if (!chunkTrimmed)
 	{
 		if (CheckChunkHeader()) {
-			ChunkBeginTrimHandle();
-			chunkTrimmed = true;
+			chunkTrimmed = ChunkBeginTrimHandle();
 		}
-		return (true);
+		return (chunkTrimmed); // cancelation / ending or proceeding
 	}
 	if (CheckChunkEnd()) {
 		ChunkEndHandle();
-		return (false);
+		return (!chunkTrimmed); // continuation or ending
 	}
 	return (true);
+}
+
+void	HTTPBufferReceive::Continue()
+{
+	chunkTrimmed = false;
 }
 
 bool	matchingDelimiter(Buffer &speciment, std::string const &delimiter)
@@ -57,6 +68,32 @@ bool	matchingDelimiter(Buffer &speciment, std::string const &delimiter)
 }
 
 #include "BufferedReceiveTypes.hpp"
+
+
+/*
+	HTTPDelimiterChunkedFileReceive
+	this receive type does not specify name in an Http header
+	it specifies approx len which can be usefull to lessen comparison
+	opperations
+*/
+bool	HTTPDelimiterChunkedFileReceive::Handle()
+{
+	try {
+		if (!HTTPBufferReceive::Handle()) // end
+		{
+			buffer >> file;
+			return (false);
+		}
+	} catch (ExceededMaximumLen &e) {
+		return (false);
+	}
+	if (chunkTrimmed && buffer.find(delimiter) == std::string::npos)
+	{
+		buffer >> file;
+		buffer.clear();
+	}
+	return (true);
+}
 
 bool	HTTPDelimiterChunkedFileReceive::CheckChunkHeader()
 {
@@ -77,24 +114,12 @@ static void	trimUntilFileBegin(Buffer &buffer)
 	buffer = buffer.substr(buffer.find("\r\n") + 4);
 };
 
-void	HTTPDelimiterChunkedFileReceive::ChunkBeginTrimHandle()
-{
-	file.Create(directory.append(getFileName(&buffer).c_str()).c_str());
-	trimUntilFileBegin(buffer);
-}
+#include "mod/contentUtils.hpp"
 
-bool	HTTPDelimiterChunkedFileReceive::Handle()
+bool	HTTPDelimiterChunkedFileReceive::ChunkBeginTrimHandle()
 {
-	if (!HTTPBufferReceive::Handle())
-	{
-		buffer >> file;
-		return (false);
-	}
-	if (chunkTrimmed && buffer.find(delimiter) == std::string::npos)
-	{
-		buffer >> file;
-		buffer.clear();
-	}
+	file.Create(updateDirIfFileExists(directory.append(getFileName(&buffer).c_str())).c_str());
+	trimUntilFileBegin(buffer);
 	return (true);
 }
 
@@ -106,16 +131,70 @@ bool	HTTPDelimiterChunkedFileReceive::CheckChunkEnd()
 void	HTTPDelimiterChunkedFileReceive::ChunkEndHandle()
 {
 	buffer = buffer.substr(0, buffer.find(delimiter) - 4);
-	// buffer = buffer.substr(0, buffer.find_last("\r\n"));
 }
 
 
+/*
+	Chunk type has specified filename at header, but only specifies len
+	of a chunk in message
+*/
 
-// static size_t	HexStrToLong(std::string const &hex_str) //////////////////////////////
-// {
-// 	std::istringstream iss(hex_str);
-// 	size_t size;
+bool	HTTPLenChunkedFileReceive::Handle()
+{
+	try {
+		if (!HTTPBufferReceive::Handle()) // end
+			return (false);
+	} catch (ExceededMaximumLen &e) {
+		return (false);
+	}
+	if (chunkTrimmed)
+	{
+		length -= buffer.length();
+		buffer >> file;
+	}
+	return (true);
+}
 
-// 	iss >> std::hex >> size;
-// 	return (size);
-// }
+static size_t	HexStrToLong(std::string const &hex_str)
+{
+	std::istringstream iss(hex_str);
+	size_t size;
+
+	iss >> std::hex >> size;
+	return (size);
+}
+
+
+bool	HTTPLenChunkedFileReceive::CheckChunkHeader()
+{
+	return ((buffer.find("\r\n") != std::string::npos));
+}
+
+bool	HTTPLenChunkedFileReceive::ChunkBeginTrimHandle()
+{
+	length = HexStrToLong(buffer.substr(0, buffer.find("\r\n")));
+	if (length == 0)
+		return (false);
+	buffer = buffer.substr(buffer.find("\r\n") + 2);
+	return (true);
+}
+
+bool	HTTPLenChunkedFileReceive::CheckChunkEnd()
+{
+	return ((length <= buffer.length()));
+}
+
+void	HTTPLenChunkedFileReceive::ChunkEndHandle()
+{
+	Buffer	toFile;
+
+	toFile = buffer.substr(0, length);
+	toFile >> file;
+	if (buffer.length() >= length + 2)
+	{
+		buffer = buffer.substr(length + 2);
+		if (!buffer.empty() && buffer.substr(0, 1).find("0") != std::string::npos)
+			return;
+	}
+	Continue();
+}

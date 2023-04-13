@@ -194,7 +194,7 @@ const std::string	fixDir(std::string const &urlDir)
 	return (dirFixed);
 }
 
-const std::string	VirtualServer::getSystemRoot(std::string const &urlDir)
+const std::string	VirtualServer::getSystemRoot(std::string const &urlDir) // double slash
 {
 	std::string	singleDir = dirDescend(fixDir(urlDir), 0);
 
@@ -216,7 +216,7 @@ const std::string	Route::getDefaultFile()
 
 const std::string	VirtualServer::determinePathEndFile(std::string const &path, std::string const &lastPathOperand, Route *route)
 {
-	if (isFile(path + lastPathOperand))
+	if (isFile(path + lastPathOperand) || !Access(path + lastPathOperand))
 		return (path + lastPathOperand);
 	else
 		return (path + lastPathOperand + "/" + route->getDefaultFile());

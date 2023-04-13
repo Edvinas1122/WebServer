@@ -97,33 +97,6 @@ bool	isFile(const std::string &path)
 	}	
 }
 
-// enum class FileType { FILE, DIRECTORY, OTHER };
-
-// FileType GetFileType(const std::string& path)
-// {
-//     struct stat path_stat;
-//     if (stat(path.c_str(), &path_stat) != 0)
-//     {
-// 		throw (std::exception());
-//         return FileType::OTHER;
-//     }
-//     if (S_ISREG(path_stat.st_mode))
-//         return FileType::FILE;
-//     if (S_ISDIR(path_stat.st_mode))
-//         return FileType::DIRECTORY;
-//     return FileType::OTHER;
-// }
-
-// bool	Access(const std::string &path)
-// {
-// 	struct stat path_stat;
-
-// 	if (stat(path.c_str(), &path_stat) != 0)
-// 		return (false);
-// 	if (S_ISREG(path_stat.st_mode) || S_ISDIR(path_stat.st_mode))
-// 		return (true);
-// 	return (false);
-// }
 
 bool	Access(const std::string &path)
 {
@@ -132,23 +105,31 @@ bool	Access(const std::string &path)
 	return (!(accessCode));
 }
 
-// std::string	HTTPHeaderFileOK(std::string const &path)
-// {
-// 	std::stringstream	header;
+static std::string	to_string(size_t const number)
+{
+	std::stringstream	str;
 
-// 	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
-// 	header << "Content-Length: " << File(path.c_str()).GetSize() << "\r\n";
-// 	header << "\r\n";
-// 	return (header.str());
-// }
+	str << number;
+	return (str.str());
+}
 
-// std::string	HTTPHeaderDirOK(std::string const &path, const std::string &url)
-// {
-// 	std::stringstream	header;
+static std::string	addAppendixToFileName(std::string const &dir, size_t appendix)
+{
+	if (dir.find_last_of('.') != std::string::npos)	
+		return (dir.substr(0, dir.find_last_of('.')) + "_" + to_string(appendix) + dir.substr(dir.find_last_of('.')));
+	else
+		return (dir + "_" + to_string(appendix));
+}
 
-// 	header << "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n";
-// 	header << "Content-Length: " << dirInfoHTTPFormat(path.c_str(), url.c_str(), true).length() << "\r\n";
-// 	header << "\r\n";
-// 	header << dirInfoHTTPFormat(path.c_str(), url.c_str(), true);
-// 	return (header.str());
-// }
+std::string	updateDirIfFileExists(std::string const &dir)
+{
+	size_t				appendix = 1;
+	std::string			altered;
+
+	if (!isFile(dir))
+		return (dir);
+
+	while (isFile(addAppendixToFileName(dir, appendix)))
+		appendix++;
+	return (addAppendixToFileName(dir, appendix));
+}

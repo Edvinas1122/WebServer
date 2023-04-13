@@ -1,0 +1,101 @@
+GET / HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encod
+ing: gzip
+
+
+POST / HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: gzip
+
+HEAD / HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+
+
+GET /directory HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/youpi.bad_extension HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/youpi.bla HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/oulalala HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/nop HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/nop/ HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/nop/other.pouic HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/nop/other.pouac HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/Yeah HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/Yeah/not_happy.bad_extension HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+PUT /put_test/file_should_exist_after HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Accept-Encoding: gzip
+
+POST /files/ HTTP/1.1
+Host: 46.101.198.64:10014
+Connection: keep-alive
+Content-Length: 50
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+Origin: http://46.101.198.64:10014
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryYGLK03M7HM6PxSZ8
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://46.101.198.64:10014/files/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+
+------WebKitFormBoundaryYGLK03M7HM6PxSZ8
+Content-Disposition: form-data; name="fileToUpload"; filename="link_to_ticket.txt"
+Content-Type: text/plain

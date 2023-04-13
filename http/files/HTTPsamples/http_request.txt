@@ -1,4 +1,4 @@
-POST /upload HTTP/1.1
+POST /files/ HTTP/1.1
 Host: 46.101.198.64:10012
 Connection: keep-alive
 Content-Length: 319
@@ -47,3 +47,26 @@ What acceptable audit canst thou leave?
    Which, used, lives th' executor to be.
 
 ------WebKitFormBoundaryyhpWEKBoDcUWqo5A--
+
+POST /files/ HTTP/1.1
+Host: 46.101.198.64:10014
+Connection: keep-alive
+Content-Length: 10590
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36
+Origin: http://46.101.198.64:10014
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryFlJ471RJyJVcaQPO
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://46.101.198.64:10014/files/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+
+------WebKitFormBoundaryFlJ471RJyJVcaQPO
+Content-Disposition: form-data; name="fileToUpload"; filename="Screen Shot 2023-01-15 at 7.06.53 PM.png"
+Content-Type: image/png
+
+fPNG
+fwq
+agsgihasghwahgoiaqpgjqpowjgpohjqwpgohqpwohgpoqwhgpohqwpoghwqafswafwq
+fasaqfwwqwfwqffwqwfq

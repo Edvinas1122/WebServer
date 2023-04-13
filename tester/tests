@@ -1,0 +1,67 @@
+GET / HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encod
+ing: gzip
+
+
+POST / HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Tra
+nsfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: gzip
+
+HEAD / HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+
+
+GET /directory HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/youpi.bad_extension HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/youpi.bla HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/oulalala HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/nop HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/nop/ HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+
+GET /directory/nop/other.pouic HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encod
+ing: gzip
+
+
+GET /directory/nop/other.pouac HTTP/1.1
+Host: localhost:10010
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip

@@ -139,14 +139,6 @@ Buffer	*removeHeader(Buffer *tmp)
 	return (tmp);
 }
 
-void	appendToBuffer(Connection *connection, Buffer *buffer)
-{
-	Buffer	tmp;
-
-	*connection >> tmp;
-	*buffer << tmp;
-}
-
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
 	try {
@@ -154,9 +146,8 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 		HTTPBufferReceive	*process;
 		Buffer				requestBuffered;
 
-		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this), request.getBoundry(), dir);
+		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
 		requestBuffered << std::string(request);
-		appendToBuffer(&theConnection(), &requestBuffered);
 		*process << *removeHeader(&requestBuffered);
 		return (process);
 	} catch (...) {

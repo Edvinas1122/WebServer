@@ -18,9 +18,17 @@ bool	HTTPFileReceiveReport::Handle()
 	return (true);
 }
 
+static void	appendToBuffer(Connection *connection, Buffer *buffer)
+{
+	Buffer	tmp;
+
+	*connection >> tmp;
+	*buffer << tmp;
+}
+
 bool	HTTPBufferReceive::Handle()
 {
-	theConnection() >> buffer;
+	appendToBuffer(&theConnection(), &buffer);
 	if (!chunkTrimmed)
 	{
 		if (CheckChunkHeader()) {

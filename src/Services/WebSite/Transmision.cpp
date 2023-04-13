@@ -56,6 +56,7 @@ bool	matchingDelimiter(Buffer &speciment, std::string const &delimiter)
 	return (false);
 }
 
+#include "BufferedReceiveTypes.hpp"
 
 bool	HTTPDelimiterChunkedFileReceive::CheckChunkHeader()
 {
@@ -108,40 +109,6 @@ void	HTTPDelimiterChunkedFileReceive::ChunkEndHandle()
 	// buffer = buffer.substr(0, buffer.find_last("\r\n"));
 }
 
-// static Buffer	unchunkBegining(Buffer buffer, std::string const &delimeter)
-// {
-// 	size_t	begin;
-
-// 	begin = buffer.find(delimeter);
-// 	if (begin != std::numeric_limits<size_t>::max())
-// 		buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
-// 	begin = buffer.find(delimeter);
-// 	if (begin != std::numeric_limits<size_t>::max())
-// 		buffer = buffer.substr(begin + delimeter.length(), buffer.length() - begin - delimeter.length());
-// 	return (buffer);
-// };
-
-// bool	HTTPFileReceive::BeginTrimHandle()
-// {
-// 	std::string	header_tmp;
-
-// 	buffer >> header_tmp;
-// 	if (header_tmp.find(delimiter, header_tmp.find(delimiter) + 1) != std::string::npos)
-// 	{
-// 		trimUntilFileBegin(buffer);
-// 		buffer >> fileToReceive;
-// 		beginTrimmed = true;
-// 		return (FileReceive::Handle());
-// 	}
-// 	else {
-// 		Buffer	tmp;
-
-// 		theConnection() >> tmp;
-// 		buffer << tmp;
-// 		return (true);
-// 	}
-// }
-
 
 
 // static size_t	HexStrToLong(std::string const &hex_str) //////////////////////////////
@@ -151,27 +118,4 @@ void	HTTPDelimiterChunkedFileReceive::ChunkEndHandle()
 
 // 	iss >> std::hex >> size;
 // 	return (size);
-// }
-
-// bool	HTTPChunkedFileReceive::Handle()
-// {
-// 	std::string	header_tmp;
-
-// 	buffer >> header_tmp;
-// 	if (header_tmp.find("\r\n") != std::string::npos)
-// 	{
-// 		size_t	size = HexStrToLong(header_tmp.substr(0, header_tmp.find("\r\n")));
-// 		std::cout << size << std::endl;
-// 		throw std::exception();
-// 		if (!buffer.empty())
-// 			buffer >> fileToReceive;
-// 		beginTrimmed = true;
-// 		return (FileReceive::Handle());
-// 	} else {
-// 		Buffer	tmp;
-
-// 		theConnection() >> tmp;
-// 		buffer << tmp;
-// 		return (true);
-// 	}
 // }

@@ -1,8 +1,37 @@
 #include "WebSite.hpp"
 #include "mod/contentUtils.hpp"
 
-# define DIR_LISTING_ALLOWED true
-# define TEST_LOCATION_DEFAULT_RESPONSES(x) ( x == "/home/WebServer/http/")
+bool	HTTPParser::Handle()
+{
+	if (!theConnection().downloadBufferReady() &&
+		!theConnection().uploadBufferReady() && theConnection().getElapsedTime() > heartBeatRate)
+		return (HeartBeat());
+	else
+	{
+		try {
+			return (BufferRequest::Handle());
+		} catch (...)
+		{
+			SetFollowingProcess(ErrorRespone(500));
+			return (false);
+		}
+	}
+}
+
+bool	HTTPParser::HeartBeat()
+{
+	theConnection() << "200 OK\r\nConnection: keep-alive\r\n";
+	return (true);
+}
+
+#define MAX_REQUEST_LEN 2048
+
+bool	HTTPParser::RequestCompleted(std::string const &request)
+{
+	if (request.length() > MAX_REQUEST_LEN)
+		throw (std::exception());
+	return (HttpRequest(request).Completed());
+}
 
 const std::string	HTTPParser::headerMessage(const int &method_version, const int &code, const size_t content_len)
 {
@@ -15,33 +44,6 @@ const std::string	HTTPParser::headerMessage(const int &method_version, const int
 	// message << "Date: ";
 	message << "\r\n";
 	return (message.str());
-}
-
-ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
-{
-	unsigned int	version = (close_connection ? 0 : 1);
-
-	if ((virtualServer->errorPage(code)).empty())
-	{
-		if (close_connection)
-		{
-			theConnection() << headerMessage(version, code) << getHttpExplanation(code);
-			return (new TerminateProcess(&theConnection()));
-		} else {
-			theConnection() << headerMessage(version, code, getHttpExplanation(code).length()) << getHttpExplanation(code);
-			return (new HTTPParser(*this));
-		}
-	} else {
-		size_t	fileSize = File(virtualServer->errorPage(code).c_str()).GetSize();
-		if (close_connection)
-		{
-			theConnection() << headerMessage(version, code) << getHttpExplanation(code);
-			return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), virtualServer->errorPage(code)));
-		} else {
-			theConnection() << headerMessage(version, code, fileSize) << getHttpExplanation(code);
-			return (new HTTPFileSend(*this, new HTTPParser(*this), virtualServer->errorPage(code)));
-		}
-	}
 }
 
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
@@ -73,6 +75,33 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 	}
 	return (new TerminateProcess(&theConnection()));
 };
+
+ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
+{
+	unsigned int	version = (close_connection ? 0 : 1);
+
+	if ((virtualServer->errorPage(code)).empty())
+	{
+		if (close_connection)
+		{
+			theConnection() << headerMessage(version, code) << getHttpExplanation(code);
+			return (new TerminateProcess(&theConnection()));
+		} else {
+			theConnection() << headerMessage(version, code, getHttpExplanation(code).length()) << getHttpExplanation(code);
+			return (new HTTPParser(*this));
+		}
+	} else {
+		size_t	fileSize = File(virtualServer->errorPage(code).c_str()).GetSize();
+		if (close_connection)
+		{
+			theConnection() << headerMessage(version, code) << getHttpExplanation(code);
+			return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), virtualServer->errorPage(code)));
+		} else {
+			theConnection() << headerMessage(version, code, fileSize) << getHttpExplanation(code);
+			return (new HTTPFileSend(*this, new HTTPParser(*this), virtualServer->errorPage(code)));
+		}
+	}
+}
 
 const std::string	setVar(std::string const &key, std::string const &value)
 {
@@ -130,15 +159,6 @@ ServiceProcess	*HTTPParser::handleDeleteRequest(std::string const &dir, HttpRequ
 	return (ErrorRespone(403));
 }
 
-// static Buffer	*removeHeader(Buffer *tmp)
-// {
-// 	std::string	header_tmp;
-
-// 	*tmp >> header_tmp;
-// 	*tmp = tmp->substr(header_tmp.find("\r\n\r\n") + 4);
-// 	return (tmp);
-// }
-
 static Buffer	removeHeader(std::string const &request)
 {
 	Buffer	requestBuffered;
@@ -157,6 +177,8 @@ static bool	chunkedFileUploadRequest(HttpHeaders const requestHeaders)
 	return (false);
 }
 
+#include <BufferedReceiveTypes.hpp>
+
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
 	HTTPBufferReceive	*process;
@@ -168,45 +190,6 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
 	*process << removeHeader(std::string(request));
 	return (process);
-}
-
-/*
-	test idle connections 
-	risk of wrong response in theory
-	recomended to use connection id like IP or MAC to determine
-	same connection source 
-*/
-
-bool	HTTPParser::Handle()
-{
-	if (!theConnection().downloadBufferReady() &&
-		!theConnection().uploadBufferReady() && theConnection().getElapsedTime() > heartBeatRate)
-		return (HeartBeat());
-	else
-	{
-		try {
-			return (BufferRequest::Handle());
-		} catch (...)
-		{
-			SetFollowingProcess(ErrorRespone(500));
-			return (false);
-		}
-	}
-}
-
-bool	HTTPParser::HeartBeat()
-{
-	theConnection() << "200 OK\r\nConnection: keep-alive\r\n";
-	return (true);
-}
-
-#define MAX_REQUEST_LEN 2048
-
-bool	HTTPParser::RequestCompleted(std::string const &request)
-{
-	if (request.length() > MAX_REQUEST_LEN)
-		throw (std::exception());
-	return (HttpRequest(request).Completed());
 }
 
 // ServiceProcess	*VirtualServerHTTPParser::RequestParse(std::string const &request)

@@ -96,35 +96,6 @@ class	HTTPBufferReceive : public HTTPParser
 	virtual void	ChunkEndHandle() = 0;
 };
 
-class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
-{
-	private:
-		File		file;
-		std::string	delimiter;
-		std::string	directory;
-
-	public:
-		HTTPDelimiterChunkedFileReceive(const HTTPParser &process,
-											std::string const &delimiter, std::string const &dir):
-					ServiceProcess(process), BufferRequest(process), HTTPBufferReceive(process),
-					delimiter(delimiter), directory(dir) {};
-
-		HTTPDelimiterChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess,
-											std::string const &delimiter, std::string const &dir):
-					ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
-					HTTPBufferReceive(process, followingProcess), delimiter(delimiter), directory(dir) {};
-		virtual ~HTTPDelimiterChunkedFileReceive() {};
-
-	bool	Handle();
-
-	private:
-
-	virtual bool	CheckChunkHeader();
-	virtual void	ChunkBeginTrimHandle();
-	virtual bool	CheckChunkEnd();
-	virtual void	ChunkEndHandle();
-};
-
 class	WebSite: public Service
 {
 	private:

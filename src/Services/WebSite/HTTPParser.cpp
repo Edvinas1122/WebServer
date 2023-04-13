@@ -130,39 +130,45 @@ ServiceProcess	*HTTPParser::handleDeleteRequest(std::string const &dir, HttpRequ
 	return (ErrorRespone(403));
 }
 
-Buffer	*removeHeader(Buffer *tmp)
-{
-	std::string	header_tmp;
+// static Buffer	*removeHeader(Buffer *tmp)
+// {
+// 	std::string	header_tmp;
 
-	*tmp >> header_tmp;
-	*tmp = tmp->substr(header_tmp.find("\r\n\r\n") + 4);
-	return (tmp);
+// 	*tmp >> header_tmp;
+// 	*tmp = tmp->substr(header_tmp.find("\r\n\r\n") + 4);
+// 	return (tmp);
+// }
+
+static Buffer	removeHeader(std::string const &request)
+{
+	Buffer	requestBuffered;
+
+	requestBuffered	<< request.substr(request.find("\r\n\r\n") + 4);
+	return (requestBuffered);
+}
+
+static bool	chunkedFileUploadRequest(HttpHeaders const requestHeaders)
+{
+	if (requestHeaders.find("Transfer-Encoding") != requestHeaders.end())
+	{
+		if (requestHeaders.at("Transfer-Encoding") == "chunked")
+			return (true);
+	}
+	return (false);
 }
 
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
-	try {
-		// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
-		HTTPBufferReceive	*process;
-		Buffer				requestBuffered;
+	HTTPBufferReceive	*process;
+	// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
 
+	if (chunkedFileUploadRequest(request.getHeaders()))
 		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
-		requestBuffered << std::string(request);
-		*process << *removeHeader(&requestBuffered);
-		return (process);
-	} catch (...) {
-		return (ErrorRespone(500));
-	}
+	else
+		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
+	*process << removeHeader(std::string(request));
+	return (process);
 }
-
-// ServiceProcess	*VirtualServerHTTPParser::RequestParse(std::string const &request)
-// {
-// 	ServiceProcess	*process;
-// 	virtualServer = virtualServers.getServerConfig(theConnection().getPort(), request.getHost());
-
-// 	process = HTTPParser::RequestParse(request);
-
-// };
 
 /*
 	test idle connections 
@@ -178,7 +184,13 @@ bool	HTTPParser::Handle()
 		return (HeartBeat());
 	else
 	{
-		return (BufferRequest::Handle());
+		try {
+			return (BufferRequest::Handle());
+		} catch (...)
+		{
+			SetFollowingProcess(ErrorRespone(500));
+			return (false);
+		}
 	}
 }
 
@@ -196,3 +208,12 @@ bool	HTTPParser::RequestCompleted(std::string const &request)
 		throw (std::exception());
 	return (HttpRequest(request).Completed());
 }
+
+// ServiceProcess	*VirtualServerHTTPParser::RequestParse(std::string const &request)
+// {
+// 	ServiceProcess	*process;
+// 	virtualServer = virtualServers.getServerConfig(theConnection().getPort(), request.getHost());
+
+// 	process = HTTPParser::RequestParse(request);
+
+// };

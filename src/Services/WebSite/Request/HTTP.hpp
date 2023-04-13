@@ -53,34 +53,6 @@ class	HttpRequest: public std::string
 		const std::string	getKeepAlive() const;
 		const std::string	getBoundry() const;
 		const std::string	getFilename() const;
-		// const std::string	getBody() const;
-
-		// /*
-		// 	Body and File related
-		// */
-		// const std::string	getContentFileName() const;
 };
-
-// class	HttpBody
-// {
-// 	private:
-// 		std::string	string;
-// 	public:
-// 		HttpBody(HttpRequest request) {
-// 			string = request;
-// 			if (string.find(request.getBoundry()) != std::string::npos) {
-// 				string = string.substr(string.find(request.getBoundry()) + request.getBoundry().length());
-// 				string = string.substr(string.find(request.getBoundry()) + request.getBoundry().length());
-// 				string = string.substr(string.find('\n') + 1).substr(string.find('\n') + 1);
-// 				string = string.substr(string.find('\n') + 1);
-// 				string = string.substr(string.find('\n') + 1);
-// 				string = string.substr(string.find('\n') + 1);
-// 			}
-// 		};
-
-// 		const std::string get() const {
-// 			return (string);
-// 		};
-// };
 
 #endif

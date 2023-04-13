@@ -84,7 +84,7 @@ class	HTTPBufferReceive : public HTTPParser
 
 	virtual bool	Handle();
 
-	HTTPBufferReceive	&operator<<(Buffer &src) {
+	HTTPBufferReceive	&operator<<(Buffer const &src) {
 		this->buffer << src;
 		return (*this);
 	};

@@ -66,7 +66,6 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 		if (request.find("_method=DELETE") != std::string::npos)
 			return (handleDeleteRequest(dir, request));
 		return (handleUploadRequest(dir, request));
-		// if () CGI
 	}
 	else if (HttpRequest(request).getMethod() == "PUT")
 	{
@@ -126,18 +125,10 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 		} else
 			return (ErrorRespone(200));
 	}
-	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension())) { // Handle CGI
-		std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
-
-		// ExecuteFile	*exec = new ExecuteFile(&theConnection(), new HTTPParser(*this), cgiExecutableDir, dir);
-		ExecuteFile	*exec = new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir);
-		exec->SetEnvVariable(setVar("REQUEST_METHOD", request.getMethod()));
-		exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion().substr(0, 8)));
-		exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
-		exec->SetEnvVariable(setVar("SCRIPT_NAME", request.getLocation().getFileName()));
+	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
+	{
 		theConnection() << headerMessage(0, 200);
-		// theConnection() << "Status: 500 Internal Server Error\r\nContent-Type: text/html; charset=utf-8\r\n\r\nPATH_INFO not found\r\n\r\n";
-		return (exec);
+		return (handleCGIExecution(dir, request));
 	}
 	if (request.getProtocolVersion() == "HTTP/1.0" || request.getKeepAlive() == "close") {
 		theConnection() << headerMessage(0, 200);
@@ -147,6 +138,19 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), dir));
 	// theConnection() << headerMessage(1, 200, File(dir.c_str()).GetSize());
 	// return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
+}
+
+ExecuteFile	*HTTPParser::handleCGIExecution(std::string const &dir, HttpRequest const &request)
+{
+	std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
+
+	// ExecuteFile	*exec = new ExecuteFile(&theConnection(), new HTTPParser(*this), cgiExecutableDir, dir);
+	ExecuteFile	*exec = new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir);
+	exec->SetEnvVariable(setVar("REQUEST_METHOD", request.getMethod()));
+	exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion().substr(0, 8)));
+	exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
+	exec->SetEnvVariable(setVar("SCRIPT_NAME", request.getLocation().getFileName()));
+	return (exec);
 }
 
 ServiceProcess	*HTTPParser::handleDeleteRequest(std::string const &dir, HttpRequest const &request)
@@ -181,12 +185,23 @@ static bool	chunkedFileUploadRequest(HttpHeaders const requestHeaders)
 
 #include <BufferedReceiveTypes.hpp>
 
+#define	DEFAULT_TMP_PATH "/home/http/tmp/cgi_tmp"
+
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
 	HTTPBufferReceive	*process;
 	// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
 
-	if (chunkedFileUploadRequest(request.getHeaders()))
+	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
+	{
+		ExecuteFile		*cgi = handleCGIExecution(dir, request);
+		std::string		tmpFile = updateDirIfFileExists(DEFAULT_TMP_PATH);
+
+		cgi->FileIntoExec(tmpFile);
+		process = new HTTPLenChunkedFileReceive(*this, cgi, tmpFile);
+
+	}
+	else if (chunkedFileUploadRequest(request.getHeaders()))
 		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(dir));
 	else
 		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);

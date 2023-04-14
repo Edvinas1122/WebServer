@@ -40,7 +40,7 @@ bool	HTTPBufferReceive::Handle()
 	{
 		if (CheckChunkHeader()) {
 			chunkTrimmed = ChunkBeginTrimHandle();
-			if (CheckChunkEnd()) { // single buffer len file solution
+			if (chunkTrimmed && CheckChunkEnd()) { // single buffer len file solution
 				ChunkEndHandle();
 				return (!chunkTrimmed);
 			}
@@ -202,3 +202,17 @@ void	HTTPLenChunkedFileReceive::ChunkEndHandle()
 	}
 	Continue();
 }
+
+
+// void	HTTPCGIChunkedFileReceive::Handle()
+// {
+// 	if (HTTPLenChunkedFileReceive::Handle())
+// 		return (true);
+// 	else
+// 	{
+// 		file.close();
+
+// 		setFDIntoExec(GetFileDescriptor());
+// 		return (ExecuteFile::Handle());
+// 	}
+// }

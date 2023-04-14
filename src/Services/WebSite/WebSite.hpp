@@ -42,6 +42,7 @@ class	HTTPParser : virtual public BufferRequest
 	ServiceProcess		*handleDeleteRequest(std::string const &dir, HttpRequest const &request);
 	ServiceProcess		*handleGetRequest(std::string const &dir, HttpRequest const &request);
 	ServiceProcess		*handleUploadRequest(std::string const &dir, HttpRequest const &request);
+	ExecuteFile			*handleCGIExecution(std::string const &dir, HttpRequest const &request);
 
 	protected:
 		bool	allowInsert(const size_t newInsertSize);

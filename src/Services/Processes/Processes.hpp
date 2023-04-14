@@ -127,17 +127,25 @@ class	ExecuteFile : virtual public ServiceProcess
 						std::string const &scriptPath);
 		ExecuteFile(Connection *connection, ServiceProcess *followingProcess,
 						std::string const &executablePath, std::string const &scriptPath);
+		ExecuteFile(ServiceProcess const &process, std::string const &executablePath, std::string const &scriptPath);
+		ExecuteFile(ServiceProcess const &process, ServiceProcess *followingProcess, std::string const &executablePath, std::string const &scriptPath);
 		virtual ~ExecuteFile();
 
 	bool	Handle();
 
-
-	int		WriteBufferToExecutorInput(void *buffer, size_t len);
+	/*
+		When filepath provided does use a file to temporary store contents else pipe,
+		but has to be buffered at once
+	*/
+	// int		WriteBufferToExecutorInput(void *buffer, size_t len, std::string const &filepath = "");
 	void	SetEnvVariable(std::string const &env);
+	void	FileIntoExec(std::string const &filePath) {filename = filePath;};
 
 	private:
 
-	int		PipeIntoExec();
+	int			PipeIntoExec();
+	int			DirrectFileIntoExec();
+	std::string	filename;
 };
 
 #endif

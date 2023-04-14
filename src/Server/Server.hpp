@@ -141,7 +141,7 @@ class Server : public ConnectionQueController, public PortSockets
 		ProcessList		processes;
 
 	public:
-		Server(): outputInbound(false), printRunTimeInfo(false) {};
+		Server(): outputInbound(true), printRunTimeInfo(false) {};
 		~Server();
 		
 	void	Run();

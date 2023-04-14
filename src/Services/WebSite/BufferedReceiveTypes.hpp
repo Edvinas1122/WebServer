@@ -49,7 +49,10 @@ class	HTTPLenChunkedFileReceive : public HTTPBufferReceive
 					directory(filepath) {file.Create(directory.c_str());};
 		virtual ~HTTPLenChunkedFileReceive() {};
 
-	bool	Handle();
+	virtual bool	Handle();
+
+	protected:
+	int		GetFileDescriptor();
 
 	private:
 
@@ -58,5 +61,20 @@ class	HTTPLenChunkedFileReceive : public HTTPBufferReceive
 	virtual bool	CheckChunkEnd();
 	virtual void	ChunkEndHandle();
 };
+
+// class	HTTPCGIChunkedFileReceive: public ExecuteFile, public HTTPLenChunkedFileReceive
+// {
+// 	public:
+// 		HTTPCGIChunkedFileReceive(const HTTPParser &process, std::string const &executableFilePath, std::string const &scriptPath, std::string const &tmpPath):
+// 					ServiceProcess(process), BufferRequest(process), ExecuteFile(process, executableFilePath, scriptPath),
+// 					HTTPLenChunkedFileReceive(process, tmpPath) {};
+// 		HTTPCGIChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &executableFilePath, std::string const &scriptPath, std::string const &tmpPath):
+// 					ServiceProcess(process), BufferRequest(process), ExecuteFile(process, followingProcess, executableFilePath, scriptPath),
+// 					HTTPLenChunkedFileReceive(process, tmpPath) {};
+
+// 		virtual	~HTTPCGIChunkedFileReceive() {};
+
+// 	bool	Handle();
+// };
 
 #endif

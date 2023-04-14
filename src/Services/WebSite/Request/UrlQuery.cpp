@@ -38,7 +38,11 @@ const std::string	UrlQuery::getDir() const
 
 const std::string	UrlQuery::getFileExtension() const
 {
-	return (getFileName().substr(getFileName().find_first_of(".")));
+	try {
+		return (getFileName().substr(getFileName().find_first_of(".")));
+	} catch (...) {
+		return ("");
+	}
 }
 
 const std::string	UrlQuery::getCGIPathInfo() const

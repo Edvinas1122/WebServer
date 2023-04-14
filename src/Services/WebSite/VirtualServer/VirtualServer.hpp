@@ -38,6 +38,10 @@ class Route
 	void	ParseAllowedMethods(DescendParser &parser);
 	void	ParseForbidMethods(DescendParser &parser);
 	void	SetMethodsDefault(); // all forbid except GET
+
+	public:
+
+	class	RouteHasNoDirNorRedirect: public std::exception {};
 };
 
 /*

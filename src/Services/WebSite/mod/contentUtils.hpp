@@ -14,6 +14,7 @@ std::string	dirInfoHTTPFormat(const char *path, std::string const &url, bool dis
 	Access info
 */
 bool	isFile(const std::string &path);
+bool	isDir(const std::string &path);
 bool	Access(const std::string &path);
 
 std::string	updateDirIfFileExists(std::string const &dir);

@@ -56,10 +56,6 @@ Route::Route(DescendParser parser): directory_listing_enabled(false), response_d
 				upload_dir(""), redirect(""), default_file("")
 {
 	try {
-		response_dir = parser.getValue("dir_route");
-	} catch (...) { response_dir = ""; }
-	
-	try {
 		default_file = parser.getValue("default_file");
 	} catch (...) { default_file = ""; }
 
@@ -79,6 +75,13 @@ Route::Route(DescendParser parser): directory_listing_enabled(false), response_d
 	try {
 		redirect = parser.getValue("redirect");
 	} catch (...) { redirect = ""; }
+	try {
+		response_dir = parser.getValue("dir_route");
+	} catch (...) { response_dir = ""; 
+		if (redirect.empty())
+			throw RouteHasNoDirNorRedirect();
+	}
+	
 }
 
 

@@ -90,10 +90,25 @@ bool	isFile(const std::string &path)
 		// Error accessing path
 		return false;
 	}
-	if (S_ISDIR(path_stat.st_mode)) {
-		return false;
-	} else {
+	if (S_ISREG(path_stat.st_mode)) {
 		return true;
+	} else {
+		return false;
+	}	
+}
+
+bool	isDir(const std::string &path)
+{
+	struct stat path_stat;
+
+	if (stat(path.c_str(), &path_stat) != 0) {
+		// Error accessing path
+		return false;
+	}
+	if (S_ISDIR(path_stat.st_mode)) {
+		return true;
+	} else {
+		return false;
 	}	
 }
 

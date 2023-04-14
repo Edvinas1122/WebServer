@@ -34,7 +34,12 @@ VirtualServer::VirtualServer(DescendParser parser)
 	}
 	while (parser.count("location") >= iterator)
 	{
-		locations.insert(parser.getMaped<Route>("location", iterator));
+		try {
+			locations.insert(parser.getMaped<Route>("location", iterator));
+		} catch (Route::RouteHasNoDirNorRedirect &e) {
+			std::cerr << "Route has no systemRoute nor Redirect" << std::endl;
+			throw std::exception();
+		}
 		iterator++;
 	}
 	iterator = 1;
@@ -214,32 +219,49 @@ const std::string	Route::getDefaultFile()
 
 #include "../mod/contentUtils.hpp"
 
-const std::string	VirtualServer::determinePathEndFile(std::string const &path, std::string const &lastPathOperand, Route *route)
+typedef	struct readDir_s
 {
-	if (isFile(path + lastPathOperand) || !Access(path + lastPathOperand))
-		return (path + lastPathOperand);
-	else
-		return (path + lastPathOperand + "/" + route->getDefaultFile());
+	std::string	realDir;
+	std::string	realFileName;
+} info_Path_t;
+
+
+static info_Path_t	setRealPath(std::string const &testDir, std::string const &testFileName, std::string const &sysPath, size_t proxyLevel)
+{
+	info_Path_t	data;
+
+	if (isDir(sysPath + dirTrim(fixDir(testDir + testFileName), proxyLevel)) && Access(sysPath + dirTrim(fixDir(testDir + testFileName), proxyLevel)))
+	{
+		data.realFileName = "";
+		data.realDir = sysPath + dirTrim(fixDir(testDir + testFileName), proxyLevel);
+		return (data);
+	}
+	data.realFileName = testFileName;
+	data.realDir = sysPath + dirTrim(fixDir(testDir), proxyLevel);
+	return (data);
 }
 
 const std::string	VirtualServer::getSystemPath(std::string const &dir, std::string const &filename)
 {
-	Route		*route = &locations.find(dirDescend(fixDir(dir), 0))->second;
-	std::string	systemPath;
+	Route		*route;
+	info_Path_t	systemPath;
 
-	if (locations.find(dirDescend(fixDir(dir), 0)) == locations.end()) // No Route
-	{
-		if (dir == "")
-			systemPath = root_dir + "/" + index;
-		else
-			systemPath = root_dir + fixDir(dir) + filename;
-		return (systemPath);
+	if (locations.find(dirDescend(fixDir(dir), 0)) != locations.end()) { // dir is dir, filename is filename
+		route = &locations.find(dirDescend(fixDir(dir), 0))->second;
+	} else if (locations.find(dirDescend(fixDir(dir + filename), 0)) != locations.end()) { // filename is route
+		route = &locations.find(dirDescend(fixDir(dir + filename), 0))->second;
+	} else { // no Route
+		systemPath = setRealPath(dir, filename, root_dir, 0);
+		if (systemPath.realFileName.empty())
+			systemPath.realFileName += index;
+		return (systemPath.realDir + systemPath.realFileName);
 	}
-	if (!route->getRedirect().empty())
+	if (!route->getRedirect().empty()) // redirect
 		return ("");
-	systemPath = getSystemRoot(dir);
-	systemPath = determinePathEndFile(systemPath, filename, route);
-	return (systemPath);
+	systemPath = setRealPath(dir, filename, route->getResponseDir(), 1);
+	if (systemPath.realFileName.empty())
+		systemPath.realFileName += route->getDefaultFile();
+	return (systemPath.realDir + systemPath.realFileName);
 }
 
 const std::string	VirtualServer::getRedirectMessage(std::string const &dir)

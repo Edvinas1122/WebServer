@@ -40,6 +40,10 @@ bool	HTTPBufferReceive::Handle()
 	{
 		if (CheckChunkHeader()) {
 			chunkTrimmed = ChunkBeginTrimHandle();
+			if (CheckChunkEnd()) { // single buffer len file solution
+				ChunkEndHandle();
+				return (!chunkTrimmed);
+			}
 		}
 		return (chunkTrimmed); // cancelation / ending or proceeding
 	}

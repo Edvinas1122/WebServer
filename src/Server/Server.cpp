@@ -355,7 +355,8 @@ ConnectionQueController::listOfConnections	Server::getConnectionsByOrigin(in_add
 #define	TIMEDOUT_CREDIBLE 20000 //prevent connectionless pulls before closure
 #define	CLOSE_CLIENT true //signify connaction for kill
 
-bool	Server::pullIncoming(Connection &connection) {
+bool	Server::pullIncoming(Connection &connection)
+{
 	if (connection.getElapsedTime() < TIMEDOUT_CREDIBLE)
 	{
 		try {

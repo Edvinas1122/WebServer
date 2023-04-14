@@ -46,6 +46,8 @@ const std::string	HTTPParser::headerMessage(const int &method_version, const int
 	return (message.str());
 }
 
+#define MAX_UPLOAD_VIA_PUT_SIZE 13000000000 // 13 GB
+
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
 	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
@@ -60,13 +62,17 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 		return (handleGetRequest(dir, request));
 	else if (HttpRequest(request).getMethod() == "POST")
 	{
+		setMaxReceiveSize(virtualServer->maxRecevieSize());
 		if (request.find("_method=DELETE") != std::string::npos)
 			return (handleDeleteRequest(dir, request));
 		return (handleUploadRequest(dir, request));
 		// if () CGI
 	}
 	else if (HttpRequest(request).getMethod() == "PUT")
+	{
+		setMaxReceiveSize(MAX_UPLOAD_VIA_PUT_SIZE);
 		return (handleUploadRequest(dir, request));
+	}
 	return (new TerminateProcess(&theConnection()));
 };
 
@@ -135,11 +141,12 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	}
 	if (request.getProtocolVersion() == "HTTP/1.0" || request.getKeepAlive() == "close") {
 		theConnection() << headerMessage(0, 200);
-		std::cout << "requested with close" << std::endl;
 		return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), dir));
 	}
-	theConnection() << headerMessage(1, 200, File(dir.c_str()).GetSize());
-	return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
+	theConnection() << headerMessage(0, 200);
+	return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), dir));
+	// theConnection() << headerMessage(1, 200, File(dir.c_str()).GetSize());
+	// return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
 }
 
 ServiceProcess	*HTTPParser::handleDeleteRequest(std::string const &dir, HttpRequest const &request)
@@ -180,7 +187,7 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 	// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
 
 	if (chunkedFileUploadRequest(request.getHeaders()))
-		process = new HTTPLenChunkedFileReceive(*this, updateDirIfFileExists(dir));
+		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), updateDirIfFileExists(dir));
 	else
 		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
 	*process << removeHeader(std::string(request));

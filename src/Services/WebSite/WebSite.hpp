@@ -14,23 +14,17 @@ class	HTTPParser : virtual public BufferRequest
 {
 	private:
 		VirtualServer		*virtualServer;
-		static const int	heartBeatRate = 10;
+		static const int	heartBeatRate = 10000;
 
 	public:
-		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), BufferRequest(connection), virtualServer(vs)
-		{
-			setMaxReceiveSize(virtualServer->maxRecevieSize());
-		};
+		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), BufferRequest(connection), virtualServer(vs) {};
 		HTTPParser(Connection *connection, ServiceProcess *followingProcess, VirtualServer *vs):
-					ServiceProcess(connection), BufferRequest(connection, followingProcess),  virtualServer(vs)
-		{
-			setMaxReceiveSize(virtualServer->maxRecevieSize());
-		};
+					ServiceProcess(connection), BufferRequest(connection, followingProcess),  virtualServer(vs) {};
 		HTTPParser(const HTTPParser &src): ServiceProcess(src), BufferRequest(src), virtualServer(src.virtualServer),
-											max_receive_size(src.max_receive_size) {};
+											max_receive_size(src.max_receive_size), received(src.received) {};
 		HTTPParser(const HTTPParser &src, ServiceProcess *followingProcess):
 					ServiceProcess(src, followingProcess), BufferRequest(src, followingProcess),
-					virtualServer(src.virtualServer), max_receive_size(src.max_receive_size) {};
+					virtualServer(src.virtualServer), max_receive_size(src.max_receive_size), received(src.received) {};
 		virtual ~HTTPParser() {};
 
 	virtual	bool	Handle();

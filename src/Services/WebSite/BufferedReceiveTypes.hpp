@@ -44,11 +44,9 @@ class	HTTPLenChunkedFileReceive : public HTTPBufferReceive
 		HTTPLenChunkedFileReceive(const HTTPParser &process, const std::string &filepath):
 					ServiceProcess(process), BufferRequest(process), HTTPBufferReceive(process),
 					directory(filepath) {file.Create(directory.c_str());};
-
-		// HTTPLenChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess,
-		// 									std::string const &delimiter, std::string const &dir):
-		// 			ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
-		// 			HTTPBufferReceive(process, followingProcess), delimiter(delimiter), directory(dir) {};
+		HTTPLenChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, const std::string &filepath):
+					ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess), HTTPBufferReceive(process, followingProcess),
+					directory(filepath) {file.Create(directory.c_str());};
 		virtual ~HTTPLenChunkedFileReceive() {};
 
 	bool	Handle();

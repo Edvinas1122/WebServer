@@ -15,7 +15,7 @@ bool	HTTPFileReceiveReport::Handle()
 {
 	theConnection() << "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 27\r\n\r\n";
 	theConnection() << "File uploaded successfully.";
-	return (true);
+	return (false);
 }
 
 static void	appendToBuffer(Connection *connection, Buffer *buffer)

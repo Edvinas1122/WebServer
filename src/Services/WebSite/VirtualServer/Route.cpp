@@ -58,7 +58,9 @@ Route::Route(DescendParser parser): directory_listing_enabled(false), response_d
 	try {
 		default_file = parser.getValue("default_file");
 	} catch (...) { default_file = ""; }
-
+	try {
+		max_body_size = atol(parser.getValue("max_route_body_size").c_str());
+	} catch (...) { max_body_size = std::numeric_limits<size_t>::max(); }
 	try {
 		if (parser.getValue("dir_listing") == "enable")
 			directory_listing_enabled = true;
@@ -94,3 +96,10 @@ void	Route::displayInfo(const char *append) const
 	std::cout << append << "Default_file: " << default_file << std::endl;
 	std::cout << append << "===" << std::endl;
 }
+
+const std::string	Route::getDefaultFile() const
+{
+	if (!default_file.empty())
+		return (default_file);
+	return ("");
+};

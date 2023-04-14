@@ -179,9 +179,9 @@ class	Buffer
 		{
 			size_t	iterator = 0;
 
-			if (buffer.empty() && !match.empty())
+			if (buffer.empty() || match.empty())
 				return (false);
-			while (iterator < len)
+			while (iterator < len && offset + iterator < buffer.size())
 			{
 				if ((char)buffer[offset + iterator] != match[iterator])
 					return (false);

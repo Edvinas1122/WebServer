@@ -62,7 +62,7 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 		return (handleGetRequest(dir, request));
 	else if (HttpRequest(request).getMethod() == "POST")
 	{
-		setMaxReceiveSize(virtualServer->maxRecevieSize());
+		setMaxReceiveSize(virtualServer->maxRecevieSize(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName()));
 		if (request.find("_method=DELETE") != std::string::npos)
 			return (handleDeleteRequest(dir, request));
 		return (handleUploadRequest(dir, request));
@@ -187,7 +187,7 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 	// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
 
 	if (chunkedFileUploadRequest(request.getHeaders()))
-		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), updateDirIfFileExists(dir));
+		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(dir));
 	else
 		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
 	*process << removeHeader(std::string(request));

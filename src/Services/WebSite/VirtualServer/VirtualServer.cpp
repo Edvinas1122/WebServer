@@ -30,7 +30,7 @@ VirtualServer::VirtualServer(DescendParser parser)
 	try {
 		max_body_size = atol(parser.getValue("max_body_size").c_str());
 	} catch (DescendParser::NoKeyExcept &e) {
-		max_body_size = 2000000; //default 2 mb
+		max_body_size = std::numeric_limits<size_t>::max(); //default no limit
 	}
 	while (parser.count("location") >= iterator)
 	{
@@ -210,13 +210,6 @@ const std::string	VirtualServer::getSystemRoot(std::string const &urlDir) // dou
 	return ("");
 }
 
-const std::string	Route::getDefaultFile()
-{
-	if (!default_file.empty())
-		return (default_file);
-	return ("");
-};
-
 #include "../mod/contentUtils.hpp"
 
 typedef	struct readDir_s
@@ -241,16 +234,24 @@ static info_Path_t	setRealPath(std::string const &testDir, std::string const &te
 	return (data);
 }
 
+const Route	*VirtualServer::getRoute(std::string const &dir, std::string const &filename) const
+{
+	if (locations.find(dirDescend(fixDir(dir), 0)) != locations.end()) // dir is dir, filename is filename
+		return (&locations.find(dirDescend(fixDir(dir), 0))->second);
+	else if (locations.find(dirDescend(fixDir(dir + filename), 0)) != locations.end()) // filename is route
+		return (&locations.find(dirDescend(fixDir(dir + filename), 0))->second);
+	else
+		return (NULL);
+
+}
+
 const std::string	VirtualServer::getSystemPath(std::string const &dir, std::string const &filename)
 {
-	Route		*route;
+	const Route	*route;
 	info_Path_t	systemPath;
 
-	if (locations.find(dirDescend(fixDir(dir), 0)) != locations.end()) { // dir is dir, filename is filename
-		route = &locations.find(dirDescend(fixDir(dir), 0))->second;
-	} else if (locations.find(dirDescend(fixDir(dir + filename), 0)) != locations.end()) { // filename is route
-		route = &locations.find(dirDescend(fixDir(dir + filename), 0))->second;
-	} else { // no Route
+	route = getRoute(dir, filename);
+	if (route == NULL)  {
 		systemPath = setRealPath(dir, filename, root_dir, 0);
 		if (systemPath.realFileName.empty())
 			systemPath.realFileName += index;
@@ -314,3 +315,11 @@ const std::string	VirtualServer::errorPage(const unsigned int &error_number)
 	return ("");
 }
 
+size_t	VirtualServer::maxRecevieSize(std::string const &dir, std::string const &filename) const
+{
+	const Route	*route = getRoute(dir, filename);
+
+	if (!route)
+		return (max_body_size);
+	return (route->getMaxBodySize());
+};

@@ -19,19 +19,22 @@ class Route
 		std::string					redirect;
 		std::string					default_file;
 		std::map<std::string, bool>	forbit_methdods;
+		size_t						max_body_size;
 	public:
 		Route(): directory_listing_enabled(true), response_dir(""),
-				upload_dir(""), redirect(""), default_file("") {};
+				upload_dir(""), redirect(""), default_file(""),
+				max_body_size(std::numeric_limits<size_t>::max()) {};
 		Route(DescendParser parser);
 
-		void	displayInfo(const char *append) const;
+	void				displayInfo(const char *append) const;
 	const std::string	getResponseDir() const {return (response_dir);};
-	const std::string	getDefaultFile();
+	const std::string	getDefaultFile() const;
 	const std::string	getRedirect() const { return (redirect);};
 	bool	MethodPermited(std::string const &method) const {
 		return (!forbit_methdods.at(method));
 	};
-	bool	DirListingPermiter() {return (directory_listing_enabled);};
+	bool	DirListingPermiter() const {return (directory_listing_enabled);};
+	size_t	getMaxBodySize() const {return (max_body_size);};
 
 	private:
 
@@ -104,11 +107,11 @@ class VirtualServer {
 	std::string				CGIexecutableDir(std::string const &fileExtention);
 	std::list<std::string>	getPorts() {return (port_number);};
 	const std::string		errorPage(const unsigned int &error_number);
-	size_t					maxRecevieSize() {return (max_body_size);};
+	size_t					maxRecevieSize(std::string const &dir, std::string const &filename) const;
 	const std::string		getDefaulFile(std::string const &dir);
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);
-		const std::string	determinePathEndFile(std::string const &path, std::string const &filename, Route *route);
+		const Route			*getRoute(std::string const &path, std::string const &filename) const;
 	public:
 		static bool	validServerName(std::string const &str);
 		static bool	validIndexFile(std::string const &str);

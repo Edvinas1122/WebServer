@@ -80,6 +80,7 @@ bool	matchingDelimiter(Buffer &speciment, std::string const &delimiter)
 	it specifies approx len which can be usefull to lessen comparison
 	opperations
 */
+
 bool	HTTPDelimiterChunkedFileReceive::Handle()
 {
 	try {
@@ -91,8 +92,9 @@ bool	HTTPDelimiterChunkedFileReceive::Handle()
 	} catch (ExceededMaximumLen &e) {
 		return (false);
 	}
-	if (chunkTrimmed && buffer.find(delimiter) == std::string::npos)
+	if (chunkTrimmed && buffer.find(delimiter) == std::numeric_limits<size_t>::max())
 	{
+		approxLen -= buffer.length();
 		buffer >> file;
 		buffer.clear();
 	}
@@ -127,8 +129,12 @@ bool	HTTPDelimiterChunkedFileReceive::ChunkBeginTrimHandle()
 	return (true);
 }
 
+#define	BEGIN_TO_MATCH 5500
+
 bool	HTTPDelimiterChunkedFileReceive::CheckChunkEnd()
 {
+	if (approxLen > BEGIN_TO_MATCH)
+		return (false);
 	return (matchingDelimiter(buffer, delimiter));
 }
 

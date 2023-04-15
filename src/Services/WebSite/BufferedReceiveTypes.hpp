@@ -13,14 +13,14 @@ class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
 
 	public:
 		HTTPDelimiterChunkedFileReceive(const HTTPParser &process,
-											std::string const &delimiter, std::string const &dir):
+											std::string const &delimiter, std::string const &dir, const size_t approx_len):
 					ServiceProcess(process), BufferRequest(process), HTTPBufferReceive(process),
-					delimiter(delimiter), directory(dir) {};
+					delimiter(delimiter), directory(dir), approxLen(approx_len) {};
 
 		HTTPDelimiterChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess,
-											std::string const &delimiter, std::string const &dir):
+											std::string const &delimiter, std::string const &dir, const size_t approx_len):
 					ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
-					HTTPBufferReceive(process, followingProcess), delimiter(delimiter), directory(dir) {};
+					HTTPBufferReceive(process, followingProcess), delimiter(delimiter), directory(dir), approxLen(approx_len) {};
 		virtual ~HTTPDelimiterChunkedFileReceive() {};
 
 	bool	Handle();
@@ -31,6 +31,8 @@ class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
 	virtual bool	ChunkBeginTrimHandle();
 	virtual bool	CheckChunkEnd();
 	virtual void	ChunkEndHandle();
+
+	size_t			approxLen;
 };
 
 class	HTTPLenChunkedFileReceive : public HTTPBufferReceive

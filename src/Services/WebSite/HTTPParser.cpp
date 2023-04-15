@@ -190,7 +190,6 @@ static bool	chunkedFileUploadRequest(HttpHeaders const requestHeaders)
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
 	HTTPBufferReceive	*process;
-	// size_t	fileSize = atoi((request.getHeaders().at("Content-Length").c_str()));
 
 	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
 	{
@@ -204,7 +203,10 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 	else if (chunkedFileUploadRequest(request.getHeaders()))
 		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(dir));
 	else
-		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir);
+	{
+		size_t	approxFileSize = atol((request.getHeaders().at("Content-Length").c_str()));
+		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir, approxFileSize);
+	}
 	*process << removeHeader(std::string(request));
 	return (process);
 }

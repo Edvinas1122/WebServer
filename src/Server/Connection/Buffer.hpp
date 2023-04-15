@@ -139,7 +139,7 @@ class	Buffer
 		{
 			size_t	iterator = offset;
 
-			while (iterator < buffer.size() + match.length())
+			while (iterator < buffer.size())
 			{
 				if (testMatch(match, iterator, match.length()))
 					return (iterator);
@@ -148,6 +148,18 @@ class	Buffer
 			return (std::numeric_limits<size_t>::max());
 		};
 
+		bool	compare(const size_t pos, const size_t len, const char *str) const
+		{
+			size_t	offset = pos;
+			size_t	iterator = 0;
+
+			while (iterator < len)
+			{
+				if (buffer[iterator + offset] != str[iterator])
+					return (false);
+			}
+			return (true);
+		}
 		// size_t	find(std::string const &match, const size_t offset = 0) const
 		// {
 		// 	size_t	iterator = offset;

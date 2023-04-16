@@ -30,12 +30,12 @@ class	ServiceProcess: public TimeOut
 
 	public:
 		ServiceProcess(Connection *connection): 
-						TimeOut(connection), connection(connection), finished(false), followingProcess(NULL) {};
+						TimeOut(connection), connection(connection), finished(false), followingProcess(NULL) {future = NULL;};
 		ServiceProcess(Connection *connection, ServiceProcess *followingProcess): 
-						TimeOut(connection), connection(connection), finished(false), followingProcess(followingProcess) {};
-		ServiceProcess(const ServiceProcess &src): TimeOut(src), connection(src.connection), finished(false), followingProcess(NULL) {};
+						TimeOut(connection), connection(connection), finished(false), followingProcess(followingProcess) {future = NULL;};
+		ServiceProcess(const ServiceProcess &src): TimeOut(src), connection(src.connection), finished(false), followingProcess(NULL) {future = NULL;};
 		ServiceProcess(const ServiceProcess &src, ServiceProcess *followingProcess):
-						TimeOut(src), connection(src.connection), finished(false), followingProcess(followingProcess) {};
+						TimeOut(src), connection(src.connection), finished(false), followingProcess(followingProcess) {future = NULL;};
 		virtual ~ServiceProcess();
 
 	bool					id(Connection *address) const;
@@ -44,16 +44,23 @@ class	ServiceProcess: public TimeOut
 	virtual void			End();
 	virtual ServiceProcess	*NextProcess();
 	virtual bool			HeartBeat() {return (true);};
+
 	// protected:
 	Connection	&theConnection() {return (*connection);};
-	void	setTimeOutDurration(const int timeOutDurration);
+	void		setTimeOutDurration(const int timeOutDurration);
+
+	virtual void		handleFollowUp();
+
+	void	ScheduleFollowUp(void (*promise)(ServiceProcess *, ServiceProcess *));
 	protected:
 
 	virtual void	SetFollowingProcess(ServiceProcess *);
 	virtual void	PushBackFollowingProcess(ServiceProcess *);
 
+
 	private:
 	ServiceProcess	*GetLastProcess();
+	void (*future)(ServiceProcess *, ServiceProcess *);
 };
 
 class	Service

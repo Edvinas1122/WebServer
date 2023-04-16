@@ -186,18 +186,7 @@ static std::string	dirTrim(std::string const &dir, int level)
 	return (dir);
 }
 
-const std::string	fixDir(std::string const &urlDir)
-{
-	std::string	dirFixed;
-
-	if (urlDir.empty())
-		dirFixed = "/";
-	else if (urlDir.at(urlDir.length() - 1) != '/')
-		dirFixed = std::string("/") + urlDir + "/"; // not recognized by http parser as urldir
-	else
-		dirFixed = std::string("/") + urlDir;
-	return (dirFixed);
-}
+#include "../mod/contentUtils.hpp"
 
 const std::string	VirtualServer::getSystemRoot(std::string const &urlDir) // double slash
 {
@@ -210,7 +199,6 @@ const std::string	VirtualServer::getSystemRoot(std::string const &urlDir) // dou
 	return ("");
 }
 
-#include "../mod/contentUtils.hpp"
 
 typedef	struct readDir_s
 {
@@ -253,7 +241,7 @@ const std::string	VirtualServer::getSystemPath(std::string const &dir, std::stri
 	route = getRoute(dir, filename);
 	if (route == NULL)  {
 		systemPath = setRealPath(dir, filename, root_dir, 0);
-		if (systemPath.realFileName.empty())
+		if (systemPath.realFileName.empty() && systemPath.realDir == fixDir(root_dir))
 			systemPath.realFileName += index;
 		return (systemPath.realDir + systemPath.realFileName);
 	}

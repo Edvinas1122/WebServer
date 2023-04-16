@@ -18,8 +18,9 @@ static const std::string	removeHexSpaces(std::string const &string)
 
 const std::string	UrlQuery::getFileName() const
 {
-	size_t	begin = find_last_of(dir_delim) + 1;
-	size_t	end =  find_first_of(query_delim);
+	size_t	dotPoss = find_last_of(".");
+	size_t	begin = substr(0, dotPoss).find_last_of(dir_delim) + 1;
+	size_t	end =  find_first_of(std::string(query_delim) + dir_delim, dotPoss);
 
 	if (begin >= end)
 		return ("");

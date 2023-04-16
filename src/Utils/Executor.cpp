@@ -1,14 +1,9 @@
 #include "Executor.hpp"
 
-Executor::Executor(std::string const &path): file(path), input_fd(STDIN_FILENO), output_fd(STDOUT_FILENO)
+Executor::Executor(std::string const &path, const int &in_fd, const int &out_fd): executablePath(path), input_fd(in_fd), output_fd(out_fd)
 {
 	if (access(path.c_str(), X_OK))
 		throw std::exception();
-	setCommandParam(path.substr(path.find_last_of("/") + 1));
-};
-
-Executor::Executor(std::string const &path, const int &in_fd, const int &out_fd): file(path), input_fd(in_fd), output_fd(out_fd)
-{
 	setCommandParam(path.substr(path.find_last_of("/") + 1));
 };
 
@@ -64,7 +59,7 @@ void	Executor::execute()
 		dup2(input_fd, STDIN_FILENO);
 		close(input_fd);
 		dup2(output_fd, STDOUT_FILENO);
-		execve(file.c_str(), getCommand(), getEnv());
+		execve(executablePath.c_str(), getCommand(), getEnv());
 		std::cerr << "Exec Command Failure in Forked sub process, ending forked sub Process.." << std::endl;
 		close(output_fd);
 		exit(EXIT_FAILURE);
@@ -95,6 +90,22 @@ int		Executor::executeToOutPut(int count, ...)
 	output_fd = pipe_fd[1];
 	execute();
 	return (pipe_fd[0]);
+}
+
+/*
+	last param filename
+*/
+int		Executor::executeToFile(int count, ...)
+{
+	va_list	args;
+
+	va_start(args, count);
+    while (count-- > 1)
+		setCommandParam(va_arg(args, const char*));
+	va_end(args);
+	output_fd = open(va_arg(args, const char*), O_WRONLY | O_CREAT);
+	execute();
+	return (output_fd);
 }
 
 int		Executor::executeToOutPut()
@@ -178,5 +189,5 @@ void	Executor::clearCommands()
 		it++;
 	}
 	commands.clear();
-	setCommandParam(file.substr(file.find_last_of("/") + 1));
+	setCommandParam(executablePath.substr(executablePath.find_last_of("/") + 1));
 }

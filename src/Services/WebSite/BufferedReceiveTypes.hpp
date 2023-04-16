@@ -32,7 +32,8 @@ class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
 	virtual bool	CheckChunkEnd();
 	virtual void	ChunkEndHandle();
 
-	size_t			approxLen;
+		size_t	approxLen;
+		static const size_t	beginToMatch = 2500;
 };
 
 class	HTTPLenChunkedFileReceive : public HTTPBufferReceive
@@ -41,17 +42,19 @@ class	HTTPLenChunkedFileReceive : public HTTPBufferReceive
 		File		file;
 		size_t		length;
 		std::string	directory;
+		size_t		totalLen;
 
 	public:
 		HTTPLenChunkedFileReceive(const HTTPParser &process, const std::string &filepath):
 					ServiceProcess(process), BufferRequest(process), HTTPBufferReceive(process),
-					directory(filepath) {file.Create(directory.c_str());};
+					directory(filepath), totalLen(0) {file.Create(directory.c_str());};
 		HTTPLenChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, const std::string &filepath):
 					ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess), HTTPBufferReceive(process, followingProcess),
-					directory(filepath) {file.Create(directory.c_str());};
+					directory(filepath), totalLen(0) {file.Create(directory.c_str());};
 		virtual ~HTTPLenChunkedFileReceive() {};
 
 	virtual bool	Handle();
+	std::string		getTotalLen();
 
 	protected:
 	int		GetFileDescriptor();
@@ -63,20 +66,5 @@ class	HTTPLenChunkedFileReceive : public HTTPBufferReceive
 	virtual bool	CheckChunkEnd();
 	virtual void	ChunkEndHandle();
 };
-
-// class	HTTPCGIChunkedFileReceive: public ExecuteFile, public HTTPLenChunkedFileReceive
-// {
-// 	public:
-// 		HTTPCGIChunkedFileReceive(const HTTPParser &process, std::string const &executableFilePath, std::string const &scriptPath, std::string const &tmpPath):
-// 					ServiceProcess(process), BufferRequest(process), ExecuteFile(process, executableFilePath, scriptPath),
-// 					HTTPLenChunkedFileReceive(process, tmpPath) {};
-// 		HTTPCGIChunkedFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &executableFilePath, std::string const &scriptPath, std::string const &tmpPath):
-// 					ServiceProcess(process), BufferRequest(process), ExecuteFile(process, followingProcess, executableFilePath, scriptPath),
-// 					HTTPLenChunkedFileReceive(process, tmpPath) {};
-
-// 		virtual	~HTTPCGIChunkedFileReceive() {};
-
-// 	bool	Handle();
-// };
 
 #endif

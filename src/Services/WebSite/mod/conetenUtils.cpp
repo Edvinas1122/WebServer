@@ -120,7 +120,7 @@ bool	Access(const std::string &path)
 	return (!(accessCode));
 }
 
-static std::string	to_string(size_t const number)
+std::string	to_string(size_t const number)
 {
 	std::stringstream	str;
 
@@ -147,4 +147,19 @@ std::string	updateDirIfFileExists(std::string const &dir)
 	while (isFile(addAppendixToFileName(dir, appendix)))
 		appendix++;
 	return (addAppendixToFileName(dir, appendix));
+}
+
+const std::string	fixDir(std::string const &urlDir)
+{
+	std::string	dirFixed;
+
+	if (urlDir.empty())
+		dirFixed = "/";
+	else if (urlDir.at(urlDir.length() - 1) != '/' && urlDir.at(0) != '/')
+		dirFixed = std::string("/") + urlDir + "/"; // not recognized by http parser as urldir
+	else if (urlDir.at(urlDir.length() - 1) != '/')
+		dirFixed = urlDir + "/";
+	else
+		dirFixed = std::string("/") + urlDir;
+	return (dirFixed);
 }

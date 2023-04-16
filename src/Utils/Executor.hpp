@@ -7,7 +7,7 @@
 class	Executor
 {
 	private:
-		const std::string	file;
+		const std::string	executablePath;
 		int					input_fd;
 		int					output_fd;
 		std::vector<char*>	commands;
@@ -15,8 +15,7 @@ class	Executor
 
 	public:
 		Executor(): input_fd(STDIN_FILENO), output_fd(STDOUT_FILENO) {};
-		Executor(std::string const &path);
-		Executor(std::string const &path, const int &in_fd, const int &out_fd);
+		Executor(std::string const &path, const int &in_fd = STDIN_FILENO, const int &out_fd = STDOUT_FILENO);
 		~Executor();
 
 	void	execute(std::list<std::string> const &param);
@@ -25,6 +24,8 @@ class	Executor
 
 	int		executeToOutPut(int count, ...);
 	int		executeToOutPut();
+
+	int		executeToFile(int count, ...);
 
 	void	setEnv(std::list<std::string> const &param);
 	void	setEnv(int count, ...);

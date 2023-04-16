@@ -33,7 +33,7 @@ bool	HTTPParser::RequestCompleted(std::string const &request)
 	return (HttpRequest(request).Completed());
 }
 
-const std::string	HTTPParser::headerMessage(const int &method_version, const int &code, const size_t content_len)
+const std::string	HTTPParser::headerMessage(const int &method_version, const int &code, const size_t content_len, bool closeHeader)
 {
 	std::stringstream	message;
 
@@ -42,7 +42,8 @@ const std::string	HTTPParser::headerMessage(const int &method_version, const int
 	if (content_len != std::numeric_limits<size_t>::max())
 		message << "Content-Length: " << content_len << "\r\n";
 	// message << "Date: ";
-	message << "\r\n";
+	if (closeHeader)
+		message << "\r\n";
 	return (message.str());
 }
 
@@ -109,6 +110,7 @@ const std::string	setVar(std::string const &key, std::string const &value)
 	return (key + "=" + value);
 }
 
+
 ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest const &request)
 {
 	if (!Access(dir))
@@ -127,7 +129,7 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	}
 	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
 	{
-		theConnection() << headerMessage(0, 200);
+		theConnection() << headerMessage(0, 200, std::numeric_limits<size_t>::max(), false);
 		return (handleCGIExecution(dir, request));
 	}
 	if (request.getProtocolVersion() == "HTTP/1.0" || request.getKeepAlive() == "close") {
@@ -140,16 +142,31 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	// return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
 }
 
+#define	DEFAULT_TMP_OUTPUT_PATH "/home/http/tmp/cgi_tmp_output"
+
 ExecuteFile	*HTTPParser::handleCGIExecution(std::string const &dir, HttpRequest const &request)
 {
 	std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
 
 	// ExecuteFile	*exec = new ExecuteFile(&theConnection(), new HTTPParser(*this), cgiExecutableDir, dir);
 	ExecuteFile	*exec = new ExecuteFile(&theConnection(), new TerminateProcess(&theConnection()), cgiExecutableDir, dir);
+	//critical
 	exec->SetEnvVariable(setVar("REQUEST_METHOD", request.getMethod()));
-	exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion().substr(0, 8)));
-	exec->SetEnvVariable(setVar("PATH_INFO", request.getLocation().getCGIPathInfo()));
+	exec->SetEnvVariable(setVar("REDIRECT_STATUS", "200"));
+	exec->SetEnvVariable(setVar("SCRIPT_FILENAME", dir));
+	try {
+		exec->SetEnvVariable(setVar("CONTENT_TYPE", request.getHeaders().at("Content-Type")));
+	} catch (...) {}
+	try {
+		exec->SetEnvVariable(setVar("CONTENT_LENGTH", request.getHeaders().at("Content-Length")));
+	} catch (...) {}
+	//non-critical
+	exec->SetEnvVariable(setVar("QUERY_STRING", request.getLocation().getQuery()));
 	exec->SetEnvVariable(setVar("SCRIPT_NAME", request.getLocation().getFileName()));
+	exec->SetEnvVariable(setVar("PATH_INFO", (request.getLocation().getCGIPathInfo().empty()) ? "" : std::string("/") + request.getLocation().getCGIPathInfo()));
+	exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion()));
+	exec->SetEnvVariable(setVar("REQUEST_URI", std::string("/") + request.getLocation()));
+	exec->OutputToFile(updateDirIfFileExists(DEFAULT_TMP_OUTPUT_PATH));
 	return (exec);
 }
 
@@ -185,6 +202,18 @@ static bool	chunkedFileUploadRequest(HttpHeaders const requestHeaders)
 
 #include <BufferedReceiveTypes.hpp>
 
+void	setContentLen(ServiceProcess *currentProcess, ServiceProcess *following)
+{
+	HTTPLenChunkedFileReceive	*received = dynamic_cast<HTTPLenChunkedFileReceive*>(currentProcess);
+	ExecuteFile					*executor = dynamic_cast<ExecuteFile*>(following);
+
+	std::cout << "example" << std::endl;
+	if (received && executor)
+		executor->SetEnvVariable(setVar("CONTENT_LENGTH", received->getTotalLen()));
+	else
+		throw std::exception();
+}
+
 #define	DEFAULT_TMP_PATH "/home/http/tmp/cgi_tmp"
 
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
@@ -197,7 +226,14 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 		std::string		tmpFile = updateDirIfFileExists(DEFAULT_TMP_PATH);
 
 		cgi->FileIntoExec(tmpFile);
-		process = new HTTPLenChunkedFileReceive(*this, cgi, tmpFile);
+		if (chunkedFileUploadRequest(request.getHeaders())) {
+			process = new HTTPLenChunkedFileReceive(*this, cgi, tmpFile);
+			process->ScheduleFollowUp(setContentLen);
+		}
+		else {
+			size_t	approxFileSize = atol((request.getHeaders().at("Content-Length").c_str()));
+			process = new HTTPDelimiterChunkedFileReceive(*this, cgi, request.getBoundry(), dir, approxFileSize);
+		}
 
 	}
 	else if (chunkedFileUploadRequest(request.getHeaders()))

@@ -43,12 +43,19 @@ class	FileSend : virtual public ServiceProcess
 	private:
 		File	fileToSend;
 	public:
-		FileSend(Connection *connection, std::string const &path): ServiceProcess(connection), fileToSend(path.c_str()) {};
+		FileSend(Connection *connection, std::string const &path): ServiceProcess(connection), fileToSend(path.c_str()), filename(path) {};
 		FileSend(Connection *connection, ServiceProcess *followingProcess, std::string const &path):
-					ServiceProcess(connection, followingProcess), fileToSend(path.c_str()) {};
+					ServiceProcess(connection, followingProcess), fileToSend(path.c_str()), filename(path) {};
+		FileSend(ServiceProcess const &process, std::string const &path): ServiceProcess(process), fileToSend(path.c_str()), filename(path) {};
+		FileSend(ServiceProcess const &process, ServiceProcess *followingProcess, std::string const &path):
+					ServiceProcess(process, followingProcess), fileToSend(path.c_str()), filename(path) {};
 		virtual ~FileSend() {};
 
 	virtual bool	Handle();
+	void			removeFile();
+
+	private:
+		const std::string filename;
 };
 
 class	FileReceive : virtual public ServiceProcess
@@ -70,10 +77,7 @@ class	FileReceive : virtual public ServiceProcess
 						ServiceProcess(connection, followingProcess), fileToReceive(path.c_str()), lenght(len) {
 			fileToReceive.Create();
 		};
-		// FileReceive(FileReceive const &process):
-		// 				ServiceProcess(process), fileToReceive(process.fileToReceive), lenght(process.lenght) {};
-		// FileReceive(FileReceive const &process, ServiceProcess *followingProcess):
-		// 				ServiceProcess(process, followingProcess), fileToReceive(process.fileToReceive), lenght(process.lenght) {};
+
 		virtual ~FileReceive() {};
 
 	virtual bool	Handle();
@@ -85,30 +89,20 @@ class	PipeSend: virtual public ServiceProcess
 	private:
 		const int	fd;
 	public:
-		PipeSend(Connection *connection, const int &fd): ServiceProcess(connection), fd(fd), wait(false) {};
-		PipeSend(Connection *connection, ServiceProcess *followingProcess, const int &fd): ServiceProcess(connection, followingProcess), fd(fd), wait(false) {};
+		PipeSend(Connection *connection, const int &fd): ServiceProcess(connection), fd(fd), wait(false)
+		{memset(&timestamp, 0, sizeof(struct timeval));};
+		PipeSend(Connection *connection, ServiceProcess *followingProcess, const int &fd): ServiceProcess(connection, followingProcess), fd(fd), wait(false)
+		{memset(&timestamp, 0, sizeof(struct timeval));};
 		~PipeSend() {close(fd);};
 
 	bool Handle();
 	private:
 	bool	wait;
 	void	bufferConnection();
+	bool	allowedTimePassed();
+	private:
+		struct timeval	timestamp;
 };
-
-#include <Buffer.hpp>
-
-// class	BufferReceive: virtual public ServiceProcess
-// {
-// 	private:
-// 		const int	size;
-// 		Buffer		receive;
-// 	public:
-// 		BufferReceive(Connection *connection, const int size): ServiceProcess(connection) {};
-// 		BufferReceive(Connection *connection, ServiceProcess *followingProcess, const int size): ServiceProcess(connection, followingProcess) {};
-// 		~BufferReceive() {};
-
-// 	bool Handle();
-// };
 
 #include <Executor.hpp>
 
@@ -118,6 +112,7 @@ class	ExecuteFile : virtual public ServiceProcess
 		ServiceProcess			*followingProcess;
 		Executor 				executor;
 		const std::string		scriptPath;
+		std::string				OutputFileName;
 		int						inputToExec;
 		int						writeEndToInputOfExec;
 		std::list<std::string>	environmnet;
@@ -137,9 +132,9 @@ class	ExecuteFile : virtual public ServiceProcess
 		When filepath provided does use a file to temporary store contents else pipe,
 		but has to be buffered at once
 	*/
-	// int		WriteBufferToExecutorInput(void *buffer, size_t len, std::string const &filepath = "");
 	void	SetEnvVariable(std::string const &env);
-	void	FileIntoExec(std::string const &filePath) {filename = filePath;};
+	void	FileIntoExec(std::string const &filePath);
+	void	OutputToFile(std::string const &newFileName);
 
 	private:
 

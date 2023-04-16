@@ -1,21 +1,13 @@
 #include "Executor.hpp"
 
-int	main()
-{
-	Executor	executor("/usr/bin/cat", open("/home/WebServer/http/files/gay.txt", O_RDONLY), STDOUT_FILENO);
+#define	DEFAULT_TMP_OUTPUT_PATH "/home/http/tmp/cgi_tmp_output"
+	int	main(void)
+	{
+		Executor	cgi("/usr/bin/php-cgi");
 
-	executor.setEnv(2, "PWD=/var/www", "HOME=/root");
-	// executor.execute(2, "-l", "/home");
-	// executor.execute(1, "-l", "/");
-	int pipe_read = executor.executeToOutPut();
-	char	buf[300];
+		cgi.setEnv(5, "REQUEST_METHOD=POST", "REDIRECT_STATUS=200", "CONTENT_LENGTH=17", "CONTENT_TYPE=application/x-www-form-urlencoded", "SCRIPT_FILENAME=/home/WebServer/http/files/index.php");
+		cgi.setInputFd(open("/home/WebServer/http/files/HTTPsamples/cgi_post_body.txt", O_RDONLY));
+		cgi.executeToFile(1, DEFAULT_TMP_OUTPUT_PATH);
+		return (0);
 
-	memset(buf, 0, 300);
-	read(pipe_read, buf, 300);
-	std::cout << buf << std::endl;
-	memset(buf, 0, 300);
-	read(pipe_read, buf, 300);
-	std::cout << buf << std::endl;
-	close(pipe_read);
-	return (0);
-}
+	}

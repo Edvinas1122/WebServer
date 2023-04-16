@@ -1,23 +1,51 @@
 #include "Processes.hpp"
 
+void	deleteTempFile(ServiceProcess *currentProcess, ServiceProcess *followingProcess)
+{
+	FileSend	*send = dynamic_cast<FileSend*>(currentProcess);
+
+	(void) followingProcess;
+
+	if (send)
+		send->removeFile();
+	else
+		throw std::exception();
+}
+
 bool	ExecuteFile::Handle()
 {
-	int	executionOutput_read_end;
+	int				executionOutput_read_end;
+	FileSend		*newFollowingProcess;
 
 	if (!environmnet.empty())
 		executor.setEnv(environmnet);
 	executor.setInputFd(DirrectFileIntoExec());
 	try {
-		executionOutput_read_end = executor.executeToOutPut(1, scriptPath.c_str());
+		if (OutputFileName.empty())
+			executionOutput_read_end = executor.executeToOutPut(1, scriptPath.c_str());
+		else
+			executionOutput_read_end = executor.executeToFile(1, OutputFileName.c_str());
 	} catch (Executor::ExecutionFailed &e) {
 		SetFollowingProcess(followingProcess);
 		followingProcess = NULL;
 		return (false);
 	}
-	if (followingProcess)
+	if (followingProcess && OutputFileName.empty())
 		SetFollowingProcess(new	PipeSend(&theConnection(), followingProcess, executionOutput_read_end));
-	else
+	else if (OutputFileName.empty())
 		SetFollowingProcess(new	PipeSend(&theConnection(), executionOutput_read_end));
+	else if (followingProcess)
+	{
+		newFollowingProcess = new FileSend(&theConnection(), followingProcess, OutputFileName);
+		newFollowingProcess->ScheduleFollowUp(deleteTempFile); // promise to delete a file after sending
+		SetFollowingProcess(newFollowingProcess);
+	}
+	else
+	{
+		newFollowingProcess = new FileSend(&theConnection(), OutputFileName);
+		newFollowingProcess->ScheduleFollowUp(deleteTempFile); // promise to delete a file after sending
+		SetFollowingProcess(newFollowingProcess);
+	}
 	followingProcess = NULL;
 	return (false);
 }
@@ -41,15 +69,6 @@ ExecuteFile::~ExecuteFile()
 	if (!filename.empty())
 		std::remove(filename.c_str());
 }
-
-// int	ExecuteFile::WriteBufferToExecutorInput(void *buffer, size_t len, std::string const &filepath)
-// {
-// 	if (!writeEndToInputOfExec && filepath.empty())
-// 		writeEndToInputOfExec = PipeIntoExec();
-// 	else if (!writeEndToInputOfExec && !filepath.empty())
-// 		writeEndToInputOfExec = FileIntoExec(filepath.c_str());
-// 	return (write(writeEndToInputOfExec, buffer, len));
-// }
 
 void	ExecuteFile::SetEnvVariable(std::string const &env)
 {
@@ -75,4 +94,14 @@ int	ExecuteFile::DirrectFileIntoExec()
 			throw std::exception();
 	}
 	return (inputToExec);
+}
+
+void	ExecuteFile::OutputToFile(std::string const &newFileName)
+{
+	OutputFileName = newFileName;
+}
+
+void	ExecuteFile::FileIntoExec(std::string const &filePath)
+{
+	filename = filePath;
 }

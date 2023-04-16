@@ -19,5 +19,7 @@ bool	Access(const std::string &path);
 
 std::string	updateDirIfFileExists(std::string const &dir);
 
+std::string	to_string(size_t const num);
+const std::string	fixDir(std::string const &urlDir);
 
 #endif

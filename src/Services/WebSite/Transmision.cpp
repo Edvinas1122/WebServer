@@ -92,7 +92,7 @@ bool	HTTPDelimiterChunkedFileReceive::Handle()
 	} catch (ExceededMaximumLen &e) {
 		return (false);
 	}
-	if (chunkTrimmed && buffer.find(delimiter) == std::numeric_limits<size_t>::max())
+	if (chunkTrimmed && (approxLen > beginToMatch || buffer.find(delimiter) == std::numeric_limits<size_t>::max()))
 	{
 		approxLen -= buffer.length();
 		buffer >> file;
@@ -129,11 +129,9 @@ bool	HTTPDelimiterChunkedFileReceive::ChunkBeginTrimHandle()
 	return (true);
 }
 
-#define	BEGIN_TO_MATCH 5500
-
 bool	HTTPDelimiterChunkedFileReceive::CheckChunkEnd()
 {
-	if (approxLen > BEGIN_TO_MATCH)
+	if (approxLen > beginToMatch)
 		return (false);
 	return (matchingDelimiter(buffer, delimiter));
 }
@@ -183,6 +181,7 @@ bool	HTTPLenChunkedFileReceive::CheckChunkHeader()
 bool	HTTPLenChunkedFileReceive::ChunkBeginTrimHandle()
 {
 	length = HexStrToLong(buffer.substr(0, buffer.find("\r\n")));
+	totalLen += length;
 	if (length == 0)
 		return (false);
 	buffer = buffer.substr(buffer.find("\r\n") + 2);
@@ -209,6 +208,12 @@ void	HTTPLenChunkedFileReceive::ChunkEndHandle()
 	Continue();
 }
 
+#include "mod/contentUtils.hpp"
+
+std::string	HTTPLenChunkedFileReceive::getTotalLen()
+{
+	return (to_string(totalLen));
+}
 
 // void	HTTPCGIChunkedFileReceive::Handle()
 // {

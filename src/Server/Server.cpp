@@ -137,26 +137,6 @@ void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &ori
 	}
 }
 
-// void	Server::idleProcessCount()
-// {
-// 	ServiceList::iterator	it_service = services.begin();
-// 	ProcessList::iterator	it = processes.begin();
-// 	size_t					count = 0;
-
-// 	while (it_service != services.end())
-// 	{
-// 		while (it != processes.end())
-// 		{
-// 			if (it_service->DetermineIfIdleProcessType(*it))
-// 				count++;
-// 		}
-// 		it_service++;
-// 	}
-// 	if (count == processes.end() && count != 0)
-// 		usleep (5000 / count);
-// 	std::cout << "idle: " << cout << " total: " << processes.size() << std::endl;
-// }
-
 Server::ProcessList::iterator	Server::FindProcess(Connection *connection)
 {
 	Server::ProcessList::iterator it = processes.begin();
@@ -242,13 +222,19 @@ void	Server::Serve() // check for loosening connections - connections with no pr
 		{
 			try {
 				if (!(*it)->Handle())
+				{
+					(*it)->handleFollowUp();
 					pullNewProcesses.push_back(*it);
+				}
 			}
 			catch(...) {
 				killProcesses.push_back(*it);
 			}
 		} else
+		{
+			(*it)->handleFollowUp();
 			pullNewProcesses.push_back(*it);
+		}
 		it++;
 	}
 	KillProcesses(killProcesses);

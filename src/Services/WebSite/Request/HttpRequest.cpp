@@ -39,7 +39,7 @@ const UrlQuery	HttpRequest::getLocation() const
 const std::string	HttpRequest::getProtocolVersion() const
 {
 	size_t	begin = find(' ', find(' ') + 1) + 1;
-	size_t	len = substr(begin).find_first_of('\n');
+	size_t	len = substr(begin).find("\r\n");
 
 	return (substr(begin, len));
 }

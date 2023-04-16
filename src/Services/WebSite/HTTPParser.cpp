@@ -128,8 +128,6 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	// return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
 }
 
-#define	DEFAULT_TMP_OUTPUT_PATH "/var/tmp/cgi_tmp_output"
-
 ExecuteFile	*HTTPParser::handleCGIExecution(std::string const &dir, HttpRequest const &request)
 {
 	std::string	cgiExecutableDir = virtualServer->CGIexecutableDir(UrlQuery(dir).getFileExtension());
@@ -152,7 +150,7 @@ ExecuteFile	*HTTPParser::handleCGIExecution(std::string const &dir, HttpRequest 
 	exec->SetEnvVariable(setVar("PATH_INFO", (request.getLocation().getCGIPathInfo().empty()) ? "" : std::string("/") + request.getLocation().getCGIPathInfo()));
 	exec->SetEnvVariable(setVar("SERVER_PROTOCOL", request.getProtocolVersion()));
 	exec->SetEnvVariable(setVar("REQUEST_URI", std::string("/") + request.getLocation()));
-	exec->OutputToFile(updateDirIfFileExists(DEFAULT_TMP_OUTPUT_PATH));
+	exec->OutputToFile(updateDirIfFileExists(TEMP_FILES_DIR));
 	return (exec);
 }
 
@@ -204,8 +202,6 @@ void	setContentLen(ServiceProcess *currentProcess, ServiceProcess *following, Co
 		throw std::exception();
 }
 
-#define	DEFAULT_TMP_PATH "/home/http/tmp/cgi_tmp"
-
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
 	HTTPBufferReceive	*process;
@@ -213,7 +209,7 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
 	{
 		ExecuteFile		*cgi = handleCGIExecution(dir, request);
-		std::string		tmpFile = updateDirIfFileExists(DEFAULT_TMP_PATH);
+		std::string		tmpFile = updateDirIfFileExists(TEMP_FILES_DIR);
 
 		cgi->FileIntoExec(tmpFile);
 		if (chunkedFileUploadRequest(request.getHeaders())) {

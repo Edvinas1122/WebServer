@@ -7,6 +7,9 @@
 # include <Connection.hpp>
 # include <VirtualServer.hpp>
 # include <HTTP.hpp>
+# ifndef TEMP_FILES_DIR
+#  define TEMP_FILES_DIR "/var/tmp/cgi_tmp"
+# endif
 
 class	HTTPParser : virtual public BufferRequest
 {

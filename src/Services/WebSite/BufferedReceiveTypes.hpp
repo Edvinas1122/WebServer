@@ -4,23 +4,30 @@
 # include <includes.hpp>
 # include <WebSite.hpp>
 
-// class	HTTPFileReceive: public	HTTPBufferReceive
-// {
-// 	private:
-// 		File				file;
-// 		Buffer				buffer;
-// 		const std::string	filename;
-// 		size_t				len;
-// 	public:
-// 		HTTPFileReceive(const HTTPParser &process, std::string const &dir, const size_t exactLen):
-// 						ServiceProcess(process), BufferRequest(process), filename(dir), len(exactLen) {};
-// 		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &dir, const size_t exactLen):
-// 						ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess), filename(dir), len(exactLen) {};
-// 		virtual	~HTTPFileReceive() {};
+class	HTTPFileReceive: public HTTPBufferReceive
+{
+	private:
+		File				file;
+		const std::string	filename;
+		size_t				remainingReceiveLen;
+	public:
+		HTTPFileReceive(const HTTPParser &process, std::string const &dir, const size_t exactLen):
+						ServiceProcess(process), BufferRequest(process), HTTPBufferReceive(process), filename(dir), remainingReceiveLen(exactLen) {file.Create(filename.c_str());};
+		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &dir, const size_t exactLen):
+						ServiceProcess(process, followingProcess), BufferRequest(process),
+						HTTPBufferReceive(process, followingProcess), filename(dir), remainingReceiveLen(exactLen) {file.Create(filename.c_str());};
+		virtual	~HTTPFileReceive() {};
 
-// 	bool	Handle();
+	bool	Handle();
 
-// }
+	private:
+
+	virtual bool	CheckChunkHeader();
+	virtual bool	ChunkBeginTrimHandle();
+	virtual bool	CheckChunkEnd();
+	virtual void	ChunkEndHandle();
+
+};
 
 class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
 {

@@ -10,6 +10,7 @@
 # ifndef TEMP_FILES_DIR
 #  define TEMP_FILES_DIR "/var/tmp/cgi_tmp"
 # endif
+# define MAX_UPLOAD_VIA_PUT_SIZE 13000000000 // 13 GB
 
 class	HTTPParser : virtual public BufferRequest
 {
@@ -50,6 +51,8 @@ class	HTTPParser : virtual public BufferRequest
 		void	setMaxReceiveSize(const size_t value);
 		size_t	max_receive_size;
 		size_t	received;
+	public:
+	class	ExceededMaximumLen: public std::exception {};
 };
 
 class	HTTPFileSend : public HTTPParser, public FileSend
@@ -102,9 +105,6 @@ class	HTTPBufferReceive : public HTTPParser
 	virtual bool	ChunkBeginTrimHandle() = 0;
 	virtual bool	CheckChunkEnd() = 0;
 	virtual void	ChunkEndHandle() = 0;
-
-	public:
-	class	ExceededMaximumLen: public std::exception {};
 };
 
 class	WebSite: public Service
@@ -127,5 +127,23 @@ class	WebSite: public Service
 		this->virtualServers = virtualServers;
 	};
 };
+
+/*
+	MarkDown Content
+*/
+const std::string	dirInfoHTTPFormat(const char *path, std::string const &url, bool displayUpload);
+const std::string	getHttpExplanation(const unsigned int code);
+
+/*
+	A complete message to a client
+	https://www.tutorialspoint.com/http/http_requests.html
+*/
+const std::string	headerMessage(const int &method_version, const int &code, const size_t content_len = std::numeric_limits<size_t>::max(), bool closeHeader = true);
+
+/* functions aka promisses */
+
+void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following, Connection *connection);
+void	setContentLen(ServiceProcess *currentProcess, ServiceProcess *following, Connection *connection);
+
 
 #endif

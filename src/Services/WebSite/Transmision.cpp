@@ -26,24 +26,6 @@ static void	appendToBuffer(Connection *connection, Buffer *buffer)
 	*buffer << tmp;
 }
 
-// bool	HTTPFileReceive::Handle()
-// {
-// 	appendToBuffer(&theConnection(), &buffer);
-// 	if (buffer.empty())
-// 		return (true);
-// 	if (!allowInsert(buffer.length()))
-// 	{
-// 		SetFollowingProcess(ErrorRespone(413));
-// 		throw ExceededMaximumLen();
-// 	}
-// 	if (buffer.length() < len)
-// 	{
-// 		len -= buffer.length();
-// 		buffer >> file;
-// 	}
-
-// }
-
 bool	HTTPBufferReceive::Handle()
 {
 	appendToBuffer(&theConnection(), &buffer);
@@ -91,6 +73,40 @@ bool	matchingDelimiter(Buffer &speciment, std::string const &delimiter)
 
 #include "BufferedReceiveTypes.hpp"
 
+bool	HTTPFileReceive::Handle()
+{
+	try {
+		if (!HTTPBufferReceive::Handle()) // end
+		{
+			buffer >> file;
+			return (false);
+		}
+	} catch (ExceededMaximumLen &e) {
+		return (false);
+	}
+	buffer >> file;
+	return (true);
+}
+
+bool	HTTPFileReceive::CheckChunkHeader()
+{
+	return (true);
+};
+
+bool	HTTPFileReceive::ChunkBeginTrimHandle()
+{
+	return (true);
+}
+
+bool	HTTPFileReceive::CheckChunkEnd()
+{
+	return (buffer.length() >= remainingReceiveLen);
+};
+
+void	HTTPFileReceive::ChunkEndHandle()
+{
+	buffer = buffer.substr(0, remainingReceiveLen);
+}
 
 /*
 	HTTPDelimiterChunkedFileReceive
@@ -98,7 +114,6 @@ bool	matchingDelimiter(Buffer &speciment, std::string const &delimiter)
 	it specifies approx len which can be usefull to lessen comparison
 	opperations
 */
-
 bool	HTTPDelimiterChunkedFileReceive::Handle()
 {
 	try {
@@ -232,16 +247,3 @@ std::string	HTTPLenChunkedFileReceive::getTotalLen()
 {
 	return (to_string(totalLen));
 }
-
-// void	HTTPCGIChunkedFileReceive::Handle()
-// {
-// 	if (HTTPLenChunkedFileReceive::Handle())
-// 		return (true);
-// 	else
-// 	{
-// 		file.close();
-
-// 		setFDIntoExec(GetFileDescriptor());
-// 		return (ExecuteFile::Handle());
-// 	}
-// }

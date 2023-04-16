@@ -90,7 +90,7 @@ int	ExecuteFile::DirrectFileIntoExec()
 {
 	if (!filename.empty())
 	{
-		inputToExec = open(filename.c_str(), O_RDONLY | O_WRONLY | O_CREAT);
+		inputToExec = open(filename.c_str(), O_RDWR, 0666);
 		if (inputToExec  == -1)
 			throw std::exception();
 	}

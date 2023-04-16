@@ -41,6 +41,12 @@ void	FileSend::removeFile()
 	std::remove(filename.c_str());
 }
 
+size_t	FileSend::GetBuffer(char *buffer, size_t len)
+{
+	fileToSend.GetContentsAsBinaryBuffet(buffer, len);
+	return (len);
+}
+
 /*
 	Length Based transmision end determinant
 

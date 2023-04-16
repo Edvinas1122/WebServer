@@ -53,6 +53,10 @@ class	FileSend : virtual public ServiceProcess
 
 	virtual bool	Handle();
 	void			removeFile();
+	/*
+		store file content in buffer and with function return needed parameter
+	*/
+	size_t	GetBuffer(char*, size_t len = 50);
 
 	private:
 		const std::string filename;

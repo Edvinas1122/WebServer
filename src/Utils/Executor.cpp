@@ -104,7 +104,7 @@ int		Executor::executeToFile(int count, ...)
     while (count-- > 1)
 		setCommandParam(va_arg(args, const char*));
 	va_end(args);
-	output_fd = open(va_arg(args, const char*), O_WRONLY | O_CREAT , S_IRWXU, 0666);
+	output_fd = open(va_arg(args, const char*), O_WRONLY | O_CREAT , 0666);
 	execute();
 	return (output_fd);
 }

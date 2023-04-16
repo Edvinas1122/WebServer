@@ -36,6 +36,11 @@ static void	appendToBuffer(Connection *connection, Buffer *buffer)
 // 		SetFollowingProcess(ErrorRespone(413));
 // 		throw ExceededMaximumLen();
 // 	}
+// 	if (buffer.length() < len)
+// 	{
+// 		len -= buffer.length();
+// 		buffer >> file;
+// 	}
 
 // }
 

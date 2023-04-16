@@ -98,12 +98,14 @@ int		Executor::executeToOutPut(int count, ...)
 int		Executor::executeToFile(int count, ...)
 {
 	va_list	args;
+	std::string	filename;
 
 	va_start(args, count);
     while (count-- > 1)
 		setCommandParam(va_arg(args, const char*));
 	va_end(args);
-	output_fd = open(va_arg(args, const char*), O_WRONLY | O_CREAT);
+	filename = va_arg(args, const char*);
+	output_fd = open(va_arg(args, const char*), O_RDWR | O_CREAT , S_IRWXU);
 	execute();
 	return (output_fd);
 }

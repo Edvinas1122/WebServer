@@ -128,7 +128,7 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	// return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
 }
 
-#define	DEFAULT_TMP_OUTPUT_PATH "/home/http/tmp/cgi_tmp_output"
+#define	DEFAULT_TMP_OUTPUT_PATH "/home/http/tmp/cgi_tmp_output" // remove and put into class
 
 ExecuteFile	*HTTPParser::handleCGIExecution(std::string const &dir, HttpRequest const &request)
 {

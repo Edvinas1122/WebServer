@@ -54,7 +54,7 @@ ServiceProcess	*ServiceProcess::GetLastProcess()
 	return (process);
 }
 
-void	ServiceProcess::ScheduleFollowUp(void (*promise)(ServiceProcess *, ServiceProcess *))
+void	ServiceProcess::ScheduleFollowUp(void (*promise)(ServiceProcess *, ServiceProcess *, Connection *))
 {
 	future = promise;
 }
@@ -62,6 +62,6 @@ void	ServiceProcess::ScheduleFollowUp(void (*promise)(ServiceProcess *, ServiceP
 void	ServiceProcess::handleFollowUp()
 {
 	if (future)
-		future(this, followingProcess);
+		future(this, followingProcess, connection);
 	future = NULL;
 }

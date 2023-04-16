@@ -4,6 +4,24 @@
 # include <includes.hpp>
 # include <WebSite.hpp>
 
+// class	HTTPFileReceive: public	HTTPBufferReceive
+// {
+// 	private:
+// 		File				file;
+// 		Buffer				buffer;
+// 		const std::string	filename;
+// 		size_t				len;
+// 	public:
+// 		HTTPFileReceive(const HTTPParser &process, std::string const &dir, const size_t exactLen):
+// 						ServiceProcess(process), BufferRequest(process), filename(dir), len(exactLen) {};
+// 		HTTPFileReceive(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &dir, const size_t exactLen):
+// 						ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess), filename(dir), len(exactLen) {};
+// 		virtual	~HTTPFileReceive() {};
+
+// 	bool	Handle();
+
+// }
+
 class	HTTPDelimiterChunkedFileReceive : public HTTPBufferReceive
 {
 	private:

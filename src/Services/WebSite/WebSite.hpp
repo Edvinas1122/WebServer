@@ -8,8 +8,6 @@
 # include <VirtualServer.hpp>
 # include <HTTP.hpp>
 
-const std::string getHttpExplanation(const unsigned int code);
-
 class	HTTPParser : virtual public BufferRequest
 {
 	private:
@@ -35,7 +33,6 @@ class	HTTPParser : virtual public BufferRequest
 	virtual bool			RequestCompleted(std::string const &request);
 
 	protected:
-	const std::string		headerMessage(const int &method_version, const int &code, const size_t content_len = std::numeric_limits<size_t>::max(), bool closeHeader = true);
 	virtual ServiceProcess	*ErrorRespone(const int code, bool close_connection = false);
 
 	private:
@@ -64,19 +61,6 @@ class	HTTPFileSend : public HTTPParser, public FileSend
 
 	virtual bool	Handle();
 };
-
-// class	HTTPCGIPipeSend : public HTTPParser, public PipeSend
-// {
-// 	public:
-// 		HTTPFileSend(const HTTPParser &process, std::string const &path):
-// 						ServiceProcess(process), BufferRequest(process), HTTPParser(process), PipeSend(&theConnection(), fd) {};
-// 		HTTPFileSend(const HTTPParser &process, ServiceProcess *followingProcess, std::string const &path):
-// 						ServiceProcess(process, followingProcess), BufferRequest(process, followingProcess),
-// 						HTTPParser(process, followingProcess), PipeSend(&theConnection(), followingProcess, path) {};
-// 		virtual ~HTTPFileSend() {};
-
-// 	virtual bool	Handle();
-// };
 
 class	HTTPFileReceiveReport : public ServiceProcess
 {

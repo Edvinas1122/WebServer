@@ -51,7 +51,7 @@ class	ServiceProcess: public TimeOut
 
 	virtual void		handleFollowUp();
 
-	void	ScheduleFollowUp(void (*promise)(ServiceProcess *, ServiceProcess *));
+	void	ScheduleFollowUp(void (*promise)(ServiceProcess *, ServiceProcess *, Connection *));
 	protected:
 
 	virtual void	SetFollowingProcess(ServiceProcess *);
@@ -60,7 +60,7 @@ class	ServiceProcess: public TimeOut
 
 	private:
 	ServiceProcess	*GetLastProcess();
-	void (*future)(ServiceProcess *, ServiceProcess *);
+	void (*future)(ServiceProcess *, ServiceProcess *, Connection *);
 };
 
 class	Service

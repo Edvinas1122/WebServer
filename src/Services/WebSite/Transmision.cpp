@@ -26,6 +26,19 @@ static void	appendToBuffer(Connection *connection, Buffer *buffer)
 	*buffer << tmp;
 }
 
+// bool	HTTPFileReceive::Handle()
+// {
+// 	appendToBuffer(&theConnection(), &buffer);
+// 	if (buffer.empty())
+// 		return (true);
+// 	if (!allowInsert(buffer.length()))
+// 	{
+// 		SetFollowingProcess(ErrorRespone(413));
+// 		throw ExceededMaximumLen();
+// 	}
+
+// }
+
 bool	HTTPBufferReceive::Handle()
 {
 	appendToBuffer(&theConnection(), &buffer);

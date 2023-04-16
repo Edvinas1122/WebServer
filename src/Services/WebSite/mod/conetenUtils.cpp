@@ -163,3 +163,17 @@ const std::string	fixDir(std::string const &urlDir)
 		dirFixed = std::string("/") + urlDir;
 	return (dirFixed);
 }
+
+const std::string	headerMessage(const int &method_version, const int &code, const size_t content_len, bool closeHeader)
+{
+	std::stringstream	message;
+
+	message << "HTTP/1." << method_version << " " << code << " " << getHttpExplanation(code) << "\r\n";
+	message << "Connection: " << ((content_len != std::numeric_limits<size_t>::max()) ? "keep-alive" : "close") << "\r\n";
+	if (content_len != std::numeric_limits<size_t>::max())
+		message << "Content-Length: " << content_len << "\r\n";
+	// message << "Date: ";
+	if (closeHeader)
+		message << "\r\n";
+	return (message.str());
+}

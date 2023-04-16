@@ -1,10 +1,11 @@
 #include "Processes.hpp"
 
-void	deleteTempFile(ServiceProcess *currentProcess, ServiceProcess *followingProcess)
+void	deleteTempFile(ServiceProcess *currentProcess, ServiceProcess *followingProcess, Connection *connection)
 {
 	FileSend	*send = dynamic_cast<FileSend*>(currentProcess);
 
 	(void) followingProcess;
+	(void) connection;
 
 	if (send)
 		send->removeFile();

@@ -33,20 +33,6 @@ bool	HTTPParser::RequestCompleted(std::string const &request)
 	return (HttpRequest(request).Completed());
 }
 
-const std::string	HTTPParser::headerMessage(const int &method_version, const int &code, const size_t content_len, bool closeHeader)
-{
-	std::stringstream	message;
-
-	message << "HTTP/1." << method_version << " " << code << " " << getHttpExplanation(code) << "\r\n";
-	message << "Connection: " << ((content_len != std::numeric_limits<size_t>::max()) ? "keep-alive" : "close") << "\r\n";
-	if (content_len != std::numeric_limits<size_t>::max())
-		message << "Content-Length: " << content_len << "\r\n";
-	// message << "Date: ";
-	if (closeHeader)
-		message << "\r\n";
-	return (message.str());
-}
-
 #define MAX_UPLOAD_VIA_PUT_SIZE 13000000000 // 13 GB
 
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
@@ -202,14 +188,18 @@ static bool	chunkedFileUploadRequest(HttpHeaders const requestHeaders)
 
 #include <BufferedReceiveTypes.hpp>
 
-void	setContentLen(ServiceProcess *currentProcess, ServiceProcess *following)
+void	setContentLen(ServiceProcess *currentProcess, ServiceProcess *following, Connection *connection)
 {
 	HTTPLenChunkedFileReceive	*received = dynamic_cast<HTTPLenChunkedFileReceive*>(currentProcess);
 	ExecuteFile					*executor = dynamic_cast<ExecuteFile*>(following);
+	(void) connection;
 
 	std::cout << "example" << std::endl;
 	if (received && executor)
+	{
 		executor->SetEnvVariable(setVar("CONTENT_LENGTH", received->getTotalLen()));
+
+	}
 	else
 		throw std::exception();
 }
@@ -232,12 +222,15 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 		}
 		else {
 			size_t	approxFileSize = atol((request.getHeaders().at("Content-Length").c_str()));
-			process = new HTTPDelimiterChunkedFileReceive(*this, cgi, request.getBoundry(), dir, approxFileSize);
+			process = new HTTPDelimiterChunkedFileReceive(*this, cgi, "", dir, approxFileSize);
 		}
 
 	}
 	else if (chunkedFileUploadRequest(request.getHeaders()))
+	{
+
 		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(dir));
+	}
 	else
 	{
 		size_t	approxFileSize = atol((request.getHeaders().at("Content-Length").c_str()));

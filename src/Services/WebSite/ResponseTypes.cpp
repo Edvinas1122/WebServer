@@ -140,7 +140,7 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 		}
 	}
 	else if (chunkedFileUploadRequest(request.getHeaders())) {
-		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(uploadDir));
+		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(uploadDir + request.getLocation().getFileName()));
 	}
 	else {
 		size_t	approxFileSize = atol((request.getHeaders().at("Content-Length").c_str()));

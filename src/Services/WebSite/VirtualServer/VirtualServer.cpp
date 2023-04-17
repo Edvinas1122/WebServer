@@ -191,8 +191,6 @@ std::string subtractDirsFromPath(std::string path, int numDirs)
 	if (lastSeparator == std::string::npos) {
 		return "";
 	}
-	std::cout << path << std::endl;
-	std::cout << fixDir(path.substr(0, lastSeparator)) << std::endl;
 	return (path.substr(0, lastSeparator));
 }
 
@@ -250,12 +248,13 @@ const std::string	VirtualServer::getSystemPath(std::string const &dir, std::stri
 const std::string	VirtualServer::getRedirectMessage(std::string const &dir, std::string const &url)
 {
 	std::string	redirectMessage;
+	const Route	*route = getRouteCout(dir, "");
 
-	if (locations.find(fixDir(dir)) == locations.end())
+	if (!route)
 		throw std::exception();
 	redirectMessage = "HTTP/1.1 302 Found\r\n";
 	redirectMessage += "Location: ";
-	redirectMessage += locations.find(fixDir(dir))->second.getRedirect();
+	redirectMessage += route->getRedirect();
 	// redirectMessage += locations.find(dirDescend(fixDir(dir), 0))->second.getRedirect();
 	redirectMessage += dirTrim(url, 1);
 	redirectMessage += "\r\n\r\n";

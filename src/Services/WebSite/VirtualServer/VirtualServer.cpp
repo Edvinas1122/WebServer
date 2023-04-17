@@ -114,64 +114,18 @@ void	VirtualServer::displayInfo() const
 	std::cout << "===" << std::endl;
 }
 
-
-
-#include <File.hpp>
-#include <configurationFileFormat.hpp>
-
-void	VirtualServers::parseConfigurationFile(const char *path)
+VirtualServer	*VirtualServer::validatePort(std::string const &port)
 {
-	DescendParser		parser;
-	FileProcessor		configurationFile;
+	std::list<std::string>::iterator	it = port_number.begin();
 
-	configurationFile.Open(path);
-	parser.setContent(configurationFile.GetContents(removeComents));
-	try {
-		parseServers(parser);
-	} catch (...)
+	while (it != port_number.end())
 	{
-		std::cerr << "Configuration file failure" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-}
-
-void	VirtualServers::Info() const
-{
-	virtualServerMap::const_iterator	it = virtualServers.begin();
-
-	while (it != virtualServers.end())
-	{
-		it->second.displayInfo();
+		if (*it == port)
+			return (this);
 		it++;
 	}
-}
-
-VirtualServer	*VirtualServers::getServer(std::string const &port, std::string const &host)
-{
-	(void) host;
-	(void) port;
-	return (&virtualServers.at("default"));
-}
-
-std::list<std::string>	VirtualServers::getPortList()
-{
-	std::list<std::string>		portList;
-	virtualServerMap::iterator	it = virtualServers.begin(); 
-
-	while (it != virtualServers.end())
-	{
-		std::list<std::string> vsPortList = it->second.getPorts();
-		std::list<std::string>::iterator	vs_it = vsPortList.begin();
-		while (vs_it != vsPortList.end())
-		{
-			if (std::find(portList.begin(), portList.end(), *vs_it) == portList.end())
-				portList.push_back(*vs_it);
-			vs_it++;
-		}
-		it++;
-	}
-	return (portList);
-}
+	return (NULL);
+};
 
 static std::string	dirDescend(std::string const &dir, int level)
 {
@@ -254,13 +208,14 @@ const std::string	VirtualServer::getSystemPath(std::string const &dir, std::stri
 	return (systemPath.realDir + systemPath.realFileName);
 }
 
-const std::string	VirtualServer::getRedirectMessage(std::string const &dir)
+const std::string	VirtualServer::getRedirectMessage(std::string const &dir, std::string const &url)
 {
 	std::string	redirectMessage;
 
 	redirectMessage = "HTTP/1.1 302 Found\r\n";
 	redirectMessage += "Location: ";
 	redirectMessage += locations.find(dirDescend(fixDir(dir), 0))->second.getRedirect();
+	redirectMessage += url;
 	redirectMessage += "\r\n\r\n";
 	return (redirectMessage);
 }

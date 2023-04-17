@@ -3,12 +3,21 @@
 
 ServiceProcess	*WebSite::RequestParse(Connection *connection, std::string const &request)
 {
-	TCP	*_connection = dynamic_cast<TCP*>(connection);
+	TCP				*_connection = dynamic_cast<TCP*>(connection);
+	VirtualServer 	*virtual_server;
 
 	if (_connection == NULL)
 		return (NULL);
 	if (HttpRequest(request).Validate())
-		return (new HTTPParser(connection, virtualServers->getServer("", _connection->getPort())));
+	{
+		virtual_server = virtualServers->getServer(_connection->getPort(), HttpRequest(request).getHost());
+		if (virtual_server == NULL)
+		{
+			throw std::exception();
+			// return (new HTTPParser(connection,  virtualServers->getDefault()));
+		}
+		return (new HTTPParser(connection, virtual_server));
+	}
 	return (NULL);
 }
 

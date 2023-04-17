@@ -128,6 +128,7 @@ void	ConnectionQueController::action(void (*action)(Connection &, T), T object, 
 
 # include <Service.hpp>
 # include <ProgramInterface.hpp>
+# define	CLOSE_CLIENT true
 
 class Server : public ConnectionQueController, public PortSockets
 {

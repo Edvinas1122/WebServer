@@ -38,7 +38,7 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
 
 	if (dir.empty()) { // handles Redirect
-		theConnection() << virtualServer->getRedirectMessage(HttpRequest(request).getLocation().getDir());
+		theConnection() << virtualServer->getRedirectMessage(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation());
 		return (new HTTPParser(*this));
 	}
 	if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getMethod()))

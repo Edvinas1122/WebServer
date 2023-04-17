@@ -178,7 +178,11 @@ void	Server::CreateProcess(Connection *connection, TCPConnectionOrigin const &or
 
 	while (it != services.end())
 	{
-		process = (*it)->RequestParse(connection, connection->getMessage());
+		try {
+			process = (*it)->RequestParse(connection, connection->getMessage());
+		} catch (...) {
+			connection->updateTime(CLOSE_CLIENT);
+		}
 		if (process != NULL)
 		{
 			(void)origin;
@@ -339,7 +343,6 @@ ConnectionQueController::listOfConnections	Server::getConnectionsByOrigin(in_add
 */
 
 #define	TIMEDOUT_CREDIBLE 20000 //prevent connectionless pulls before closure
-#define	CLOSE_CLIENT true //signify connaction for kill
 
 bool	Server::pullIncoming(Connection &connection)
 {

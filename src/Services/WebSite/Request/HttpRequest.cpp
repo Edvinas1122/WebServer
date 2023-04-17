@@ -47,7 +47,7 @@ const std::string	HttpRequest::getProtocolVersion() const
 const std::string	HttpRequest::getHost() const
 {
 	size_t	begin = find("Host: ") + 6;
-	size_t	len = substr(begin).find_first_of('\n');
+	size_t	len = substr(begin).find_first_of(":\r\n");
 
 	return (substr(begin, len));
 }

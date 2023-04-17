@@ -47,36 +47,6 @@ class Route
 	class	RouteHasNoDirNorRedirect: public std::exception {};
 };
 
-/*
-	Response types:
-		1 string -	text or html or redirect
-		2 fd -		file or cgi
-		or 
-		1 fd - 		
-*/
-
-/*
-	Limit client body size
-	server_names can be missing or not
-
-	Max body size implament
-
-	CGI ?
-	atribute validators - design- a bit more completed validation
-
-*/
-
-// class HTTPErrorMessage
-// {
-// 	private:
-// 		std::map<int, std::string>	errorPageResponseList;
-// 	public:
-// 		HTTPErrors() {};
-// 		~HTTPErrors() {};
-
-// 	std::string	getError(const int &error) const;
-// };
-
 class VirtualServer {
 	private:
 		std::string							host;
@@ -102,9 +72,10 @@ class VirtualServer {
 	bool					methodPermited(std::string const &dir, std::string const &method);
 	bool					dirListingPermited(std::string const &dir);
 	const std::string		getSystemPath(std::string const &dir, std::string const &filename);
-	const std::string		getRedirectMessage(std::string const &dir);
+	const std::string		getRedirectMessage(std::string const &dir, std::string const &url);
 	bool					isCGI(std::string const &fileExtention);
 	std::string				CGIexecutableDir(std::string const &fileExtention);
+	VirtualServer			*validatePort(std::string const &port);
 	std::list<std::string>	getPorts() {return (port_number);};
 	const std::string		errorPage(const unsigned int &error_number);
 	size_t					maxRecevieSize(std::string const &dir, std::string const &filename) const;
@@ -137,6 +108,7 @@ class	VirtualServers {
 	void					parseConfigurationFile(const char *path);
 	VirtualServer			*getServer(std::string const &port, std::string const &host);
 	std::list<std::string>	getPortList();
+	VirtualServer			*getDefault() {return (&virtualServers.begin()->second);};
 
 	public:
 		void parseServers(DescendParser &parser)

@@ -88,3 +88,12 @@ const std::string	setVar(std::string const &key, std::string const &value)
 		return (key);
 	return (key + "=" + value);
 }
+
+std::string	to_lower(std::string const &bigger)
+{
+	std::string	str = bigger;
+    for (std::string::iterator it = str.begin(); it != str.end(); ++it) {
+        *it = std::tolower(*it);
+    }
+    return (str);
+}

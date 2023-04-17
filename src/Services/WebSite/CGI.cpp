@@ -15,7 +15,7 @@ static std::string	getRemainer(char *buffer, size_t start, size_t const len)
 
 static std::string	getConententType(std::string const &params)
 {
-	return (params.substr(params.find("Content-type: "), params.find("\r\n\r\n")));
+	return (params.substr(to_lower(params).find("content-type: ")));
 }
 
 static size_t	getStatus(std::string &params)
@@ -24,7 +24,7 @@ static size_t	getStatus(std::string &params)
 	size_t		begin;
 
 	begin = params.find("Status: ");
-	status = params.substr(begin, params.find("\r\n", begin));
+	status = params.substr(begin + 8, params.find("\r\n", begin + 8));
 	return (atol(status.c_str()));
 }
 
@@ -56,7 +56,7 @@ std::string	getBodyParams(FileSend *send, std::vector<char> *array)
 		if (mem_pos)
 		{
 			position = (char*)memmem((const void*)buffer, 50, (const void*)"\r\n\r\n", 4) - buffer;
-			return (vectorToStr(array, position));
+			return (vectorToStr(array, position + (50 * (iterator - 1))));
 		}
 		iterator++;
 	}
@@ -75,12 +75,22 @@ void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following,
 	if (send && executor) {
 		(void)executor;
 		params = getBodyParams(send, &array);
+		if (params.find("Content-Type: ") != std::string::npos)
+		{
+			*connection << headerMessage(0, 200, std::numeric_limits<size_t>::max(), false);
+			*connection << params;
+			*connection << getRemainer(array.data(), params.length(), array.size());
+			return ;
+		}
+
 		if (params.find("Status:") != std::string::npos)
-			*connection << headerMessage(0, getStatus(params));
+			*connection << headerMessage(0, getStatus(params), std::numeric_limits<size_t>::max(), false);
 		else
 			*connection << headerMessage(0, 200, std::numeric_limits<size_t>::max(), false);
-		*connection << getConententType(params);
-		*connection << getRemainer(array.data(), params.length(), 50);
+		try {
+			*connection << getConententType(params);
+		} catch (...) {}
+		*connection << getRemainer(array.data(), params.length(), array.size());
 	}
 	else
 		throw std::exception();

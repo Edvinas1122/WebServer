@@ -6,29 +6,30 @@ static void	copy_list_values(container &destination, container const &source)
 	std::copy(source.begin(), source.end(), std::back_inserter(destination));
 }
 
+
 VirtualServer::VirtualServer(DescendParser parser)
 {
 	int	iterator = 1;
 
 	port_number = parser.getValuesList("listen", this->isPositiveNumber);
-	root_dir = parser.getValue("root", 1, this->pathcheck);
+	root_dir = parser.getValue("root", 1, validPath);
 	try {
 		index = parser.getValue("index");
 	} catch (DescendParser::NoKeyExcept &e) {
 		index = "";
 	}
 	try {
-		server_name = parser.getValue("server_name");
+		server_name = parser.getValue("server_name", 1, validServerName);
 	} catch (DescendParser::NoKeyExcept &e) {
 		server_name = "Serv1122";
 	}
 	try {
-		host = parser.getValue("host");
+		host = parser.getValue("host", 1);
 	} catch (DescendParser::NoKeyExcept &e) {
 		host = "default";
 	}
 	try {
-		max_body_size = atol(parser.getValue("max_body_size").c_str());
+		max_body_size = atol(parser.getValue("max_body_size", 1, isPositiveNumber).c_str());
 	} catch (DescendParser::NoKeyExcept &e) {
 		max_body_size = std::numeric_limits<size_t>::max(); //default no limit
 	}
@@ -43,15 +44,15 @@ VirtualServer::VirtualServer(DescendParser parser)
 		iterator++;
 	}
 	iterator = 1;
-	while (parser.count("status") >= iterator)
+	while (parser.count("use_cgi") >= iterator)
 	{
-		error_pages.insert(parser.getPair("status", iterator));
+		cgi_response.insert(parser.getPair("use_cgi", iterator, validPath, validCGI));
 		iterator++;
 	}
 	iterator = 1;
-	while (parser.count("use_cgi") >= iterator)
+	while (parser.count("error_page") >= iterator)
 	{
-		cgi_response.insert(parser.getPair("use_cgi", iterator));
+		error_pages.insert(parser.getPair("error_page", iterator, validPath, isPositiveNumberInErrorRange));
 		iterator++;
 	}
 }
@@ -298,8 +299,8 @@ bool	VirtualServer::dirListingPermited(std::string const &dir)
 
 const std::string	VirtualServer::errorPage(const unsigned int &error_number)
 {
-	if (ErrorResponsePages.find(error_number) != ErrorResponsePages.end())
-		return (ErrorResponsePages.at(error_number));
+	if (error_pages.find(to_string(error_number)) != error_pages.end())
+		return (error_pages.at(to_string(error_number)));
 	return ("");
 }
 

@@ -88,7 +88,7 @@ class VirtualServer {
 		std::list<std::string>				port_number;
 		std::map<std::string, Route>		locations;
 		size_t								max_body_size;
-		std::map<unsigned int, std::string>	ErrorResponsePages;
+		// std::map<unsigned int, std::string>	ErrorResponsePages;
 		// std::map<std::string, CGI>			cgi_map;
 	public:
 		VirtualServer() {};
@@ -117,6 +117,9 @@ class VirtualServer {
 		static bool	validIndexFile(std::string const &str);
 		static bool	pathcheck(std::string const &str);
 		static bool	isPositiveNumber(std::string const &str);
+		static bool isPositiveNumberInErrorRange(std::string const &str);
+		static bool validPath(std::string const &str);
+		static bool validCGI(std::string const &str);
 };
 
 

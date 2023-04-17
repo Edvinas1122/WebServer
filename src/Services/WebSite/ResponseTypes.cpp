@@ -19,10 +19,10 @@ ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
 		size_t	fileSize = File(virtualServer->errorPage(code).c_str()).GetSize();
 		if (close_connection)
 		{
-			theConnection() << headerMessage(version, code) << getHttpExplanation(code);
+			theConnection() << headerMessage(version, code);
 			return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), virtualServer->errorPage(code)));
 		} else {
-			theConnection() << headerMessage(version, code, fileSize) << getHttpExplanation(code);
+			theConnection() << headerMessage(version, code, fileSize);
 			return (new HTTPFileSend(*this, new HTTPParser(*this), virtualServer->errorPage(code)));
 		}
 	}

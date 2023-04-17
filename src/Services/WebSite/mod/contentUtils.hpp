@@ -25,6 +25,7 @@ std::string	updateDirIfFileExists(std::string const &dir);
 	String manipulation
 */
 std::string			to_string(size_t const num);
+std::string			to_lower(std::string const &bigger);
 const std::string	fixDir(std::string const &urlDir);
 const std::string	setVar(std::string const &key, std::string const &value);
 

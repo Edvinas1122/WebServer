@@ -8,12 +8,29 @@ bool VirtualServer::pathcheck(std::string const &path)
 bool VirtualServer::isPositiveNumber(std::string const &str)
 {
 	std::stringstream ss(str);
-	double num;
+	int	num;
 
-	if (ss >> num && num > 0 && ss.eof())
-		return false;
+	ss >> num;
+	if (num > 0)
+		return (true);
 	else
-		return true;
+		return (false);
+}
+
+bool VirtualServer::isPositiveNumberInErrorRange(std::string const &str)
+{
+	std::stringstream ss(str);
+	int	num;
+
+	ss >> num;
+	if (num > 0)
+	{
+		if (num > 500)
+			return (false);
+		return (true);
+	}
+	else
+		return (false);
 }
 
 bool VirtualServer::validIndexFile(std::string const &str)
@@ -25,25 +42,25 @@ bool VirtualServer::validIndexFile(std::string const &str)
 bool VirtualServer::validServerName(std::string const &str)
 {
 	(void) str;
-	return (false);
+	return (true);
 }
 
-// bool VirtualServer::validCGI(std::string const &str)
-// {
-// 	if (str[0] != '.' || str.find('$') == std::string::npos)
-// 		return (true);
-// 	else
-// 		return (false);
+bool VirtualServer::validCGI(std::string const &str)
+{
+	if (str[0] == '.')
+		return (true);
+	else
+		return (false);
 
-// }
+}
 
-// bool VirtualServer::validPath(std::string const &str)
-// {
-// 	if (str[0] != '/' || str.find('$') == std::string::npos)
-// 		return (true);
-// 	else
-// 		return (false);
-// }
+bool VirtualServer::validPath(std::string const &str)
+{
+	if (str[0] == '/')
+		return (true);
+	else
+		return (false);
+}
 
 // bool VirtualServer::validEnable(std::string const &str)
 // {

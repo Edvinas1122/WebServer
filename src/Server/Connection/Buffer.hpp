@@ -64,12 +64,13 @@ class	Buffer
 			char	tmp_buffer[FILE_BUFFERING_SIZE];
 			size_t	buffer_iterator;
 			size_t	initial_buffer_size = buffer.size();
+			size_t	remaining_len = file.GetRemainingLen();
 
 			if (initial_buffer_size < FILE_BUFFERING_SIZE) {
 				memset(tmp_buffer, 0, FILE_BUFFERING_SIZE);
 				file.GetContentsAsBinaryBuffet((void *)tmp_buffer, FILE_BUFFERING_SIZE - initial_buffer_size);
 				buffer_iterator = 0;
-				while (buffer_iterator < FILE_BUFFERING_SIZE - initial_buffer_size)
+				while (buffer_iterator < FILE_BUFFERING_SIZE - initial_buffer_size && buffer_iterator < remaining_len)
 				{
 					buffer.push_back(tmp_buffer[buffer_iterator]); 
 					buffer_iterator++;

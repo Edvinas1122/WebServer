@@ -8,9 +8,22 @@ const std::string	&httpMethodsList(const unsigned int& iterator)
 		{ "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH", "" };
 	
 	if (iterator > METHOD_COUNT)
-			return (http_methods_str[10]);
+			return (http_methods_str[9]);
     return (http_methods_str[iterator]);
 }
+
+const std::string	&inMethodList(std::string const &method)
+{
+	size_t iterator = 0;
+
+	while (iterator > METHOD_COUNT)
+	{
+		if (httpMethodsList(iterator) == method)
+			return (method);
+		iterator++;
+	}
+	return (httpMethodsList(iterator));
+};
 
 void	Route::ParseAllowedMethods(DescendParser &parser)
 {
@@ -19,9 +32,9 @@ void	Route::ParseAllowedMethods(DescendParser &parser)
 	while (METHOD_COUNT > iterator)
 	{
 		try {
-			if (parser.getValue("allow") == httpMethodsList(iterator))
-				forbit_methdods[httpMethodsList(iterator)] = false;
-		} catch (...) {}
+			if (!inMethodList(parser.getValue("allow", iterator + 1)).empty())
+				forbit_methdods[parser.getValue("allow", iterator + 1)] = false;
+		} catch (...) {break;}
 		iterator++;
 	}
 }
@@ -33,9 +46,9 @@ void	Route::ParseForbidMethods(DescendParser &parser)
 	while (METHOD_COUNT > iterator)
 	{
 		try {
-			if (parser.getValue("forbid") == httpMethodsList(iterator))
-				forbit_methdods[httpMethodsList(iterator)] = true;
-		} catch (...) {}
+			if (!inMethodList(parser.getValue("forbid", iterator + 1)).empty())
+				forbit_methdods[parser.getValue("forbid", iterator + 1)] = true;
+		} catch (...) {break;}
 		iterator++;
 	}
 }

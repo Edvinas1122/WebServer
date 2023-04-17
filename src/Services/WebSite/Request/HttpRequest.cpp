@@ -52,6 +52,14 @@ const std::string	HttpRequest::getHost() const
 	return (substr(begin, len));
 }
 
+const std::string	HttpRequest::getHostnPort() const
+{
+	size_t	begin = find("Host: ") + 6;
+	size_t	len = substr(begin).find("\r\n");
+
+	return (substr(begin, len));
+}
+
 const std::string	HttpRequest::getKeepAlive() const
 {
 	size_t	begin = find("Connection: ") + 12;

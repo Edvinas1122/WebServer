@@ -25,7 +25,7 @@ bool	ExecuteFile::Handle()
 		if (OutputFileName.empty())
 			executionOutput_read_end = executor.executeToOutPut(1, scriptPath.c_str());
 		else
-			executionOutput_read_end = executor.executeToFile(1, OutputFileName.c_str());
+			executionOutput_read_end = executor.executeToFile(2, scriptPath.c_str(), OutputFileName.c_str());
 	} catch (Executor::ExecutionFailed &e) {
 		SetFollowingProcess(followingProcess);
 		followingProcess = NULL;

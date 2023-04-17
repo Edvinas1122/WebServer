@@ -8,11 +8,11 @@ static const std::string	removeHexSpaces(std::string const &string)
 	std::string				filename = string;
 	std::string::size_type	pos = 0;
 
-    while ((pos = filename.find("%20", pos)) != std::string::npos)
+	while ((pos = filename.find("%20", pos)) != std::string::npos)
 	{
-        filename.replace(pos, 3, " ");
-        pos += 1;
-    }
+		filename.replace(pos, 3, " ");
+		pos += 1;
+	}
 	return (filename);
 }
 

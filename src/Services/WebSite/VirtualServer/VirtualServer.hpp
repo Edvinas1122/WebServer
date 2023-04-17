@@ -35,13 +35,13 @@ class Route
 	};
 	bool	DirListingPermiter() const {return (directory_listing_enabled);};
 	size_t	getMaxBodySize() const {return (max_body_size);};
+	const std::string	getUploadDir() const {return (upload_dir);};
 
 	private:
 
 	void	ParseAllowedMethods(DescendParser &parser);
 	void	ParseForbidMethods(DescendParser &parser);
 	void	SetMethodsDefault(); // all forbid except GET
-
 	public:
 
 	class	RouteHasNoDirNorRedirect: public std::exception {};
@@ -70,8 +70,9 @@ class VirtualServer {
 	void		displayInfo() const;
 
 	bool					methodPermited(std::string const &dir, std::string const &method);
+	const std::string		getUploadDir(std::string const &dir, std::string const &filename) const;
 	bool					dirListingPermited(std::string const &dir);
-	const std::string		getSystemPath(std::string const &dir, std::string const &filename);
+	const std::string		getSystemPath(std::string const &dir, std::string const &filename) const;
 	const std::string		getRedirectMessage(std::string const &dir, std::string const &url);
 	bool					isCGI(std::string const &fileExtention);
 	std::string				CGIexecutableDir(std::string const &fileExtention);
@@ -80,6 +81,8 @@ class VirtualServer {
 	const std::string		errorPage(const unsigned int &error_number);
 	size_t					maxRecevieSize(std::string const &dir, std::string const &filename) const;
 	const std::string		getDefaulFile(std::string const &dir);
+	const Route				*findDescendLevel(std::string const &dir) const;
+	const Route				*getRouteCout(std::string const &dir, std::string const &filename) const;
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);
 		const Route			*getRoute(std::string const &path, std::string const &filename) const;

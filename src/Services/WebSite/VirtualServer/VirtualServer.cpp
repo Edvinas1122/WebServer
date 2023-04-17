@@ -130,7 +130,7 @@ VirtualServer	*VirtualServer::validatePort(std::string const &port)
 static std::string	dirDescend(std::string const &dir, int level)
 {
 	if (level)
-		return (dirDescend(dir.substr(dir.find("/", 1)), level - 1));
+		return (dirDescend(dir.substr(0, dir.find("/", 1)), level - 1));
 	return (dir.substr(0, dir.find("/", 1) + 1));
 }
 
@@ -154,7 +154,6 @@ const std::string	VirtualServer::getSystemRoot(std::string const &urlDir) // dou
 	return ("");
 }
 
-
 typedef	struct readDir_s
 {
 	std::string	realDir;
@@ -177,6 +176,46 @@ static info_Path_t	setRealPath(std::string const &testDir, std::string const &te
 	return (data);
 }
 
+
+std::string subtractDirsFromPath(std::string path, int numDirs)
+{
+	size_t lastSeparator = path.find_last_of("/");
+	
+	for (int i = 0; i < numDirs; i++)
+	{
+		if (lastSeparator == std::string::npos || lastSeparator == 0) {
+			break;
+		}
+		lastSeparator = path.find_last_of("/\\", lastSeparator - 1);
+	}
+	if (lastSeparator == std::string::npos) {
+		return "";
+	}
+	std::cout << path << std::endl;
+	std::cout << fixDir(path.substr(0, lastSeparator)) << std::endl;
+	return (path.substr(0, lastSeparator));
+}
+
+const Route	*VirtualServer::getRouteCout(std::string const &dir, std::string const &filename) const
+{
+	size_t	iterator = 0;
+
+	while (!subtractDirsFromPath(fixDir(dir), iterator).empty())
+	{
+		if (locations.find(fixDir(subtractDirsFromPath(fixDir(dir), iterator))) != locations.end())
+			return (&locations.find(fixDir((subtractDirsFromPath(fixDir(dir), iterator))))->second);
+		iterator++;
+	}
+	iterator = 0;
+	while (!subtractDirsFromPath(fixDir(dir + filename), iterator).empty())
+	{
+		if (locations.find(fixDir(subtractDirsFromPath(fixDir(dir + filename), iterator))) != locations.end())
+			return (&locations.find(fixDir(subtractDirsFromPath(fixDir(dir + filename), iterator)))->second);
+		iterator++;
+	}
+	return (NULL);
+}
+
 const Route	*VirtualServer::getRoute(std::string const &dir, std::string const &filename) const
 {
 	if (locations.find(dirDescend(fixDir(dir), 0)) != locations.end()) // dir is dir, filename is filename
@@ -188,12 +227,12 @@ const Route	*VirtualServer::getRoute(std::string const &dir, std::string const &
 
 }
 
-const std::string	VirtualServer::getSystemPath(std::string const &dir, std::string const &filename)
+const std::string	VirtualServer::getSystemPath(std::string const &dir, std::string const &filename) const
 {
 	const Route	*route;
 	info_Path_t	systemPath;
 
-	route = getRoute(dir, filename);
+	route = getRouteCout(dir, filename);
 	if (route == NULL)  {
 		systemPath = setRealPath(dir, filename, root_dir, 0);
 		if (systemPath.realFileName.empty() && systemPath.realDir == fixDir(root_dir))
@@ -212,10 +251,13 @@ const std::string	VirtualServer::getRedirectMessage(std::string const &dir, std:
 {
 	std::string	redirectMessage;
 
+	if (locations.find(fixDir(dir)) == locations.end())
+		throw std::exception();
 	redirectMessage = "HTTP/1.1 302 Found\r\n";
 	redirectMessage += "Location: ";
-	redirectMessage += locations.find(dirDescend(fixDir(dir), 0))->second.getRedirect();
-	redirectMessage += url;
+	redirectMessage += locations.find(fixDir(dir))->second.getRedirect();
+	// redirectMessage += locations.find(dirDescend(fixDir(dir), 0))->second.getRedirect();
+	redirectMessage += dirTrim(url, 1);
 	redirectMessage += "\r\n\r\n";
 	return (redirectMessage);
 }
@@ -267,3 +309,12 @@ size_t	VirtualServer::maxRecevieSize(std::string const &dir, std::string const &
 		return (max_body_size);
 	return (route->getMaxBodySize());
 };
+
+const std::string	VirtualServer::getUploadDir(std::string const &dir, std::string const &filename) const
+{
+	const Route	*route = getRoute(dir, filename);
+
+	if (!route)
+		return ("");
+	return (route->getUploadDir());
+}

@@ -39,7 +39,7 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	if (!isFile(dir)) { // dirrectory listing handle
 		if (virtualServer->dirListingPermited(request.getLocation().getDir()))
 		{
-			std::string	url_link_to_this_server = std::string("http://") + request.getHost() + request.getLocation();
+			std::string	url_link_to_this_server = std::string("http://") + request.getHostnPort() + request.getLocation();
 			std::string	DirList = dirInfoHTTPFormat(dir.c_str(), url_link_to_this_server.c_str(), virtualServer->methodPermited(request.getLocation().getDir(), "POST"));
 
 			theConnection() << headerMessage(1, 200, DirList.length());
@@ -67,11 +67,13 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 
 ServiceProcess	*HTTPParser::handleDeleteRequest(std::string const &dir, HttpRequest const &request)
 {
+	if (!virtualServer->methodPermited(request.getLocation().getDir(), "DELETE"))
+		return (ErrorRespone(405));
 	if (access(dir.c_str(), W_OK) == 0)
 	{
 		std::remove(dir.c_str());
-		theConnection() << headerMessage(1, 200, 18 + HttpRequest(request).getLocation().getFileName().length());
-		theConnection() << "Resource Deleted: " << HttpRequest(request).getLocation().getFileName();
+		theConnection() << headerMessage(1, 200, 18 + request.getLocation().getFileName().length());
+		theConnection() << "Resource Deleted: " << request.getLocation().getFileName();
 		return (new HTTPParser(*this));
 	}
 	return (ErrorRespone(403));
@@ -110,10 +112,15 @@ void	setContentLen(ServiceProcess *currentProcess, ServiceProcess *following, Co
 		throw std::exception();
 }
 
+// std::string	choseUploadDir(std::string const &dir, )
+
 ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpRequest const &request)
 {
 	HTTPBufferReceive	*process;
+	std::string			uploadDir = virtualServer->getUploadDir(request.getLocation().getDir(), request.getLocation().getFileName());
 
+	if (uploadDir.empty())
+		uploadDir = dir;
 	if (virtualServer->isCGI(UrlQuery(dir).getFileExtension()))
 	{
 		ExecuteFile		*cgi = handleCGIExecution(dir, request);
@@ -133,11 +140,11 @@ ServiceProcess		*HTTPParser::handleUploadRequest(std::string const &dir, HttpReq
 		}
 	}
 	else if (chunkedFileUploadRequest(request.getHeaders())) {
-		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(dir));
+		process = new HTTPLenChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new TerminateProcess(&theConnection())), updateDirIfFileExists(uploadDir));
 	}
 	else {
 		size_t	approxFileSize = atol((request.getHeaders().at("Content-Length").c_str()));
-		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), dir, approxFileSize);
+		process = new HTTPDelimiterChunkedFileReceive(*this, new HTTPFileReceiveReport(*this, new HTTPParser(*this)), request.getBoundry(), uploadDir, approxFileSize);
 	}
 	*process << removeHeader(std::string(request));
 	return (process);

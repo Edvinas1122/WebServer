@@ -91,6 +91,8 @@ void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following,
 			*connection << getConententType(params);
 		} catch (...) {}
 		*connection << getRemainer(array.data(), params.length(), array.size());
+		// if (params.empty() || params.find("\r\n\r\n") == std::string::npos)
+		// 	*connection << "\r\n\r\n";
 	}
 	else
 		throw std::exception();

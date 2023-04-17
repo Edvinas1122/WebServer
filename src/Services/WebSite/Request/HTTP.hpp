@@ -49,6 +49,7 @@ class	HttpRequest: public std::string
 		const std::string	getProtocolVersion() const;
 
 		const HttpHeaders	getHeaders() const;
+		const std::string	getHostnPort() const;
 		const std::string	getHost() const;
 		const std::string	getKeepAlive() const;
 		const std::string	getBoundry() const;

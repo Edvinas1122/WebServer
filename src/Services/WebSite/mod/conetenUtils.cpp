@@ -67,19 +67,33 @@ std::string	updateDirIfFileExists(std::string const &dir)
 	return (addAppendixToFileName(dir, appendix));
 }
 
+static const std::string	addHexSpaces(std::string filename)
+{
+	std::string::size_type	pos = 0;
+
+	while (42)
+	{
+		pos = filename.find(" ", pos + 1);
+		if (pos == std::string::npos)
+			break;
+		filename.replace(pos, 1, "%20");
+	}
+	return (filename);
+}
+
 const std::string	fixDir(std::string const &urlDir)
 {
 	std::string	dirFixed;
 
 	if (urlDir.empty())
 		dirFixed = "/";
-	else if (urlDir.at(urlDir.length() - 1) != '/' && urlDir.at(0) != '/')
-		dirFixed = std::string("/") + urlDir + "/"; // not recognized by http parser as urldir
+	else if (urlDir.at(0) != '/' && urlDir.at(urlDir.length() - 1) != '/')
+		dirFixed += "/" + urlDir + "/"; // not recognized by http parser as urldir
 	else if (urlDir.at(urlDir.length() - 1) != '/')
 		dirFixed = urlDir + "/";
 	else
-		dirFixed = std::string("/") + urlDir;
-	return (dirFixed);
+		dirFixed += "/" + urlDir;
+	return (addHexSpaces(dirFixed));
 }
 
 const std::string	setVar(std::string const &key, std::string const &value)

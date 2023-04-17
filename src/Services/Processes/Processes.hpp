@@ -59,7 +59,8 @@ class	FileSend : virtual public ServiceProcess
 	size_t	GetBuffer(char*, size_t len = 50);
 
 	private:
-		const std::string filename;
+		const std::string	filename;
+		// std::streamsize		file_len;
 };
 
 class	FileReceive : virtual public ServiceProcess

@@ -10,11 +10,12 @@ SERVER = $(addprefix src/Server/,Server.cpp PortSockets.cpp ConnectionQue.cpp Ob
 #Services
 REQUEST = $(addprefix Request/,HttpRequest.cpp UrlQuery.cpp dic/*.cpp)
 # REQUEST_INCLUDE = -Isrc/Services/Request/
-VIRTUAL_SERVER = $(addprefix VirtualServer/,VirtualServer.cpp Route.cpp VirtualServerValidators.cpp)
+VIRTUAL_SERVER = $(addprefix VirtualServer/,VirtualServer.cpp Route.cpp VirtualServerValidators.cpp VSHead.cpp)
 # RESPONSE = $(addprefix Response/,Error.cpp Response.cpp)
 # UPLOAD = $(addprefix Upload/,UploadService.cpp mod/*.cpp)
 # WEBSITE = $(addprefix WebSite/,WebSite.cpp Download.cpp FileUpload.cpp $(REQUEST) $(VIRTUAL_SERVER) mod/*.cpp)
-WEBSITE = $(addprefix WebSite/,WebSite.cpp HTTPParser.cpp Transmision.cpp HTTPCodes.cpp $(REQUEST) $(VIRTUAL_SERVER) mod/*.cpp)
+WEBSITE = $(addprefix WebSite/,WebSite.cpp HTTPParser.cpp Transmision.cpp HTTPCodes.cpp CGI.cpp \
+			headerMessage.cpp DirBrowser.cpp ResponseTypes.cpp $(REQUEST) $(VIRTUAL_SERVER) mod/*.cpp)
 TELNET_SERVICE = $(addprefix TelNetServer/, TelNetServer.cpp)
 PROCESSES = $(addprefix Processes/,Processes.cpp ExecuteFile.cpp)
 SERVICE = $(addprefix src/Services/,Service.cpp ServiceProcess.cpp TimeOut.cpp $(WEBSITE) $(TELNET_SERVICE) $(PROCESSES))
@@ -23,6 +24,9 @@ INTERFACE = $(addprefix src/Interface/, ProgramInterface.cpp)
 SRC = src/main.cpp $(SERVER) $(SERVICE) $(UTILS) $(INTERFACE)
 TEST = src/test.cpp $(SERVER) $(SERVICE) $(UTILS)
 
+# define your default temp files dir
+TEMP_FILES_DIR = -DTEMP_FILES_DIR=\"/home/http/tmp/cgi_tmp\"
+
 HEADER_FILES := -Isrc/
 HEADER_FILES += $(if $(filter $(UTILS),$(SRC)), $(UTILS_INCLUDE))
 HEADER_FILES += $(if $(filter $(SERVICE),$(SRC)), $(REQUEST_INCLUDE))
@@ -30,7 +34,7 @@ HEADER_FILES += -Isrc/Utils/Parsers/ -Isrc/Utils/ -Isrc/Utils/Parsers/Formats/\
 			 -Isrc/ -Isrc/Services/WebSite/Request/ -Isrc/Services/Processes/ -Isrc/Services/TelNetServer/\
 				-Isrc/Services/ -Isrc/Services/WebSite/VirtualServer -Isrc/Server/\
 				-Isrc/Server/Connection/ -Isrc/Interface/ -Isrc/Services/WebSite $(TERMINAL_INCLUDE)
-FLAGS = -Wall -Wextra -Werror -std=c++98 $(HEADER_FILES) -DC98 -DTERMINAL=1 -g
+FLAGS = -Wall -Wextra -Werror -std=c++98 $(HEADER_FILES) -DC98 -DTERMINAL=1 $(TEMP_FILES_DIR) -g
 NAME = server
 CC = c++
 

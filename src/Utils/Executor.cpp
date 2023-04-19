@@ -22,6 +22,8 @@ Executor::~Executor()
 		delete[] (*it);
 		it++;
 	}
+	if (input_fd != STDIN_FILENO)
+		close(input_fd);
 };
 
 void	Executor::execute(std::string const &param)
@@ -50,9 +52,6 @@ void	Executor::execute(int count, ...)
 
 void	Executor::execute()
 {
-	pid_t	pid;
-	int		status;
-
 	pid = fork();
 	if (pid == 0)
 	{
@@ -63,18 +62,27 @@ void	Executor::execute()
 		std::cerr << "Exec Command Failure in Forked sub process, ending forked sub Process.." << std::endl;
 		close(output_fd);
 		exit(EXIT_FAILURE);
-	} else {
-		// write(pipe_fd[1], input_data, strlen(input_data));
-
 	}
-	waitpid(pid, &status, 0);
-	clearCommands();
-	if (input_fd != STDIN_FILENO)
-		close(input_fd);
+}
+
+bool	Executor::hasFinished()
+{
+	int	process_info;
+
+	process_info = waitpid(pid, &status, WNOHANG);
+	if (process_info == 0)
+		return (false);
+	else if (process_info == -1)
+		throw ExecutionFailed();
+	else if (process_info == pid) {
+		clearCommands();
+		return (true);
+	}
 	if (WEXITSTATUS(status)) {
 		close(output_fd);
 		throw ExecutionFailed();
 	}
+	return (true);
 }
 
 int		Executor::executeToOutPut(int count, ...)
@@ -191,4 +199,9 @@ void	Executor::clearCommands()
 	}
 	commands.clear();
 	setCommandParam(executablePath.substr(executablePath.find_last_of("/") + 1));
+}
+
+void	Executor::killProcess()
+{
+	kill(pid, SIGTERM);
 }

@@ -15,22 +15,51 @@ void	deleteTempFile(ServiceProcess *currentProcess, ServiceProcess *followingPro
 
 bool	ExecuteFile::Handle()
 {
-	int				executionOutput_read_end;
-	FileSend		*newFollowingProcess;
-
-	if (!environmnet.empty())
-		executor.setEnv(environmnet);
-	executor.setInputFd(DirrectFileIntoExec());
-	try {
-		if (OutputFileName.empty())
-			executionOutput_read_end = executor.executeToOutPut(1, scriptPath.c_str());
-		else
-			executionOutput_read_end = executor.executeToFile(2, scriptPath.c_str(), OutputFileName.c_str());
-	} catch (Executor::ExecutionFailed &e) {
-		SetFollowingProcess(followingProcess);
-		followingProcess = NULL;
+	if (!waiting) 
+	{
+		try {
+			callExecution();
+		} catch (Executor::ExecutionFailed &e) {
+			SetFollowingProcess(followingProcess);
+			followingProcess = NULL;
+			return (false);
+		}
+		startClock();
+	}
+	if (timedOut())
+	{
+		executor.killProcess();
+		throw InfiniteLoop();
 		return (false);
 	}
+	if (executor.hasFinished())
+	{
+		deliverOutPut();
+		return (false);
+	}
+	return (true);
+}
+
+void	ExecuteFile::startClock()
+{
+	waiting = true;
+	gettimeofday(&timestamp, NULL);	
+}
+
+bool	ExecuteFile::timedOut()
+{
+	struct timeval	currenttime;
+
+	gettimeofday(&currenttime, NULL);	
+	if (currenttime.tv_sec - timestamp.tv_sec > 2)
+		return (true);
+	return (false);
+}
+
+void	ExecuteFile::deliverOutPut()
+{
+	FileSend		*newFollowingProcess;
+
 	if (followingProcess && OutputFileName.empty())
 		SetFollowingProcess(new	PipeSend(&theConnection(), followingProcess, executionOutput_read_end));
 	else if (OutputFileName.empty())
@@ -48,20 +77,30 @@ bool	ExecuteFile::Handle()
 		SetFollowingProcess(newFollowingProcess);
 	}
 	followingProcess = NULL;
-	return (false);
+}
+
+void	ExecuteFile::callExecution()
+{
+	if (!environmnet.empty())
+		executor.setEnv(environmnet);
+	executor.setInputFd(DirrectFileIntoExec());
+	if (OutputFileName.empty())
+		executionOutput_read_end = executor.executeToOutPut(1, scriptPath.c_str());
+	else
+		executionOutput_read_end = executor.executeToFile(2, scriptPath.c_str(), OutputFileName.c_str());
 }
 
 ExecuteFile::ExecuteFile(Connection *connection, std::string const &executablePath, std::string const &scriptPath):
-						ServiceProcess(connection), followingProcess(NULL), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0) {};
+						ServiceProcess(connection), followingProcess(NULL), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0), waiting(false) {};
 
 ExecuteFile::ExecuteFile(Connection *connection, ServiceProcess *followingProcess, std::string const &executablePath, std::string const &scriptPath):
-						ServiceProcess(connection), followingProcess(followingProcess), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0) {};
+						ServiceProcess(connection), followingProcess(followingProcess), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0), waiting(false) {};
 
 ExecuteFile::ExecuteFile(ServiceProcess const &process, std::string const &executablePath, std::string const &scriptPath):
-						ServiceProcess(process), followingProcess(NULL), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0) {};
+						ServiceProcess(process), followingProcess(NULL), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0), waiting(false) {};
 
 ExecuteFile::ExecuteFile(ServiceProcess const &process, ServiceProcess *followingProcess, std::string const &executablePath, std::string const &scriptPath):
-						ServiceProcess(process), followingProcess(followingProcess), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0) {};
+						ServiceProcess(process), followingProcess(followingProcess), executor(executablePath), scriptPath(scriptPath), inputToExec(STDIN_FILENO), writeEndToInputOfExec(0), waiting(false) {};
 
 ExecuteFile::~ExecuteFile()
 {

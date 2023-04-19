@@ -82,7 +82,6 @@ void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following,
 			*connection << getRemainer(array.data(), params.length(), array.size());
 			return ;
 		}
-
 		if (params.find("Status:") != std::string::npos)
 			*connection << headerMessage(0, getStatus(params), std::numeric_limits<size_t>::max(), false);
 		else

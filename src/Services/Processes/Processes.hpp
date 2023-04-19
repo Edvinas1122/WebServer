@@ -143,9 +143,20 @@ class	ExecuteFile : virtual public ServiceProcess
 
 	private:
 
+	void		startClock();
+	bool		timedOut();
+	void		callExecution();
+	void		deliverOutPut();
 	int			PipeIntoExec();
 	int			DirrectFileIntoExec();
 	std::string	filename;
+	bool		waiting;
+	int			executionOutput_read_end;
+	struct timeval	timestamp;
+
+	public:
+	class	InfiniteLoop: public std::exception {};
+
 };
 
 #endif

@@ -33,6 +33,9 @@ class	Executor
 	void	setInputFd(const int &fd) {input_fd = fd;};
 	void	setOutputFd(const int &fd) {output_fd = fd;};
 
+	bool	hasFinished();
+	void	killProcess();
+
 	private:
 	void	execute(std::string const &param);
 	void	setEnv(std::string const &param);
@@ -47,6 +50,9 @@ class	Executor
 	public:
 
 	class ExecutionFailed : public std::exception {};
+	private:
+		pid_t	pid;
+		int		status;
 };
 
 #endif

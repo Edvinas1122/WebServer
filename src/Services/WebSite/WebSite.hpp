@@ -16,7 +16,7 @@ class	HTTPParser : virtual public BufferRequest
 {
 	private:
 		VirtualServer		*virtualServer;
-		static const int	heartBeatRate = 10000;
+		static const int	heartBeatRate = 10;
 
 	public:
 		HTTPParser(Connection *connection, VirtualServer *vs): ServiceProcess(connection), BufferRequest(connection), virtualServer(vs) {};

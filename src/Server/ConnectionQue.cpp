@@ -84,3 +84,24 @@ bool	operator<(const TCPConnectionOrigin& left, const TCPConnectionOrigin& right
 		return (true);
 	return (false);
 }
+
+static std::string	getIPAddress(struct in_addr addr)
+{
+	char ip_address[INET_ADDRSTRLEN];
+
+    inet_ntop(AF_INET, &(addr), ip_address, INET_ADDRSTRLEN);
+	return (ip_address);
+}
+
+std::string	ConnectionQueController::infoConnections() const
+{
+	listOfConnections::const_iterator	it = Connections.begin();
+	std::string	info;
+
+	while (it != Connections.end())
+	{
+		info += "Connection: " + getIPAddress(it->first.ipAddress) + "\n";
+		it++;
+	}
+	return (info);
+}

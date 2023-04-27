@@ -16,6 +16,9 @@ ServiceProcess	*WebSite::RequestParse(Connection *connection, std::string const 
 			throw std::exception();
 			// return (new HTTPParser(connection,  virtualServers->getDefault()));
 		}
+		if (lastRequests.size() > 10)
+			lastRequests.clear();
+		lastRequests.push_back(request);
 		return (new HTTPParser(connection, virtual_server));
 	}
 	return (NULL);
@@ -27,3 +30,17 @@ bool	WebSite::DetermineIfIdleProcessType(ServiceProcess *process)
 		return (true);
 	return (false);
 };
+
+std::string	WebSite::connectionsInfo()
+{
+	std::list<std::string>::iterator	it = lastRequests.begin();
+	std::string	piledUp;
+
+	while (it != lastRequests.end())
+	{
+		piledUp += *it + "\n";
+		it++;
+	}
+	lastRequests.clear();
+	return (piledUp);
+}

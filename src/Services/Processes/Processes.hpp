@@ -57,6 +57,7 @@ class	FileSend : virtual public ServiceProcess
 		store file content in buffer and with function return needed parameter
 	*/
 	size_t	GetBuffer(char*, size_t len = 50);
+	size_t	SizeInfo() {return (fileToSend.GetRemainingLen());};
 
 	private:
 		const std::string	filename;

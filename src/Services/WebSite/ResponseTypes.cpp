@@ -59,8 +59,8 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 		theConnection() << headerMessage(0, 200);
 		return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), dir));
 	}
-	theConnection() << headerMessage(0, 200);
-	return (new HTTPFileSend(*this, new TerminateProcess(&theConnection()), dir));
+	theConnection() << headerMessage(1, 200, File(dir.c_str()).GetSize());
+	return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
 	// theConnection() << headerMessage(1, 200, File(dir.c_str()).GetSize());
 	// return (new HTTPFileSend(*this, new HTTPParser(*this), dir));
 }

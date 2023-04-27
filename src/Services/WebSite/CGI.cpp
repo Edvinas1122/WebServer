@@ -69,27 +69,30 @@ void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following,
 	FileSend			*send = dynamic_cast<FileSend*>(following);
 	ExecuteFile			*executor = dynamic_cast<ExecuteFile*>(currentProcess);
 	std::string			params;
+	std::string			remainer;
 	std::vector<char>	array;
 
 	array.reserve(200);
 	if (send && executor) {
 		(void)executor;
 		params = getBodyParams(send, &array);
+		remainer = getRemainer(array.data(), params.length(), array.size());
+		send->SizeInfo();
 		if (params.find("Content-Type: ") != std::string::npos)
 		{
-			*connection << headerMessage(0, 200, std::numeric_limits<size_t>::max(), false);
+			*connection << headerMessage(1, 200, send->SizeInfo() + remainer.length() - 8, false);
 			*connection << params;
-			*connection << getRemainer(array.data(), params.length(), array.size());
+			*connection << remainer;
 			return ;
 		}
 		if (params.find("Status:") != std::string::npos)
-			*connection << headerMessage(0, getStatus(params), std::numeric_limits<size_t>::max(), false);
+			*connection << headerMessage(1, getStatus(params), send->SizeInfo() + remainer.length(), false);
 		else
-			*connection << headerMessage(0, 200, std::numeric_limits<size_t>::max(), false);
+			*connection << headerMessage(1, 200, send->SizeInfo() + remainer.length() - 8, false);
 		try {
 			*connection << getConententType(params);
 		} catch (...) {}
-		*connection << getRemainer(array.data(), params.length(), array.size());
+		*connection << remainer;
 		// if (params.empty() || params.find("\r\n\r\n") == std::string::npos)
 		// 	*connection << "\r\n\r\n";
 	}

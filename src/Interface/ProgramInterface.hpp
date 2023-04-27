@@ -25,6 +25,11 @@ class	ProgramInterface
 	// 	return (outside);
 	// };
 
+	void	addSystemMessage(std::string const &operator_id, std::string const &info_type, std::string const &message)
+	{
+		data[operator_id][info_type].push_back(message);
+	}
+
 	protected:
 
 	std::string	DataFeed(std::string const &id, std::string const &info_type)
@@ -46,10 +51,6 @@ class	ProgramInterface
 		return ("");
 	};
 
-	void	addSystemMessage(std::string const &operator_id, std::string const &info_type, std::string const &message)
-	{
-		data[operator_id][info_type].push_back(message);
-	}
 
 	void	Terminate() {run = false;};
 };

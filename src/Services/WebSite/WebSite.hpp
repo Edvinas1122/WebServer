@@ -126,6 +126,11 @@ class	WebSite: public Service
 	{
 		this->virtualServers = virtualServers;
 	};
+
+	bool		newIncame() {return ((!lastRequests.empty()));};
+	std::string	connectionsInfo();
+	private:
+		std::list<std::string>	lastRequests;
 };
 
 /*
@@ -145,5 +150,19 @@ const std::string	headerMessage(const int &method_version, const int &code, cons
 void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following, Connection *connection);
 void	setContentLen(ServiceProcess *currentProcess, ServiceProcess *following, Connection *connection);
 
+
+#include <ProgramInterface.hpp>
+#include "mod/contentUtils.hpp"
+
+class	WebSocketHandle : virtual public ServiceProcess, public Terminal
+{
+	private:
+		std::string	who;
+	public:
+		WebSocketHandle(ServiceProcess const &process): ServiceProcess(process), who(generate_random_string()) {};
+		~WebSocketHandle() {};
+	
+	bool	Handle();
+};
 
 #endif

@@ -82,3 +82,18 @@ const std::string	HttpRequest::getFilename() const
 {
 	return (substr(find("filename=") + 10, substr(find("filename=") + 11).find('"') + 1));
 }
+
+bool	HttpRequest::UpgradeRequest() const
+{
+	if (find("Connection: Upgrade\r\n") != std::string::npos)
+		return (true);
+	return (false);
+}
+
+const std::string	HttpRequest::UpgradeKey() const
+{
+	size_t	begin = find("Sec-WebSocket-Key: ") + 19;
+	size_t	end = find("\r\n", begin) - begin;
+
+	return (substr(begin, end));
+}

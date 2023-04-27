@@ -88,6 +88,8 @@ class	ConnectionQueController: virtual public Observer
 	public:
 		ConnectionQueController() {};
 		~ConnectionQueController() {};
+	
+		std::string	infoConnections() const;
 	protected:
 
 		void	setConnections(std::list<std::pair<std::string, int> > const &loudPortList);

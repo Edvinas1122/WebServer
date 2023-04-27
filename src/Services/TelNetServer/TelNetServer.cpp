@@ -39,6 +39,7 @@ static std::string	logoGee()
 
 bool	TelNetServerParser::Handle()
 {
+	request.clear();
 	theConnection() >> request;
 	if (!request.empty())
 	{

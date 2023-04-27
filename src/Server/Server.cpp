@@ -61,7 +61,7 @@ void	Server::CommandParse(std::string const &data)
 	if (data.find("print") != std::string::npos)
 		outputInbound = outputInbound ? false : true;
 	if (data.find("file_pr") != std::string::npos)
-		dupToFile("/home/WebServer/serverLog.txt");
+		dupToFile("/home/Uploads/serverLog.txt");
 	if (data.find("runtime") != std::string::npos)
 		printRunTimeInfo = printRunTimeInfo ? false : true;
 	if (data.find("background") != std::string::npos)

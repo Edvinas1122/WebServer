@@ -33,6 +33,20 @@ bool	HTTPParser::RequestCompleted(std::string const &request)
 	return (HttpRequest(request).Completed());
 }
 
+std::string	headerUpgrade(HttpRequest const &request)
+{
+	std::string	message;
+
+	message += "HTTP/1.1 101 Switching Protocols\r\n" 
+				"Upgrade: websocket\r\n"
+				"Connection: Upgrade\r\n"
+				"Sec-WebSocket-Accept: " + generateWebSocketAccept(request.UpgradeKey()) + "\r\n"
+				// "Sec-WebSocket-Protocol: chat\r\n"
+				// "Sec-WebSocket-Extensions: permessage-deflate\r\n"
+				"\r\n";
+	return (message);
+}
+
 ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 {
 	std::string	dir = virtualServer->getSystemPath(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation().getFileName());
@@ -40,6 +54,11 @@ ServiceProcess	*HTTPParser::RequestParse(std::string const &request)
 	if (dir.empty()) { // handles Redirect
 		theConnection() << virtualServer->getRedirectMessage(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getLocation());
 		return (new HTTPParser(*this));
+	}
+	if (HttpRequest(request).UpgradeRequest())
+	{
+		theConnection() << headerUpgrade(request);
+		return (new WebSocketHandle(*this));
 	}
 	if (!virtualServer->methodPermited(HttpRequest(request).getLocation().getDir(), HttpRequest(request).getMethod()))
 		return (ErrorRespone(405));

@@ -57,6 +57,16 @@ class	Buffer
 			return std::string(buffer.begin(), buffer.end());
 		};
 
+		uint8_t	*operator*()
+		{
+			return (buffer.data());
+		}
+
+		uint8_t	operator[](int n) const
+		{
+			return (buffer[n]);
+		}
+
 		#define FILE_BUFFERING_SIZE 1024
 
 		Buffer	&operator<<(File &file)

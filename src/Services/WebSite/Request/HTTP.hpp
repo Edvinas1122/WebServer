@@ -44,6 +44,7 @@ class	HttpRequest: public std::string
 
 		bool				Validate() const;
 		bool				Completed() const;
+		bool				UpgradeRequest() const;
 		const std::string	getMethod() const;
 		const UrlQuery		getLocation() const;
 		const std::string	getProtocolVersion() const;
@@ -54,6 +55,7 @@ class	HttpRequest: public std::string
 		const std::string	getKeepAlive() const;
 		const std::string	getBoundry() const;
 		const std::string	getFilename() const;
+		const std::string	UpgradeKey() const;
 };
 
 #endif

@@ -20,8 +20,12 @@ const std::string	UrlQuery::getFileName() const
 {
 	size_t	dotPoss = find_last_of(".");
 	size_t	begin = substr(0, dotPoss).find_last_of(dir_delim) + 1;
-	size_t	end =  find_first_of(std::string(query_delim) + dir_delim, dotPoss);
+	size_t	end;
 
+	if (dotPoss != std::string::npos)
+		end = find_first_of(std::string(query_delim) + dir_delim, dotPoss);
+	else
+		end = find_first_of(query_delim, find_last_of(dir_delim));
 	if (begin >= end)
 		return ("");
 	return (removeHexSpaces(substr(begin, end - begin)));
@@ -63,7 +67,7 @@ const std::string	UrlQuery::getQuery() const
 
 	if (begin >= end)
 		return ("");
-	return (substr(begin, end - begin));
+	return (substr(begin + 1, end - begin));
 }
 
 const std::string	UrlQuery::getPath() const

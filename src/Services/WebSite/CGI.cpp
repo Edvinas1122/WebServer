@@ -80,7 +80,7 @@ void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following,
 		send->SizeInfo();
 		if (params.find("Content-Type: ") != std::string::npos)
 		{
-			*connection << headerMessage(1, 200, send->SizeInfo() + remainer.length() - 8, false);
+			*connection << headerMessage(1, 200, send->SizeInfo() + remainer.length() - 4, false);
 			*connection << params;
 			*connection << remainer;
 			return ;

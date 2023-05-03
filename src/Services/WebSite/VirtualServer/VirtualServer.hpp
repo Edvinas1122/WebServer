@@ -53,13 +53,15 @@ class VirtualServer {
 		std::string							server_name;
 		std::string							root_dir;
 		std::string							index;
+		std::map<std::string, std::string>	ssl_certificates;
+		std::map<std::string, std::string>	ssl_keys;
+		std::map<std::string, std::string>	ssl_ports;
 		std::map<std::string, std::string>	cgi_response;
 		std::map<std::string, std::string>	error_pages;
 		std::list<std::string>				port_number;
 		std::map<std::string, Route>		locations;
 		size_t								max_body_size;
-		// std::map<unsigned int, std::string>	ErrorResponsePages;
-		// std::map<std::string, CGI>			cgi_map;
+
 	public:
 		VirtualServer() {};
 		VirtualServer(DescendParser parser);
@@ -111,6 +113,9 @@ class	VirtualServers {
 	void					parseConfigurationFile(const char *path);
 	VirtualServer			*getServer(std::string const &port, std::string const &host);
 	std::list<std::string>	getPortList();
+	// std::list<std::pair<std::string, <std::pair<std::string, std::string> > > >	getSLLPorts();
+
+
 	VirtualServer			*getDefault() {return (&virtualServers.begin()->second);};
 
 	public:

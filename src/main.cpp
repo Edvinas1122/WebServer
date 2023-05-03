@@ -17,6 +17,11 @@ static void handleSignal(int sigNum)
 	signalEnd = true;
 }
 
+SSL_CTX* create_ssl_context(const char *cert_file, const char *key_file) EXCEPTION;
+
+#define KEY_PATH "/home/WebServer/cert/server.key"
+#define CERT_PATH "/home/WebServer/cert/server.crt"
+
 int	main(int argc, char **args)
 {
 #ifdef TERMINAL
@@ -39,6 +44,12 @@ int	main(int argc, char **args)
 		// virtualServers.Info(); // 
 	} catch (...) {
 		std::cout << "Configuration Read Failure" << std::endl;
+		return (EXIT_FAILURE);
+	}
+	try {
+		httpServer.startSSLPort(create_ssl_context(CERT_PATH, KEY_PATH), "8080");
+	} catch (...) {
+		std::cout << "Port Bind Failure" << std::endl;
 		return (EXIT_FAILURE);
 	}
 	try {

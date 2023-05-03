@@ -31,7 +31,6 @@ void	VirtualServers::Info() const
 
 VirtualServer	*VirtualServers::getServer(std::string const &port, std::string const &host)
 {
-	(void) port;
 	if (virtualServers.find(host) == virtualServers.end())
 		return (virtualServers.begin()->second.validatePort(port));
 	
@@ -57,3 +56,17 @@ std::list<std::string>	VirtualServers::getPortList()
 	}
 	return (portList);
 }
+
+// std::list<std::pair<std::string, <std::pair<std::string, std::string> > > >	VirtualServers::getSLLPorts()
+// {
+// 	std::list<std::pair<std::string, <std::pair<std::string, std::string> > > >	listOfSSLPortsWithPaths;
+// 	std::pair<std::string, <std::pair<std::string, std::string> > >				portAndSSLcertnkey;
+// 	std::pair<std::string, std::string>											SSLcertnkey;
+// 	virtualServerMap::iterator	it = virtualServers.begin();
+
+// 	while (it != virtualServers.end())
+// 	{
+// 		it
+// 		it++;
+// 	}
+// };

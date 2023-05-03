@@ -144,10 +144,7 @@ Server::ProcessList::iterator	Server::FindProcess(Connection *connection)
 	while (it != processes.end())
 	{
 		if ((*it)->id(connection))
-		{
-			// std::cout << "found" << std::endl;
 			return (it);
-		}
 		it++;
 	}
 	return (it);

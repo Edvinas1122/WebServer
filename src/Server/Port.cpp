@@ -21,7 +21,9 @@ Connection	*SSLPort::getConnection(const int fd, struct sockaddr_in &socketAddre
 	if (SSL_accept(ssl) <= 0)
 	{
 		ERR_print_errors_fp(stderr);
-		throw std::exception();
+		SSL_shutdown(ssl);
+    	SSL_free(ssl);
+		throw ConnectFailure();
 	}
 	return (new TLS(ssl, fd, socketAddress, port));
 };

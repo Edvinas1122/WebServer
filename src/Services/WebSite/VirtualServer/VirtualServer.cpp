@@ -9,9 +9,16 @@ static void	copy_list_values(container &destination, container const &source)
 
 VirtualServer::VirtualServer(DescendParser parser)
 {
-	int	iterator = 1;
+	int		iterator = 1;
+	bool	hasPorts = true;
 
-	port_number = parser.getValuesList("listen", this->isPositiveNumber);
+	try {
+		port_number = parser.getValuesList("listen", this->isPositiveNumber);
+	} catch (DescendParser::NoKeyExcept &e)
+	{
+		hasPorts = false;
+	}
+
 	root_dir = parser.getValue("root", 1, validPath);
 	try {
 		index = parser.getValue("index");
@@ -55,6 +62,32 @@ VirtualServer::VirtualServer(DescendParser parser)
 		error_pages.insert(parser.getPair("error_page", iterator, validPath, isPositiveNumberInErrorRange));
 		iterator++;
 	}
+
+	iterator = 1;
+	while (parser.count("ssl_port") >= iterator)
+	{
+		ssl_ports.insert(parser.getPair("ssl_port", iterator)); // check valid cert path
+		iterator++;
+	}
+	if (iterator == 1 && !hasPorts)
+	{
+		std::cerr << "Server definition does not have any ports" << std::endl;
+		throw std::exception();
+	}
+	iterator = 1;
+	while (parser.count("ssl_cert") >= iterator)
+	{
+		ssl_certificates.insert(parser.getPair("ssl_cert", iterator)); // check valid var name
+		iterator++;
+	}
+
+	iterator = 1;
+	while (parser.count("ssl_key") >= iterator)
+	{
+		ssl_keys.insert(parser.getPair("ssl_key", iterator)); // check valid var name
+		iterator++;
+	}
+
 }
 
 const char	*VirtualServer::getHost() const
@@ -124,6 +157,9 @@ VirtualServer	*VirtualServer::validatePort(std::string const &port)
 			return (this);
 		it++;
 	}
+
+	if (ssl_ports.find(port) != ssl_ports.end())
+		return (this);
 	return (NULL);
 };
 

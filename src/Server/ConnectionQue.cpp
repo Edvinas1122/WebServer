@@ -45,6 +45,7 @@ void	ConnectionQueController::setConnections(std::list<Port*> const &loudPortLis
 	socklen_t							addrlen = sizeof(struct sockaddr_in);
 	int									clientFd;
 	std::list<Port*>::const_iterator	it = loudPortList.begin();
+	Connection							*connection;
 
 	while (it != loudPortList.end())
 	{
@@ -53,9 +54,15 @@ void	ConnectionQueController::setConnections(std::list<Port*> const &loudPortLis
 			break;
 		if (std::find_if(Connections.begin(), Connections.end(), findByFD(clientFd)) == Connections.end())
 		{
-			Connections[TCPConnectionOrigin(clientFd, socketAddress.sin_addr, **it)] = (*it)->getConnection(clientFd, socketAddress);
-			// Connections.insert(std::pair<TCPConnectionOrigin, TCP*>(TCPConnectionOrigin(clientFd, socketAddress.sin_addr, it->first), new TCP(clientFd, socketAddress, it->first)));
-			insertFileDescriptor(clientFd);
+			try {
+				connection = (*it)->getConnection(clientFd, socketAddress);
+				Connections[TCPConnectionOrigin(clientFd, socketAddress.sin_addr, **it)] = connection;
+				insertFileDescriptor(clientFd);
+			} catch (Port::ConnectFailure &e)
+			{
+				
+			}
+
 		}
 		it++;
 	}

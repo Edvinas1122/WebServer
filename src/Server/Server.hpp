@@ -39,7 +39,7 @@ class	Observer
 
 # include <TCP.hpp>
 
-class	Port: virtual public Observer
+class	Port
 {
 	protected:
 		const std::string	port;
@@ -50,7 +50,7 @@ class	Port: virtual public Observer
 		Port(std::string const &port, const int fd): port(port), fd(fd), socketInitMethod(openPortSocket) {};
 		Port(std::string const &port, const int fd, int	(*socketInitMethod)(char const *)):
 				port(port), fd(fd), socketInitMethod(socketInitMethod) {};
-		~Port() {};
+		virtual ~Port() {};
 
 	virtual Connection	*getConnection(const int fd, struct sockaddr_in &socketAddress);
 
@@ -61,6 +61,7 @@ class	Port: virtual public Observer
 		return (port);
 	};
 
+	class	ConnectFailure: public std::exception {};
 	private:
 		int	(*socketInitMethod)(char const *);
 };
@@ -72,7 +73,7 @@ class	SSLPort: public Port
 
 	public:
 		SSLPort(SSL_CTX *certificate, std::string const &port, const int fd): Port(port, fd), certificate(certificate) {};
-		~SSLPort();
+		virtual ~SSLPort();
 	
 	virtual Connection	*getConnection(const int fd, struct sockaddr_in &socketAddress) EXCEPTION;
 };

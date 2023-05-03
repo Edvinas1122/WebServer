@@ -18,7 +18,7 @@ Server::~Server()
 void	Server::Run()
 {
 	Observer::Poll();
-	setConnections(getLoudSockets());
+	setConnections(getLoudPorts());
 	ProcessQue(pullIncoming, POLLIN);
 	StartProcesses(); // runs interfaces
 	Serve(); // runs processes
@@ -79,7 +79,7 @@ void	Server::TimeOutProcessLessConnections(const int allowedInactiveDurration)
 
 	while (it != Connections.end())
 	{
-		if (it->second.getElapsedTime() > allowedInactiveDurration && FindProcess(&(it->second)) == processes.end())
+		if (it->second->getElapsedTime() > allowedInactiveDurration && FindProcess((it->second)) == processes.end())
 		{
 			closeConnection(it);
 			it = Connections.begin();
@@ -96,11 +96,11 @@ void	Server::StartProcesses()
 
 	while (conn_it != Connections.end())
 	{
-		if (conn_it->second.downloadBufferReady() && FindProcess(&(conn_it->second)) == processes.end())
+		if (conn_it->second->downloadBufferReady() && FindProcess((conn_it->second)) == processes.end())
 		{
 			if (printRunTimeInfo)
 				std::cout << "Inbounded" << std::endl;
-			CreateProcess(&(conn_it->second), conn_it->first);
+			CreateProcess((conn_it->second), conn_it->first);
 		}
 		conn_it++;
 	}
@@ -124,7 +124,7 @@ void	Server::HeartBeatIdleProcessesFromSameOrigin(TCPConnectionOrigin const &ori
 
 			while (it_origin != matchingOrigin.end())
 			{
-				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == (*it_origin).second) {
+				if (!(*it)->theConnection().downloadBufferReady() && (*it)->theConnection() == *(*it_origin).second) {
 					(*it)->HeartBeat();
 					if (printRunTimeInfo)
 						std::cout << "idle process from same origin heart beat set" << std::endl;
@@ -185,7 +185,6 @@ void	Server::CreateProcess(Connection *connection, TCPConnectionOrigin const &or
 		}
 		if (process != NULL)
 		{
-			(void)origin;
 			HeartBeatIdleProcessesFromSameOrigin(origin, *it);
 			process->setTimeOutDurration((*it)->TimeOutAge());
 			processes.push_back(process);

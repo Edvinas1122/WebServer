@@ -1,4 +1,4 @@
-#include <Server.hpp>
+#include "Server.hpp"
 
 PortSockets::~PortSockets()
 {
@@ -12,24 +12,41 @@ std::list<std::pair<std::string, int> >	PortSockets::getLoudSockets(const int ev
 
 	while (it != portSockets.end())
 	{
-		if (checkFd(it->second, events))
+		if (checkFd(*it->second, events))
 		{
 			// std::cout << "loud socket: " << it->second << std::endl;
-			loudSocketList.push_back(std::make_pair<std::string, int>(it->first, it->second));
+			loudSocketList.push_back(std::make_pair<std::string, int>(it->first, *it->second));
 		}
 		it++;
 	}
 	return (loudSocketList);
 }
 
+std::list<Port*>	PortSockets::getLoudPorts(const int events)
+{
+	socketMap::iterator	it = portSockets.begin();
+	std::list<Port*>	loudPortList;
+
+	while (it != portSockets.end())
+	{
+		if (checkFd(*it->second, events))
+		{
+			// std::cout << "loud socket: " << it->second << std::endl;
+			loudPortList.push_back(it->second);
+		}
+		it++;
+	}
+	return (loudPortList);
+}
+
 std::list<int>	PortSockets::getSockets()
 {
-	std::map<std::string, int>::iterator	it = portSockets.begin();
+	socketMap::iterator	it = portSockets.begin();
 	std::list<int>							socketList;
 
 	while (it != portSockets.end())
 	{
-		socketList.push_back(it->second);
+		socketList.push_back(*it->second);
 		it++;
 	}
 	return (socketList);
@@ -57,13 +74,13 @@ void	PortSockets::startPort(std::string const &port, bool asynch)
 	} catch (...) {
 		throw std::exception();
 	}
-	portSockets[port] = scoket_fd;
+	portSockets[port] = new Port(port, scoket_fd);
 	insertFileDescriptor(scoket_fd, POLLIN, asynch);
 }
 
 void	PortSockets::infoPorts() const
 {
-	std::map<std::string, int>::const_iterator	it = portSockets.begin();
+	socketMap::const_iterator	it = portSockets.begin();
 
 	while (it != portSockets.end())
 	{
@@ -78,8 +95,14 @@ void	PortSockets::closePorts()
 
 	while (it != portSockets.end())
 	{
-		removeFileDescriptor(it->second);
+		removeFileDescriptor(*it->second);
+		delete it->second;
 		it++;
 	}
 	portSockets.clear();
 }
+
+// void	SSLPorts::startSSLPort(std::string port)
+// {
+
+// }

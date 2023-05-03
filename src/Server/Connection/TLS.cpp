@@ -1,12 +1,12 @@
-#include "TCP.hpp"
+#include "TLS.hpp"
 
-bool	TCP::receivePacket()
+bool	TLS::receivePacket()
 {
 	char	mesg[RECEIVE_BUFFER_SIZE + 1];
 	int		bytes_read = 0;
 
 	memset((void*)mesg, (int)'\0', RECEIVE_BUFFER_SIZE + 1);
-	bytes_read = recv(fd, mesg, RECEIVE_BUFFER_SIZE, 0);
+	bytes_read = SSL_read(ssl, mesg, RECEIVE_BUFFER_SIZE);
 	if (bytes_read == -1)
 		throw std::exception();
 	if (bytes_read > 0) {
@@ -16,16 +16,16 @@ bool	TCP::receivePacket()
 	return (false);
 }
 
-bool	TCP::sendPacket()
+bool	TLS::sendPacket()
 {
-	int		buffer_len = outgoing.length();
-	int		bytes_sent;
-	int		send_len;
+	int	buffer_len = outgoing.length();
+	int	bytes_sent;
+	int	send_len;
 
 	send_len = buffer_len;
 	if (buffer_len > RECEIVE_BUFFER_SIZE)
 		send_len = 1024;
-	bytes_sent = send(fd, (void*)outgoing.substr(0, buffer_len).data(), send_len, MSG_NOSIGNAL);
+	bytes_sent = SSL_write(ssl, (void*)outgoing.substr(0, buffer_len).data(), send_len);
 	if (bytes_sent == -1)
 		throw std::exception();
 	if (bytes_sent > 0) {
@@ -33,4 +33,10 @@ bool	TCP::sendPacket()
 		return (true);
 	}
 	return (false);
+}
+
+TLS::~TLS()
+{
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
 }

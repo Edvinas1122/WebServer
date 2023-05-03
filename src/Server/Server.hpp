@@ -11,7 +11,7 @@ class	Observer
 		static const int TIMEOUT = 5000;
 	public:
 		Observer();
-		~Observer() {vector.clear();};
+		virtual ~Observer() {vector.clear();};
 
 		/*
 			Unix poll https://man7.org/linux/man-pages/man2/poll.2.html
@@ -37,10 +37,37 @@ class	Observer
 
 #include "mod/openPortSocket.hpp"
 
+# include <TCP.hpp>
+
+class	Port: virtual public Observer
+{
+	private:
+		const std::string	port;
+		const int			fd;
+		int	(*socketInitMethod)(char const *);
+
+	public:
+		Port(const int fd): fd(fd), socketInitMethod(openPortSocket) {};
+		Port(std::string const &port, const int fd): port(port), fd(fd), socketInitMethod(openPortSocket) {};
+		Port(std::string const &port, const int fd, int	(*socketInitMethod)(char const *)):
+				port(port), fd(fd), socketInitMethod(socketInitMethod) {};
+		~Port() {};
+
+	virtual Connection	*getConnection(const int fd, struct sockaddr_in &socketAddress);
+
+	operator int() const {
+		return (fd);
+	};
+	operator std::string() const {
+		return (port);
+	};
+};
+
+
 class	PortSockets: virtual public Observer
 {
 	public:
-		typedef std::map<std::string, int>	socketMap;	
+		typedef std::map<std::string, Port*>	socketMap;
 	private:
 		socketMap	portSockets;
 		int	(*socketInitMethod)(char const *);
@@ -48,7 +75,7 @@ class	PortSockets: virtual public Observer
 		PortSockets() {
 			this->socketInitMethod = openPortSocket;
 		};
-		~PortSockets();
+		virtual ~PortSockets();
 
 		template <typename PARSER>
 		void	startPorts(std::list<std::string> (*parsingMethod)(PARSER &), PARSER parser, bool asynch = true);
@@ -66,6 +93,7 @@ class	PortSockets: virtual public Observer
 	protected:
 		std::list<int>							getSockets();
 		std::list<std::pair<std::string, int> >	getLoudSockets(const int events = POLLIN);
+		std::list<Port*>						getLoudPorts(const int events = POLLIN);
 };
 
 template <typename PARSER>
@@ -75,24 +103,23 @@ void	PortSockets::startPorts(std::list<std::string> (*parsingMethod)(PARSER &), 
 };
 
 
-# include <TCP.hpp>
-
 class	ConnectionQueController: virtual public Observer
 {
 	public:
-		typedef	int									fd_t;
-		typedef	std::map<TCPConnectionOrigin, TCP>	listOfConnections;
+		typedef	int											fd_t;
+		typedef	std::map<TCPConnectionOrigin, Connection*>	listOfConnections;
 	protected:
 		listOfConnections	Connections;
 
 	public:
 		ConnectionQueController() {};
-		~ConnectionQueController() {};
+		~ConnectionQueController();
 	
 		std::string	infoConnections() const;
 	protected:
 
 		void	setConnections(std::list<std::pair<std::string, int> > const &loudPortList);
+		void	setConnections(std::list<Port*> const &loudPortList);
 
 		void	ProcessQue(bool (*action)(Connection &), const int observer_event = POLLIN);
 	

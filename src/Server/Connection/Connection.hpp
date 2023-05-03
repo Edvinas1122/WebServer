@@ -34,7 +34,7 @@ class	Connection: public Timer
 			outgoing = src.outgoing;
 			return (*this);
 		};
-		~Connection() {};
+		virtual ~Connection() {};
 
 	virtual bool	sendPacket() = 0;
 	virtual bool	receivePacket() = 0;

@@ -30,6 +30,10 @@
 # include <limits>
 # include <dirent.h>
 # include <signal.h>
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+# include <netdb.h>
+# include <netinet/in.h>
 
 #ifdef C98
 # define EXCEPTION throw(std::exception)

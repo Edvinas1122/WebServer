@@ -2,7 +2,9 @@
 # define TCP_HPP
 
 # include <includes.hpp>
-# include <Connection.hpp>
+# include "Connection.hpp"
+
+#define RECEIVE_BUFFER_SIZE 1024
 
 class	TCP: public Connection
 {
@@ -22,10 +24,10 @@ class	TCP: public Connection
 			}
 			return (*this);
 		};
-		~TCP() {};
+		virtual ~TCP() {};
 
-	bool		sendPacket();
-	bool		receivePacket();
+	virtual bool	sendPacket();
+	virtual bool	receivePacket();
 
 	const std::string	getPort() const {return (port);};
 
@@ -50,7 +52,7 @@ struct findByFD
 {
 	fd_t	fd;
 	findByFD(const fd_t& fd) : fd(fd) {}
-	bool operator()(const std::pair<TCPConnectionOrigin, TCP> &pair) const
+	bool operator()(const std::pair<TCPConnectionOrigin, Connection*> &pair) const
 	{
 		return (pair.first.fd == fd);
 	};

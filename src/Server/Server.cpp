@@ -19,6 +19,7 @@ void	Server::Run()
 {
 	Observer::Poll();
 	setConnections(getLoudPorts());
+	ProcessQue(handShakeHandle, POLLIN | POLLOUT);
 	ProcessQue(pullIncoming, POLLIN);
 	StartProcesses(); // runs interfaces
 	Serve(); // runs processes
@@ -340,8 +341,43 @@ ConnectionQueController::listOfConnections	Server::getConnectionsByOrigin(in_add
 
 #define	TIMEDOUT_CREDIBLE 20000 //prevent connectionless pulls before closure
 
+#include <TLS.hpp>
+
+bool	handleHandShake(Connection *connection)
+{
+	TLS	*_connection = dynamic_cast<TLS*>(connection);
+
+	if (!_connection)
+		return (false);
+	try {
+		if (_connection->handShake())
+			return (true);
+		else
+			return (false);
+	} catch (...) {
+		connection->updateTime(CLOSE_CLIENT);
+	}
+	return (false);
+}
+
+bool	testForPermission(Connection *connection)
+{
+	TLS	*_connection = dynamic_cast<TLS*>(connection);
+
+	if (!_connection)
+		return (true);
+	return (_connection->handShakeCompleted());
+}
+
+bool	Server::handShakeHandle(Connection &connection)
+{
+	return (handleHandShake(&connection));
+}
+
 bool	Server::pullIncoming(Connection &connection)
 {
+	if (!testForPermission(&connection))
+		return (false);
 	if (connection.getElapsedTime() < TIMEDOUT_CREDIBLE)
 	{
 		try {

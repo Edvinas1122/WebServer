@@ -85,6 +85,7 @@ class VirtualServer {
 	const std::string		getDefaulFile(std::string const &dir);
 	const Route				*findDescendLevel(std::string const &dir) const;
 	const Route				*getRouteCout(std::string const &dir, std::string const &filename) const;
+	const std::string		getScheme(std::string const &port);
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);
 		const Route			*getRoute(std::string const &path, std::string const &filename) const;

@@ -18,13 +18,17 @@ Connection	*SSLPort::getConnection(const int fd, struct sockaddr_in &socketAddre
 		throw std::exception();
 	}
 	SSL_set_fd(ssl, fd);
-	if (SSL_accept(ssl) <= 0)
-	{
-		ERR_print_errors_fp(stderr);
-		SSL_shutdown(ssl);
-    	SSL_free(ssl);
-		throw ConnectFailure();
-	}
+	// int flags = fcntl(fd, F_GETFL, 0);
+	// fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
+	// if (SSL_accept(ssl) <= 0)
+	// {
+	// 	ERR_print_errors_fp(stderr);
+	// 	SSL_shutdown(ssl);
+    // 	SSL_free(ssl);
+	// 	throw ConnectFailure();
+	// }
+	// flags = fcntl(fd, F_GETFL, 0);
+	// fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 	return (new TLS(ssl, fd, socketAddress, port));
 };
 

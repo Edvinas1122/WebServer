@@ -17,6 +17,7 @@ static void handleSignal(int sigNum)
 	signalEnd = true;
 }
 
+
 SSL_CTX* create_ssl_context(const char *cert_file, const char *key_file) EXCEPTION;
 
 #define KEY_PATH "/home/WebServer/cert/server.key"
@@ -36,6 +37,8 @@ int	main(int argc, char **args)
 
 	signal(SIGINT, handleSignal); // setSig for ending leak free
 	signal(SIGQUIT, handleSignal);
+	signal(SIGPIPE, SIG_IGN);
+
 	try {
 		if (argc == 1)
 			virtualServers.parseConfigurationFile("/home/WebServer/server.conf");

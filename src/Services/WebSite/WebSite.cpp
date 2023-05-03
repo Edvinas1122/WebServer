@@ -1,5 +1,7 @@
 #include "WebSite.hpp"
 #include <TCP.hpp>
+#include <TLS.hpp>
+
 
 ServiceProcess	*WebSite::RequestParse(Connection *connection, std::string const &request)
 {
@@ -11,12 +13,10 @@ ServiceProcess	*WebSite::RequestParse(Connection *connection, std::string const 
 	if (HttpRequest(request).Validate())
 	{
 		virtual_server = virtualServers->getServer(_connection->getPort(), HttpRequest(request).getHost());
-		if (virtual_server == NULL)
-		{
+		if (virtual_server == NULL) {
 			throw std::exception();
-			// return (new HTTPParser(connection,  virtualServers->getDefault()));
 		}
-		if (lastRequests.size() > 10)
+		if (lastRequests.size() > 10) // info for monitoring
 			lastRequests.clear();
 		lastRequests.push_back(request);
 		return (new HTTPParser(connection, virtual_server));

@@ -218,6 +218,7 @@ class Server : public ConnectionQueController, public PortSockets
 	static bool pushOutgoing(Connection &client);
 	static void wipeIncomingBuffers(Connection &client);
 	static void	printIncoming(Connection &connection);
+	static bool	handShakeHandle(Connection &connection);
 
 	private:
 		bool	outputInbound;

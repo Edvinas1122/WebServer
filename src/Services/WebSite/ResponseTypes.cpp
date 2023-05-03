@@ -31,6 +31,7 @@ ServiceProcess	*HTTPParser::ErrorRespone(const int code, bool close_connection)
 /*
 	GET REQUEST
 */
+#include <TCP.hpp>
 
 ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest const &request)
 {
@@ -39,7 +40,8 @@ ServiceProcess	*HTTPParser::handleGetRequest(std::string const &dir, HttpRequest
 	if (!isFile(dir)) { // dirrectory listing handle
 		if (virtualServer->dirListingPermited(request.getLocation().getDir()))
 		{
-			std::string	url_link_to_this_server = std::string("http://") + request.getHostnPort() + request.getLocation();
+			TCP	*_connection = dynamic_cast<TCP*>(&theConnection());
+			std::string	url_link_to_this_server = virtualServer->getScheme(_connection->getPort()) + request.getHostnPort() + request.getLocation(); // set beginning bassed on protocol
 			std::string	DirList = dirInfoHTTPFormat(dir.c_str(), url_link_to_this_server.c_str(), virtualServer->methodPermited(request.getLocation().getDir(), "POST"));
 
 			theConnection() << headerMessage(1, 200, DirList.length());

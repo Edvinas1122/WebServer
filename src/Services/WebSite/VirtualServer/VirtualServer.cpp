@@ -353,3 +353,11 @@ const std::string	VirtualServer::getUploadDir(std::string const &dir, std::strin
 		return ("");
 	return (route->getUploadDir());
 }
+
+const std::string	VirtualServer::getScheme(std::string const &port)
+{
+	if (ssl_ports.find(port) != ssl_ports.end())
+		return ("https://");
+	else
+		return ("http://");
+}

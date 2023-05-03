@@ -78,6 +78,21 @@ void	PortSockets::startPort(std::string const &port, bool asynch)
 	insertFileDescriptor(scoket_fd, POLLIN, asynch);
 }
 
+void	PortSockets::startSSLPort(SSL_CTX *certificate, std::string const &port, bool asynch)
+{
+	int	scoket_fd;
+
+	if (portSockets.find(port) != portSockets.end())
+		return ;
+	try {
+		scoket_fd = this->socketInitMethod(port.c_str());
+	} catch (...) {
+		throw std::exception();
+	}
+	portSockets[port] = new SSLPort(certificate, port, scoket_fd);
+	insertFileDescriptor(scoket_fd, POLLIN, asynch);
+};
+
 void	PortSockets::infoPorts() const
 {
 	socketMap::const_iterator	it = portSockets.begin();

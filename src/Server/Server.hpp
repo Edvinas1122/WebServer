@@ -41,10 +41,9 @@ class	Observer
 
 class	Port: virtual public Observer
 {
-	private:
+	protected:
 		const std::string	port;
 		const int			fd;
-		int	(*socketInitMethod)(char const *);
 
 	public:
 		Port(const int fd): fd(fd), socketInitMethod(openPortSocket) {};
@@ -61,8 +60,22 @@ class	Port: virtual public Observer
 	operator std::string() const {
 		return (port);
 	};
+
+	private:
+		int	(*socketInitMethod)(char const *);
 };
 
+class	SSLPort: public Port
+{
+	private:
+		SSL_CTX *certificate;
+
+	public:
+		SSLPort(SSL_CTX *certificate, std::string const &port, const int fd): Port(port, fd), certificate(certificate) {};
+		~SSLPort();
+	
+	virtual Connection	*getConnection(const int fd, struct sockaddr_in &socketAddress) EXCEPTION;
+};
 
 class	PortSockets: virtual public Observer
 {
@@ -81,6 +94,8 @@ class	PortSockets: virtual public Observer
 		void	startPorts(std::list<std::string> (*parsingMethod)(PARSER &), PARSER parser, bool asynch = true);
 		void	startPorts(std::list<std::string> ports, bool asynch = true);
 		void	startPort(std::string const &port, bool asynch = true);
+
+		void	startSSLPort(SSL_CTX *certificate, std::string const &port, bool asynch = true);
 	
 		void	infoPorts() const;
 	protected:

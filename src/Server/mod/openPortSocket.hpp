@@ -10,7 +10,9 @@
 # define MAX_REQUEST_QUE 10
 
 class	BindFailure: public std::exception {};
+class	SSLCertificateFailure: public std::exception {};
 
 int	openPortSocket(char const *port_number) EXCEPTION;
+SSL_CTX* create_ssl_context(const char *cert_file, const char *key_file) EXCEPTION;
 
 #endif

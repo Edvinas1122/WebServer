@@ -57,16 +57,22 @@ std::list<std::string>	VirtualServers::getPortList()
 	return (portList);
 }
 
-// std::list<std::pair<std::string, <std::pair<std::string, std::string> > > >	VirtualServers::getSLLPorts()
-// {
-// 	std::list<std::pair<std::string, <std::pair<std::string, std::string> > > >	listOfSSLPortsWithPaths;
-// 	std::pair<std::string, <std::pair<std::string, std::string> > >				portAndSSLcertnkey;
-// 	std::pair<std::string, std::string>											SSLcertnkey;
-// 	virtualServerMap::iterator	it = virtualServers.begin();
+std::list<std::pair<SSL_CTX*, std::string> >	VirtualServers::getSSLPortList()
+{
+	std::list<std::pair<SSL_CTX*, std::string> >	list;
+	virtualServerMap::const_iterator				it = virtualServers.begin();
 
-// 	while (it != virtualServers.end())
-// 	{
-// 		it
-// 		it++;
-// 	}
-// };
+	while (it != virtualServers.end())
+	{
+		std::list<std::pair<SSL_CTX*, std::string> >	tmp_list = it->second.getSSLSocketMap();
+		std::list<std::pair<SSL_CTX*, std::string> >::const_iterator ittmp = tmp_list.begin();
+
+		while (ittmp != tmp_list.end())
+		{
+			list.push_back(*ittmp);
+			ittmp++;
+		}
+		it++;
+	}
+	return (list);
+}

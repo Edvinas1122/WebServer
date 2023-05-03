@@ -97,6 +97,7 @@ class	PortSockets: virtual public Observer
 		void	startPort(std::string const &port, bool asynch = true);
 
 		void	startSSLPort(SSL_CTX *certificate, std::string const &port, bool asynch = true);
+		void	startSSLPorts(std::list<std::pair<SSL_CTX*, std::string> > const &ports, bool asynch = true);
 	
 		void	infoPorts() const;
 	protected:
@@ -219,6 +220,7 @@ class Server : public ConnectionQueController, public PortSockets
 	static void wipeIncomingBuffers(Connection &client);
 	static void	printIncoming(Connection &connection);
 	static bool	handShakeHandle(Connection &connection);
+	static bool	pullPending(Connection &connection);
 
 	private:
 		bool	outputInbound;

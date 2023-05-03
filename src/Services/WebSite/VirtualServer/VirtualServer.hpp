@@ -53,8 +53,8 @@ class VirtualServer {
 		std::string							server_name;
 		std::string							root_dir;
 		std::string							index;
-		std::map<std::string, std::string>	ssl_certificates;
-		std::map<std::string, std::string>	ssl_keys;
+		std::string							ssl_certificates;
+		std::string							ssl_keys;
 		std::map<std::string, std::string>	ssl_ports;
 		std::map<std::string, std::string>	cgi_response;
 		std::map<std::string, std::string>	error_pages;
@@ -66,7 +66,7 @@ class VirtualServer {
 		VirtualServer() {};
 		VirtualServer(DescendParser parser);
 
-		Route		getLocation(std::string const &location); // <--- /jumper/tall/ > "null or /jumper/"
+		Route		getLocation(std::string const &location);
 		const char	*getHost() const;
 		const char	*getServerName() const;
 	void		displayInfo() const;
@@ -86,6 +86,7 @@ class VirtualServer {
 	const Route				*findDescendLevel(std::string const &dir) const;
 	const Route				*getRouteCout(std::string const &dir, std::string const &filename) const;
 	const std::string		getScheme(std::string const &port);
+	std::list<std::pair<SSL_CTX*, std::string> >	getSSLSocketMap() const;	
 	private:
 		const std::string	getSystemRoot(std::string const &urlDir);
 		const Route			*getRoute(std::string const &path, std::string const &filename) const;
@@ -114,6 +115,7 @@ class	VirtualServers {
 	void					parseConfigurationFile(const char *path);
 	VirtualServer			*getServer(std::string const &port, std::string const &host);
 	std::list<std::string>	getPortList();
+	std::list<std::pair<SSL_CTX*, std::string> >	getSSLPortList();
 	// std::list<std::pair<std::string, <std::pair<std::string, std::string> > > >	getSLLPorts();
 
 

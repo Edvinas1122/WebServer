@@ -7,9 +7,10 @@ bool	TLS::receivePacket()
 	int		ssl_err_code = 0;
 
 	memset((void*)mesg, (int)'\0', RECEIVE_BUFFER_SIZE + 1);
+	SSL_set_read_ahead(ssl, 0);
 	bytes_read = SSL_read(ssl, mesg, RECEIVE_BUFFER_SIZE);
 	if (bytes_read == 0)
-		throw std::exception();
+		return (false);
 	if (bytes_read == -1)
 	{
 		ssl_err_code = SSL_get_error(ssl, bytes_read);
@@ -36,7 +37,7 @@ bool	TLS::sendPacket()
 		send_len = 1024;
 	bytes_sent = SSL_write(ssl, (void*)outgoing.substr(0, buffer_len).data(), send_len);
 	if (bytes_sent == 0)
-		throw std::exception();
+		return (false);
 	if (bytes_sent == -1)
 	{
 		err = SSL_get_error(ssl, bytes_sent);

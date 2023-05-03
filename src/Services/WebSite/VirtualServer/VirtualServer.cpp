@@ -74,19 +74,13 @@ VirtualServer::VirtualServer(DescendParser parser)
 		std::cerr << "Server definition does not have any ports" << std::endl;
 		throw std::exception();
 	}
-	iterator = 1;
-	while (parser.count("ssl_cert") >= iterator)
-	{
-		ssl_certificates.insert(parser.getPair("ssl_cert", iterator)); // check valid var name
-		iterator++;
-	}
+	try {
+		ssl_keys = parser.getValue("ssl_key");
+	} catch (DescendParser::NoKeyExcept &e) {}
+	try {
+		ssl_certificates = parser.getValue("ssl_cert");
+	} catch (DescendParser::NoKeyExcept &e) {}
 
-	iterator = 1;
-	while (parser.count("ssl_key") >= iterator)
-	{
-		ssl_keys.insert(parser.getPair("ssl_key", iterator)); // check valid var name
-		iterator++;
-	}
 
 }
 
@@ -360,4 +354,19 @@ const std::string	VirtualServer::getScheme(std::string const &port)
 		return ("https://");
 	else
 		return ("http://");
+}
+
+SSL_CTX* create_ssl_context(const char *cert_file, const char *key_file) EXCEPTION;
+
+std::list<std::pair<SSL_CTX*, std::string> >	VirtualServer::getSSLSocketMap() const
+{
+	std::list<std::pair<SSL_CTX*, std::string> >		map;
+	std::map<std::string, std::string>::const_iterator	it = ssl_ports.begin();
+
+	while (it != ssl_ports.end())
+	{
+		map.push_back(std::pair<SSL_CTX*, std::string>(create_ssl_context(ssl_certificates.c_str(), ssl_keys.c_str()), it->first));
+		it++;
+	}
+	return (map);
 }

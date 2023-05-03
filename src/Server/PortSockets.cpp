@@ -78,6 +78,17 @@ void	PortSockets::startPort(std::string const &port, bool asynch)
 	insertFileDescriptor(scoket_fd, POLLIN, asynch);
 }
 
+void	PortSockets::startSSLPorts(std::list<std::pair<SSL_CTX*, std::string> > const &ports, bool asynch)
+{
+	std::list<std::pair<SSL_CTX*, std::string> >::const_iterator	it = ports.begin();
+
+	while (it != ports.end())
+	{
+		startSSLPort(it->first, it->second, asynch);
+		it++;
+	}
+}
+
 void	PortSockets::startSSLPort(SSL_CTX *certificate, std::string const &port, bool asynch)
 {
 	int	scoket_fd;

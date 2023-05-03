@@ -21,6 +21,7 @@ void	Server::Run()
 	setConnections(getLoudPorts());
 	ProcessQue(handShakeHandle, POLLIN | POLLOUT);
 	ProcessQue(pullIncoming, POLLIN);
+	ProcessQue(pullPending, POLLIN | POLLOUT);
 	StartProcesses(); // runs interfaces
 	Serve(); // runs processes
 	ProcessQue(pushOutgoing, POLLOUT);
@@ -372,6 +373,32 @@ bool	testForPermission(Connection *connection)
 bool	Server::handShakeHandle(Connection &connection)
 {
 	return (handleHandShake(&connection));
+}
+
+bool	bytesPending(Connection *connection)
+{
+	TLS	*_connection = dynamic_cast<TLS*>(connection);
+
+	if (!_connection)
+		return (false);
+	return (_connection->bytesPending());
+}
+
+bool	Server::pullPending(Connection &connection)
+{
+	if (bytesPending(&connection))
+	{
+		if (connection.getElapsedTime() < TIMEDOUT_CREDIBLE)
+		{
+			try {
+				return (connection.receivePacket());
+			} catch (...) {
+				connection.updateTime(CLOSE_CLIENT);
+				return (false);
+			}
+		}
+	}
+	return (false);
 }
 
 bool	Server::pullIncoming(Connection &connection)

@@ -30,7 +30,6 @@ class	ProgramInterface
 		data[operator_id][info_type].push_back(message);
 	}
 
-	protected:
 
 	std::string	DataFeed(std::string const &id, std::string const &info_type)
 	{
@@ -51,6 +50,7 @@ class	ProgramInterface
 		return ("");
 	};
 
+	protected:
 
 	void	Terminate() {run = false;};
 };

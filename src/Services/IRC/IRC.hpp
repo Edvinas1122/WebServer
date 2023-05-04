@@ -186,7 +186,10 @@ bool	IRCParser::Handle()
 		parseBot(request.substr(begin, end));
 		request.clear();
 	}
-	theConnection() << irc_message_split("armin", "#example", DataFeed("IRC", "messages"));
+	std::string	rcv = DataFeed("IRC", "messages");
+	if (!rcv.empty()) {
+		theConnection() << irc_message_split("armin", "#example", rcv);
+	}
 	return (true);
 };
 

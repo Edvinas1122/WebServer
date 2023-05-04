@@ -4,6 +4,22 @@
 #include <ProgramInterface.hpp>
 #include <TelnetServer.hpp>
 #include <IRC.hpp>
+#include <Executor.hpp>
+
+static void	sendNotification(std::string const &notification)
+{
+	Executor	script("/usr/bin/php-cgi");
+	std::string	message = "message=" + notification;
+	
+	script.execute(2, "/home/WebServer/http/chat/sendMessage.php", message.c_str());
+}
+
+static void	waitForNotifications(std::string const &notification)
+{
+	if (!notification.empty())
+		sendNotification(notification);
+}
+
 
 /*
 	Signal Termination for exit with freeing allocated memory
@@ -83,6 +99,7 @@ int	main(int argc, char **args)
 		{
 			giveInfoToIRC ? giveInfoToIRC = false : giveInfoToIRC = true;
 		}
+		waitForNotifications(terminal.DataFeed("Discord", "messages"));
 #endif
 	}
 	std::cout << "Exiting..." << std::endl;

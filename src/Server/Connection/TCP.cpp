@@ -9,6 +9,8 @@ bool	TCP::receivePacket()
 	bytes_read = recv(fd, mesg, RECEIVE_BUFFER_SIZE, 0);
 	if (bytes_read == -1)
 		throw std::exception();
+	if (bytes_read == 0) // client disconected 
+		throw std::exception(); 
 	if (bytes_read > 0) {
 		incoming.append(mesg, bytes_read);
 		return (true);

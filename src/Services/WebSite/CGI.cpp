@@ -77,7 +77,6 @@ void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following,
 		(void)executor;
 		params = getBodyParams(send, &array);
 		remainer = getRemainer(array.data(), params.length(), array.size());
-		send->SizeInfo();
 		if (params.find("Content-Type: ") != std::string::npos)
 		{
 			*connection << headerMessage(1, 200, send->SizeInfo() + remainer.length() - 4, false);
@@ -85,10 +84,10 @@ void	ComposeCGIHeader(ServiceProcess *currentProcess, ServiceProcess *following,
 			*connection << remainer;
 			return ;
 		}
-		if (params.find("Status:") != std::string::npos)
+		else if (params.find("Status:") != std::string::npos)
 			*connection << headerMessage(1, getStatus(params), send->SizeInfo() + remainer.length(), false);
 		else
-			*connection << headerMessage(1, 200, send->SizeInfo() + remainer.length() - 8, false);
+			*connection << headerMessage(1, 200, send->SizeInfo() + remainer.length() - 4, false);
 		try {
 			*connection << getConententType(params);
 		} catch (...) {}
